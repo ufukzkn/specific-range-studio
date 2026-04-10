@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -33,6 +34,36 @@ st.markdown(
     .block-container {
         padding-top: 1.5rem;
         padding-bottom: 1.5rem;
+    }
+    section[data-testid="stSidebar"] {
+        border-right: 1px solid rgba(148, 163, 184, 0.16);
+    }
+    [data-testid="stSidebarCollapseButton"] {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    [data-testid="collapsedControl"] {
+        top: 0.9rem;
+        left: 0.9rem;
+        z-index: 10000;
+    }
+    [data-testid="collapsedControl"] button,
+    [data-testid="stSidebarCollapseButton"] button {
+        min-width: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: rgba(15, 23, 42, 0.92);
+        color: white;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        opacity: 1 !important;
+    }
+    [data-testid="collapsedControl"] button:hover,
+    [data-testid="stSidebarCollapseButton"] button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.28);
     }
     div[data-testid="stImage"] img {
         border-radius: 12px;
@@ -135,91 +166,170 @@ def _render_clickable_image_preview(path: Path, caption: str, key: str, max_widt
         encoded = base64.b64encode(image_file.read()).decode("utf-8")
 
     data_url = f"data:image/png;base64,{encoded}"
-    modal_id = f"modal_{key}"
-    st.markdown(
+    safe_caption = caption.replace("\\", "\\\\").replace("`", "\\`").replace("${", "\\${")
+    link_id = f"preview_link_{key}".replace("-", "_")
+    components.html(
         f"""
-        <style>
-        #{modal_id} {{
-          display: none;
-          position: fixed;
-          z-index: 99999;
-          inset: 0;
-          background: rgba(15, 23, 42, 0.92);
-          padding: 1.5rem;
-          box-sizing: border-box;
-        }}
-        #{modal_id}:target {{
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }}
-        #{modal_id} .modal-inner {{
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        }}
-        #{modal_id} .modal-top {{
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          color: white;
-          font-size: 0.95rem;
-        }}
-        #{modal_id} .modal-close {{
-          color: white;
-          text-decoration: none;
-          font-weight: 700;
-          border: 1px solid rgba(255,255,255,0.25);
-          padding: 0.35rem 0.75rem;
-          border-radius: 999px;
-        }}
-        #{modal_id} .modal-image-wrap {{
-          flex: 1;
-          overflow: auto;
-          background: rgba(2, 6, 23, 0.45);
-          border-radius: 16px;
-          padding: 1rem;
-        }}
-        #{modal_id} .modal-image {{
-          display: block;
-          max-width: none;
-          width: auto;
-          height: auto;
-          margin: 0 auto;
-        }}
-        </style>
-        <div style="margin-bottom: 0.5rem;">
-          <a href="#{modal_id}" title="Buyuk gormek icin tikla">
+        <div style="width:100%;">
+          <a id="{link_id}" href="{data_url}" target="_blank" rel="noopener noreferrer" style="display:block; text-decoration:none;">
             <img
               src="{data_url}"
               alt="{caption}"
+              title="Yeni sekmede ac"
               style="
-                width: 100%;
-                border-radius: 12px;
-                border: 1px solid rgba(148, 163, 184, 0.25);
-                cursor: zoom-in;
-                display: block;
+                width:100%;
+                display:block;
+                border-radius:12px;
+                border:1px solid rgba(148, 163, 184, 0.25);
+                cursor:zoom-in;
               "
             />
           </a>
-        </div>
-        <div id="{modal_id}">
-          <div class="modal-inner">
-            <div class="modal-top">
-              <div>{caption}</div>
-              <a class="modal-close" href="#">Kapat</a>
-            </div>
-            <div class="modal-image-wrap">
-              <img class="modal-image" src="{data_url}" alt="{caption}" />
-            </div>
+          <div style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin-top:0.5rem;
+            color:rgba(226,232,240,0.9);
+            font-size:0.9rem;
+          ">
+            Resme tikla: yeni sekmede acilsin
           </div>
         </div>
+        <script>
+        (() => {{
+          const html = `<!doctype html>
+            <html>
+              <head>
+                <meta charset="utf-8" />
+                <title>{safe_caption}</title>
+                <style>
+                  html, body {{
+                    margin: 0;
+                    padding: 0;
+                    background: #0f172a;
+                    width: 100%;
+                    height: 100%;
+                    overflow: auto;
+                  }}
+                  .wrap {{
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 1rem;
+                    box-sizing: border-box;
+                  }}
+                  .preview-image {{
+                    display: block;
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 12px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+                    cursor: zoom-in;
+                    transition: transform 0.16s ease, box-shadow 0.16s ease;
+                    transform-origin: top center;
+                  }}
+                  body.zoomed .wrap {{
+                    align-items: flex-start;
+                    justify-content: center;
+                  }}
+                  body.zoomed .preview-image {{
+                    transform: scale(1.85);
+                    cursor: grab;
+                    box-shadow: 0 24px 72px rgba(0,0,0,0.42);
+                  }}
+                  body.panning,
+                  body.panning * {{
+                    cursor: grabbing !important;
+                    user-select: none !important;
+                  }}
+                </style>
+              </head>
+              <body>
+                <div class="wrap">
+                  <img class="preview-image" src="{data_url}" alt="{safe_caption}" title="Tikla: zoom in / out" />
+                </div>
+                <script>
+                  (() => {{
+                    const image = document.querySelector('.preview-image');
+                    let isPanning = false;
+                    let movedDuringPan = false;
+                    let panButton = null;
+                    let startX = 0;
+                    let startY = 0;
+                    let startScrollX = 0;
+                    let startScrollY = 0;
+
+                    image.addEventListener('click', () => {{
+                      if (movedDuringPan) {{
+                        movedDuringPan = false;
+                        return;
+                      }}
+                      document.body.classList.toggle('zoomed');
+                    }});
+
+                    window.addEventListener('mousedown', (event) => {{
+                      const zoomed = document.body.classList.contains('zoomed');
+                      const allowLeftPan = zoomed && event.button === 0;
+                      const allowMiddlePan = event.button === 1;
+                      if (!allowLeftPan && !allowMiddlePan) {{
+                        return;
+                      }}
+                      event.preventDefault();
+                      isPanning = true;
+                      movedDuringPan = false;
+                      panButton = event.button;
+                      startX = event.clientX;
+                      startY = event.clientY;
+                      startScrollX = window.scrollX;
+                      startScrollY = window.scrollY;
+                      document.body.classList.add('panning');
+                    }});
+
+                    window.addEventListener('mousemove', (event) => {{
+                      if (!isPanning) {{
+                        return;
+                      }}
+                      const deltaX = event.clientX - startX;
+                      const deltaY = event.clientY - startY;
+                      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {{
+                        movedDuringPan = true;
+                      }}
+                      window.scrollTo(startScrollX - deltaX, startScrollY - deltaY);
+                    }});
+
+                    window.addEventListener('mouseup', (event) => {{
+                      if (!isPanning || event.button !== panButton) {{
+                        return;
+                      }}
+                      isPanning = false;
+                      panButton = null;
+                      document.body.classList.remove('panning');
+                    }});
+
+                    window.addEventListener('mouseleave', () => {{
+                      isPanning = false;
+                      panButton = null;
+                      document.body.classList.remove('panning');
+                    }});
+                  }})();
+                <\\/script>
+              </body>
+            </html>`;
+
+          const blob = new Blob([html], {{ type: 'text/html' }});
+          const url = URL.createObjectURL(blob);
+          const link = document.getElementById('{link_id}');
+          if (link) {{
+            link.href = url;
+          }}
+        }})();
+        </script>
         """,
-        unsafe_allow_html=True,
+        height=540,
     )
-    st.caption("Onizlemeye tikla: gorsel sayfa icinde buyuk onizleme olarak acilir.")
+    st.caption("Onizlemeye tikladiginda gorsel dogrudan yeni sekmede acilir.")
 
 
 def _setup_command_specs(python_exec: str, dataset_path: str, xgb_device: str, ft_device: str) -> dict[str, dict[str, object]]:
@@ -439,13 +549,19 @@ def _render_report_viewer() -> None:
             detail_col2.metric("Ortalama abs error", f"{filtered_rows[error_column].mean():.6f}")
             detail_col3.metric("Maks abs error", f"{filtered_rows[error_column].max():.6f}")
 
-        preview_count = min(len(row_df), 2500)
         display_df = filtered_rows[available]
-        if error_column in display_df.columns:
+        total_cells = int(display_df.shape[0] * max(display_df.shape[1], 1))
+        max_styler_cells = 250_000
+        if error_column in display_df.columns and total_cells <= max_styler_cells:
             styled_rows = display_df.style.background_gradient(subset=[error_column], cmap="RdYlGn_r")
+            st.dataframe(styled_rows, use_container_width=True, height=640)
         else:
-            styled_rows = display_df.style
-        st.dataframe(styled_rows, use_container_width=True, height=640)
+            st.dataframe(display_df, use_container_width=True, height=640)
+            if error_column in display_df.columns and total_cells > max_styler_cells:
+                st.caption(
+                    "Tablo cok buyuk oldugu icin renkli hata vurgusu gecici olarak kapatildi. "
+                    "Filtreyi daraltirsan renkli gorunume geri doner."
+                )
         st.caption(
             f"Toplam satir: {len(row_df)}. Filtre sonrasi: {len(filtered_rows)}. "
             f"Tablo akici sekilde kaydirilabilir."

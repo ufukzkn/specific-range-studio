@@ -26,7 +26,6 @@ from PySide6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSizePolicy,
-    QSlider,
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
@@ -439,7 +438,7 @@ class ModernDesktopApp(QMainWindow):
         suggested_text = QLabel(
             "1. Setup ile veri ve egitim adimlarini tamamla.\n"
             "2. Hazir raporda genel metrikleri incele.\n"
-            "3. Filtrelerle belirli engine_type / altitude / error bandlarini daralt.\n"
+            "3. Filtrelerle belirli engine_type / altitude kesitlerini daralt.\n"
             "4. Secili satirin detayina bak.\n"
             "5. Gerekirse Tekil Tahmin ile ara deger test et."
         )
@@ -453,21 +452,13 @@ class ModernDesktopApp(QMainWindow):
         self.report_altitude_filter = QComboBox()
         self.report_sort_filter = QComboBox()
         self.report_sort_filter.addItems(["En buyuk hata ustte", "En kucuk hata ustte", "row_id"])
-        self.report_error_slider = QSlider(Qt.Horizontal)
-        self.report_error_slider.setRange(0, 1000)
-        self.report_error_slider.setValue(1000)
-        self.report_error_value_label = QLabel("Tum hata bandi")
         self.report_engine_filter.currentTextChanged.connect(self._apply_report_filters)
         self.report_altitude_filter.currentTextChanged.connect(self._apply_report_filters)
         self.report_sort_filter.currentTextChanged.connect(self._apply_report_filters)
-        self.report_error_slider.valueChanged.connect(self._apply_report_filters)
         filter_layout.addWidget(QLabel("engine_type"))
         filter_layout.addWidget(self.report_engine_filter)
         filter_layout.addWidget(QLabel("altitude"))
         filter_layout.addWidget(self.report_altitude_filter)
-        filter_layout.addWidget(QLabel("error"))
-        filter_layout.addWidget(self.report_error_slider, stretch=1)
-        filter_layout.addWidget(self.report_error_value_label)
         filter_layout.addWidget(QLabel("siralama"))
         filter_layout.addWidget(self.report_sort_filter)
         layout.addWidget(filter_group)
@@ -1074,17 +1065,6 @@ class ModernDesktopApp(QMainWindow):
         self.report_engine_filter.blockSignals(False)
         self.report_altitude_filter.blockSignals(False)
 
-        error_column = self._report_error_column()
-        max_error = 0.0
-        if error_column in self.report_row_df.columns:
-            max_error = float(self.report_row_df[error_column].fillna(0.0).max())
-        slider_max = max(int(max_error * 1_000_000), 1)
-        self.report_error_slider.blockSignals(True)
-        self.report_error_slider.setRange(0, slider_max)
-        self.report_error_slider.setValue(slider_max)
-        self.report_error_slider.blockSignals(False)
-        self.report_error_value_label.setText("Tum hata bandi")
-
     def _apply_report_filters(self) -> None:
         if self.report_row_df.empty:
             return
@@ -1099,10 +1079,6 @@ class ModernDesktopApp(QMainWindow):
         if altitude_value and altitude_value != "All":
             altitude = float(altitude_value.replace(" ft", ""))
             filtered = filtered[filtered["altitude"].astype(float) == altitude]
-        if error_column in filtered.columns:
-            threshold = self.report_error_slider.value() / 1_000_000.0
-            filtered = filtered[filtered[error_column].astype(float) <= threshold]
-            self.report_error_value_label.setText(f"<= {threshold:.6f}")
         sort_mode = self.report_sort_filter.currentText()
         if error_column in filtered.columns:
             if sort_mode == "En buyuk hata ustte":
