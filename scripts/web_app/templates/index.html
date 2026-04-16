@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Specific Range Studio</title>
+  <meta name="description" content="FT-Transformer ve XGBoost ile uçak performans tahmini ve analiz paneli">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- ===== HEADER ===== -->
+  <header class="app-header">
+    <div class="app-header__brand">
+      <div class="app-header__icon">✈</div>
+      <div>
+        <div class="app-header__title">Specific Range Studio</div>
+        <div class="app-header__subtitle">FT-Transformer &amp; XGBoost — Uçuş Performans Tahmin Paneli</div>
+      </div>
+    </div>
+    <div class="app-header__status" id="status-badges">
+      <div class="status-badge status-badge--warn"><span class="status-badge__dot"></span>Yükleniyor…</div>
+    </div>
+  </header>
+
+  <!-- ===== TAB NAVIGATION ===== -->
+  <nav class="tab-nav" role="tablist">
+    <button class="tab-nav__item tab-nav__item--active" data-tab="overview" role="tab">
+      📊 Genel Bakış
+    </button>
+    <button class="tab-nav__item" data-tab="compare" role="tab">
+      ⚖️ Karşılaştırma
+    </button>
+    <button class="tab-nav__item" data-tab="predict" role="tab">
+      🎯 Tekil Tahmin
+    </button>
+    <button class="tab-nav__item" data-tab="nomogram" role="tab">
+      📈 Nomogram
+    </button>
+    <button class="tab-nav__item" data-tab="setup" role="tab">
+      ⚙️ Setup
+    </button>
+  </nav>
+
+  <!-- ================================================================== -->
+  <!-- TAB 1: GENEL BAKIŞ                                                 -->
+  <!-- ================================================================== -->
+  <div class="tab-content tab-content--active" id="tab-overview">
+    <div class="section-header flex-between">
+      <div>
+        <div class="section-header__title">Genel Bakış</div>
+        <div class="section-header__desc">Eğitilmiş modelin genel performans metrikleri ve slice bazlı özet</div>
+      </div>
+      <div>
+        <select id="overview-model-select" class="form-select" onchange="switchOverviewModel()" style="width:200px">
+          <option value="xgboost">XGBoost</option>
+          <option value="ft_transformer">FT-Transformer</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Metric Cards -->
+    <div class="metric-grid mb-lg" id="overview-metrics">
+      <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+      <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+      <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+      <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+      <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- Slice Summary Chart -->
+    <div class="card mb-lg">
+      <div class="card__header"><div class="card__title">Slice Bazlı Hata Dağılımı</div></div>
+      <div class="chart-container" id="overview-slice-chart" style="min-height:400px"></div>
+    </div>
+
+    <!-- Slice Table -->
+    <div class="card">
+      <div class="card__header"><div class="card__title">Slice Özet Tablosu</div></div>
+      <div id="overview-slice-table">
+        <div class="loading-overlay"><div class="spinner"></div><span>Yükleniyor…</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- TAB 2: KARŞILAŞTIRMA                                               -->
+  <!-- ================================================================== -->
+  <div class="tab-content" id="tab-compare">
+    <div class="section-header">
+      <div class="section-header__title">Model Karşılaştırması</div>
+      <div class="section-header__desc">XGBoost ve FT-Transformer sonuçlarını aynı grafik ve tabloda karşılaştır</div>
+    </div>
+
+    <!-- Comparison Metrics -->
+    <div class="metric-grid mb-lg" id="compare-metrics" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+      <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+      <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+      <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- Cost Simulator -->
+    <div class="card mb-lg">
+      <div class="card__header">
+        <div>
+          <div class="card__title">Tahmini Maliyet Fonksiyonu Simülatörü</div>
+          <div class="card__subtitle">Doğruluk, hız ve bellek ağırlıklarını değiştir; model tercihinin nasıl kaydığını gör</div>
+        </div>
+      </div>
+
+      <div class="simulator-layout mb-lg">
+        <div class="simulator-panel">
+          <div class="simulator-panel__title">Ağırlıklar</div>
+
+          <div class="range-control">
+            <div class="range-control__header">
+              <label for="cost-accuracy">Doğruluk Önceliği</label>
+              <span id="cost-accuracy-value">55%</span>
+            </div>
+            <input type="range" id="cost-accuracy" class="form-range" min="0" max="100" step="1" value="55" oninput="debounceCostSimulation()">
+          </div>
+
+          <div class="range-control">
+            <div class="range-control__header">
+              <label for="cost-latency">Hız Önceliği</label>
+              <span id="cost-latency-value">25%</span>
+            </div>
+            <input type="range" id="cost-latency" class="form-range" min="0" max="100" step="1" value="25" oninput="debounceCostSimulation()">
+          </div>
+
+          <div class="range-control">
+            <div class="range-control__header">
+              <label for="cost-memory">Bellek Önceliği</label>
+              <span id="cost-memory-value">20%</span>
+            </div>
+            <input type="range" id="cost-memory" class="form-range" min="0" max="100" step="1" value="20" oninput="debounceCostSimulation()">
+          </div>
+
+          <div class="simulator-panel__title" style="margin-top:var(--space-lg)">Donanım Varsayımları</div>
+
+          <div class="range-control">
+            <div class="range-control__header">
+              <label for="cost-cpu-speed">CPU Hız Faktörü</label>
+              <span id="cost-cpu-speed-value">1.00x</span>
+            </div>
+            <input type="range" id="cost-cpu-speed" class="form-range" min="0.5" max="2.0" step="0.05" value="1.0" oninput="debounceCostSimulation()">
+          </div>
+
+          <div class="range-control">
+            <div class="range-control__header">
+              <label for="cost-ram-budget">RAM Bütçesi</label>
+              <span id="cost-ram-budget-value">8.0 GB</span>
+            </div>
+            <input type="range" id="cost-ram-budget" class="form-range" min="2" max="32" step="0.5" value="8" oninput="debounceCostSimulation()">
+          </div>
+
+          <div class="simulator-help">
+            Bu bölüm gerçek benchmark değil; rapor metrikleri, model boyutu ve konfigürasyon üzerinden tahmini bir karar desteği sunar.
+          </div>
+        </div>
+
+        <div>
+          <div id="compare-cost-summary" class="grid-2">
+            <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+            <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container" id="compare-cost-chart" style="min-height:340px"></div>
+    </div>
+
+    <!-- Report Charts: XGBoost -->
+    <div class="grid-2 mb-lg">
+      <div class="card">
+        <div class="card__header"><div class="card__title">XGBoost — Actual vs Predicted (Slice)</div></div>
+        <div id="compare-xgb-slice-plot" style="text-align:center">
+          <img src="/api/report/xgboost/plots/slice_predictions" alt="XGBoost slice predictions"
+               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
+               onclick="window.open(this.src, '_blank')"
+               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi. Rapor uretilmis mi?</div></div>'">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card__header"><div class="card__title">FT-Transformer — Actual vs Predicted (Slice)</div></div>
+        <div id="compare-ft-slice-plot" style="text-align:center">
+          <img src="/api/report/ft_transformer/plots/slice_predictions" alt="FT-Transformer slice predictions"
+               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
+               onclick="window.open(this.src, '_blank')"
+               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi. Rapor uretilmis mi?</div></div>'">
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Charts: Slice Summary -->
+    <div class="grid-2 mb-lg">
+      <div class="card">
+        <div class="card__header"><div class="card__title">XGBoost — Slice Hata Ozeti</div></div>
+        <div id="compare-xgb-summary-plot" style="text-align:center">
+          <img src="/api/report/xgboost/plots/slice_summary" alt="XGBoost slice summary"
+               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
+               onclick="window.open(this.src, '_blank')"
+               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi</div></div>'">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card__header"><div class="card__title">FT-Transformer — Slice Hata Ozeti</div></div>
+        <div id="compare-ft-summary-plot" style="text-align:center">
+          <img src="/api/report/ft_transformer/plots/slice_summary" alt="FT-Transformer slice summary"
+               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
+               onclick="window.open(this.src, '_blank')"
+               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi</div></div>'">
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric Comparison Bar Chart (Plotly — this one is fine, only 6 bars) -->
+    <div class="card mb-lg">
+      <div class="card__header"><div class="card__title">Metrik Karsilastirmasi</div></div>
+      <div class="chart-container" id="compare-metric-chart" style="min-height:340px"></div>
+    </div>
+
+    <!-- Merged Row Table -->
+    <div class="card mb-lg">
+      <div class="card__header">
+        <div class="card__title">Satır Bazlı Karşılaştırma</div>
+        <div class="card__subtitle">Her satır için her iki modelin tahmini ve hatası</div>
+      </div>
+      <div id="compare-table">
+        <div class="loading-overlay"><div class="spinner"></div><span>Yükleniyor…</span></div>
+      </div>
+      <div id="compare-pagination"></div>
+    </div>
+
+    <!-- Row Detail -->
+    <div class="card">
+      <div class="card__header"><div class="card__title">Seçili Satır Detayı</div></div>
+      <div id="compare-row-detail">
+        <p class="text-muted">Detay görmek için tabloda bir satıra tıkla.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- TAB 3: TEKİL TAHMİN                                                -->
+  <!-- ================================================================== -->
+  <div class="tab-content" id="tab-predict">
+    <div class="section-header">
+      <div class="section-header__title">Tekil Tahmin</div>
+      <div class="section-header__desc">Custom input ile tek bir uçuş koşulunu tahmin et, gerçek veriyle karşılaştır</div>
+    </div>
+
+    <div class="grid-2 mb-lg">
+      <!-- Left: Form -->
+      <div class="card">
+        <div class="card__header"><div class="card__title">Giriş Parametreleri</div></div>
+
+        <!-- Scenario selector -->
+        <div class="form-group">
+          <label class="form-label">Hazır Senaryo</label>
+          <div style="display:flex;gap:8px">
+            <select id="predict-scenario" class="form-select" style="flex:1"></select>
+            <button class="btn btn--secondary btn--sm" onclick="applyScenario()">Yükle</button>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--glass-border);margin:var(--space-md) 0">
+
+        <!-- Flight Conditions -->
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">
+          Uçuş Koşulları
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Altitude (ft)</label>
+            <input type="number" id="input-altitude" class="form-input" value="11000" step="any" placeholder="11000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mach</label>
+            <input type="number" id="input-mach" class="form-input" value="0.22" step="any" placeholder="0.22">
+          </div>
+        </div>
+
+        <!-- Configuration -->
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;margin-top:var(--space-md)">
+          Konfigürasyon
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Gross Weight (lb)</label>
+            <input type="number" id="input-gross-weight" class="form-input" value="30000" step="any" placeholder="30000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Drag Index</label>
+            <input type="number" id="input-drag-index" class="form-input" value="0" step="any" placeholder="0">
+          </div>
+        </div>
+
+        <!-- Engine -->
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;margin-top:var(--space-md)">
+          Motor
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Fuel Flow (lb/h)</label>
+            <input type="number" id="input-fuel-flow" class="form-input" value="5000" step="any" placeholder="5000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Engine Type</label>
+            <select id="input-engine-type" class="form-select">
+              <option value="one_engine">one_engine</option>
+              <option value="two_engine">two_engine</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn btn--primary btn--lg" style="width:100%;margin-top:var(--space-lg)" onclick="runPrediction()">
+          Tahmini Hesapla
+        </button>
+      </div>
+
+      <!-- Right: Results -->
+      <div id="predict-results">
+        <div class="card">
+          <div class="empty-state">
+            <div class="empty-state__icon">🎯</div>
+            <div class="empty-state__text">Tahmin sonuçları burada gösterilecek</div>
+            <p class="text-muted">Parametreleri gir ve "Tahmini Hesapla" butonuna tıkla</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- TAB 4: NOMOGRAM                                                     -->
+  <!-- ================================================================== -->
+  <div class="tab-content" id="tab-nomogram">
+    <div class="section-header">
+      <div class="section-header__title">Taslak Nomogram</div>
+      <div class="section-header__desc">Handbook benzeri kategorik grafik — altitude ve gross_weight birer kesit, drag_index eğri ailesi</div>
+    </div>
+
+    <div class="grid-2 mb-lg">
+      <div class="card">
+        <div class="card__header"><div class="card__title">Nomogram Parametreleri</div></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Model</label>
+            <select id="nomo-model" class="form-select">
+              <option value="xgboost">XGBoost</option>
+              <option value="ft_transformer">FT-Transformer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Engine Type</label>
+            <select id="nomo-engine" class="form-select" onchange="loadNomoAltitudes()">
+              <option value="one_engine">one_engine</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Altitude (ft)</label>
+            <select id="nomo-altitude" class="form-select" onchange="loadNomoWeights()">
+              <option value="">Önce engine type seçin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gross Weight (lb)</label>
+            <select id="nomo-gross-weight" class="form-select">
+              <option value="">Önce altitude seçin</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn--primary" style="margin-top:var(--space-md)" onclick="generateNomogram()">
+          Taslak Nomogram Üret
+        </button>
+      </div>
+      <div class="card" id="nomo-preview">
+        <div class="empty-state">
+          <div class="empty-state__icon">📈</div>
+          <div class="empty-state__text">Nomogram henüz üretilmedi</div>
+          <p class="text-muted">Parametreleri seç ve "Taslak Nomogram Üret" butonuna tıkla</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- TAB 5: SETUP                                                        -->
+  <!-- ================================================================== -->
+  <div class="tab-content" id="tab-setup">
+    <div class="section-header flex-between">
+      <div>
+        <div class="section-header__title">Setup ve Eğitim</div>
+        <div class="section-header__desc">Veri pipeline, model eğitimi ve rapor üretimi adımları</div>
+      </div>
+      <button class="btn btn--primary btn--lg" onclick="runQuickstart()">
+        ▶ Quickstart Çalıştır
+      </button>
+    </div>
+
+    <div class="grid-2">
+      <!-- Steps -->
+      <div>
+        <div class="stepper" id="setup-steps">
+          <div class="loading-overlay"><div class="spinner"></div><span>Komutlar yükleniyor…</span></div>
+        </div>
+      </div>
+
+      <!-- Log -->
+      <div class="card">
+        <div class="card__header"><div class="card__title">Çalışma Günlüğü</div></div>
+        <div class="log-area" id="setup-log">Henüz komut çalıştırılmadı.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Scripts -->
+<script src="/static/js/charts.js"></script>
+<script src="/static/js/tables.js"></script>
+<script src="/static/js/app.js"></script>
+
+</body>
+</html>

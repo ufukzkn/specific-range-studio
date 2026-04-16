@@ -58,6 +58,10 @@ src/
     config.py
     seed.py
 scripts/
+  web_app/
+    server.py
+    templates/
+    static/
   run_data_pipeline.py
   train_ft_transformer.py
   train_xgboost.py
@@ -81,13 +85,12 @@ python -m venv .venv
 pip install -r requirements.txt
 python scripts/run_data_pipeline.py
 python scripts/train_xgboost.py --dataset data/processed/combined_specific_range.csv --device cuda --run-table-report
-python scripts/train_ft_transformer.py --dataset data/processed/combined_specific_range.csv --device cpu --run-table-report
-python scripts/run_table_report.py --dataset data/processed/combined_specific_range.csv --model both --ft-device cpu
-streamlit run scripts/launch_ui.py
-python scripts/desktop_app_qt.py
+python scripts/train_ft_transformer.py --dataset data/processed/combined_specific_range.csv --device cuda --run-table-report
+python scripts/run_table_report.py --dataset data/processed/combined_specific_range.csv --model both --ft-device cuda
+python scripts/web_app/server.py
 ```
 
-GPU yoksa FT-Transformer komutunda `--device cpu` kullanin.
+GPU yoksa FT-Transformer komutunda `--device cpu`, toplu raporda da `--ft-device cpu` kullanin.
 
 ## Typical Workflow
 
@@ -128,27 +131,38 @@ python scripts/run_pso.py --dataset data/processed/combined_specific_range.csv -
 python scripts/compare_models.py --dataset data/processed/combined_specific_range.csv --run-pso
 ```
 
-6. Launch the prediction UI:
+6. Launch the main web UI:
+
+```bash
+python scripts/web_app/server.py
+```
+
+Bu arayuz Flask tabanlidir ve tarayicida `http://localhost:5000` adresinde acilir.
+Icerdigi ana sekmeler:
+
+- `Genel Bakis`
+- `Karsilastirma`
+- `Tekil Tahmin`
+- `Nomogram`
+- `Setup`
+
+`Setup` sekmesi veri pipeline, egitim ve toplu raporlama adimlarini arayuz icinden calistirabilir.
+
+7. Launch the legacy Streamlit UI if needed:
 
 ```bash
 streamlit run scripts/launch_ui.py
 ```
 
-Streamlit icinde `Setup` sekmesi, quickstart akisindaki backend komutlarini arayuzden calistirir.
+Bu arayuz artik ikincil/legacy durumdadir; ana gelistirme akisi Flask web UI uzerinden devam etmektedir.
 
-7. Launch the native desktop app:
-
-```bash
-python scripts/desktop_app.py
-```
-
-8. Launch the modern Qt desktop app:
+8. Launch the modern Qt desktop app if you want a native window:
 
 ```bash
 python scripts/desktop_app_qt.py
 ```
 
-Qt masaustu uygulamasinda da `Setup` sekmesi bulunur; veri pipeline, egitim ve toplu raporlama adimlari log ekranli bir panelden calistirilabilir.
+Qt masaustu uygulamasinda da `Setup` sekmesi bulunur; veri pipeline, egitim ve toplu raporlama adimlari log ekranli bir panelden calistirilabilir. Ancak su an ana odak Flask tabanli web panelidir.
 
 9. Generate full-table comparison reports from trained artifacts:
 
@@ -156,7 +170,7 @@ Qt masaustu uygulamasinda da `Setup` sekmesi bulunur; veri pipeline, egitim ve t
 python scripts/run_table_report.py --dataset data/processed/combined_specific_range.csv --model both --ft-device cpu
 ```
 
-9. Generate a draft nomogram-style comparison plot for one categorical slice:
+10. Generate a draft nomogram-style comparison plot for one categorical slice:
 
 ```bash
 python scripts/run_nomogram_report.py --dataset data/processed/combined_specific_range.csv --model xgboost --engine-type one_engine --altitude 5000 --gross-weight 50000
@@ -171,14 +185,22 @@ python scripts/run_nomogram_report.py --dataset data/processed/combined_specific
 
 ## UI Scope
 
-The Streamlit UI is designed for the workflow described by the project lead:
+The main UI is the Flask-based web app under `scripts/web_app/`.
+
+It is designed for the workflow described by the project lead:
 
 - users manually enter `altitude`, `gross_weight`, `drag_index`, `mach`, `fuel_flow`, and `engine_type`,
 - the app can predict for intermediate values such as `11000 ft`, even when the original tables only contain `10000 ft` and `15000 ft`,
 - predictions can be generated with XGBoost, FT-Transformer, or both side by side.
+- report metrics, slice plots, row-level comparison tables, nomogram generation, and setup commands are available from the same interface,
+- the comparison tab includes a cost-function simulator for approximate accuracy / latency / memory trade-off exploration.
 
-A native desktop version is also available through `tkinter` for users who prefer an application window over a browser-hosted localhost interface.
-For a more modern desktop experience, a `PySide6`-based Qt application is also included.
+Legacy interfaces are still present:
+
+- `scripts/launch_ui.py` for Streamlit,
+- `scripts/desktop_app_qt.py` for a native Qt window.
+
+The old `tkinter` desktop version is kept only for reference and is not the primary interface anymore.
 
 ## Full-Table Reports
 

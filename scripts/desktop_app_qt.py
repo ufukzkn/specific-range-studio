@@ -470,6 +470,15 @@ class ModernDesktopApp(QMainWindow):
         self.report_summary.setMinimumHeight(120)
         self.report_summary.setMaximumHeight(180)
         summary_layout.addWidget(self.report_summary)
+        metric_help = QLabel(
+            "MAE: Ortalama mutlak hata.\n"
+            "RMSE: Buyuk hatalari daha fazla cezalandiran karekok ortalama kare hata.\n"
+            "MAPE: Ortalama yuzde hata.\n"
+            "R2: Modelin veriyi ne kadar iyi acikladigini gosterir; 1.0'a yaklastikca daha iyidir."
+        )
+        metric_help.setWordWrap(True)
+        metric_help.setObjectName("metricHelpLabel")
+        summary_layout.addWidget(metric_help)
         layout.addWidget(summary_group)
 
         table_group = QGroupBox("Tum Satirlarin Karsilastirmasi")
@@ -985,7 +994,7 @@ class ModernDesktopApp(QMainWindow):
         if not exact_matches.empty:
             actual_value = float(exact_matches.iloc[0]["specific_range"])
             self.prediction_comparison.setPlainText(
-                "Birebir eslesen gercek satir bulundu.\n\n"
+                "Bire bir eslesen gercek satir bulundu.\n\n"
                 f"actual_specific_range = {actual_value:.6f}\n"
                 f"XGBoost absolute error = {abs(xgb_value - actual_value):.6f}\n"
                 f"FT absolute error = {abs(ft_value - actual_value):.6f}"
@@ -1001,7 +1010,7 @@ class ModernDesktopApp(QMainWindow):
 
         nearest_actual = float(nearest.iloc[0]["specific_range"])
         self.prediction_comparison.setPlainText(
-            "Birebir eslesen satir yok. En yakin gercek satirlar gosteriliyor.\n\n"
+            "Bire bir eslesen satir yok. En yakin gercek satirlar gosteriliyor.\n\n"
             f"nearest_actual = {nearest_actual:.6f}\n"
             f"XGBoost abs diff to nearest = {abs(xgb_value - nearest_actual):.6f}\n"
             f"FT abs diff to nearest = {abs(ft_value - nearest_actual):.6f}"

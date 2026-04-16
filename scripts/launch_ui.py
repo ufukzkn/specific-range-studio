@@ -413,6 +413,21 @@ def _setup_command_specs(python_exec: str, dataset_path: str, xgb_device: str, f
     }
 
 
+METRIC_HELP = {
+    "MAE": "Mean Absolute Error: Tahmin ile gercek deger farklarinin mutlak degerlerin ortalamasi. Dusuk = iyi.",
+    "RMSE": "Root Mean Squared Error: Buyuk hatalara karsi hassas. MAE'den buyukse ucta hatalar var demektir.",
+    "MAPE": "Mean Absolute Percentage Error: Yuzde cinsinden ortalama hata. Olcek bagimsiz karsilastirma saglar.",
+    "R2": "R-Squared (Belirtme Katsayisi): 1.0 = mukemmel uyum. Modelin verideki varyansin yuzde kacini acikladigini gosterir.",
+    "Rows": "Rapordaki toplam veri satiri sayisi.",
+}
+
+
+def _render_metric_help() -> None:
+    with st.expander("Metrik Aciklamalari", expanded=False):
+        for name, desc in METRIC_HELP.items():
+            st.markdown(f"**{name}**: {desc}")
+
+
 def _render_report_viewer() -> None:
     st.subheader("Hazir Toplu Karsilastirma Raporu")
     st.caption(
@@ -477,18 +492,19 @@ def _render_report_viewer() -> None:
 
     available = [column for column in preferred if column in row_df.columns]
 
-    tab_ozet, tab_satirlar, tab_grafikler, tab_nomogram = st.tabs(
-        ["Ozet", "Satir Bazli Karsilastirma", "Grafikler", "Taslak Nomogram"]
+    tab_ozet, tab_kiyasla, tab_satirlar, tab_grafikler, tab_nomogram = st.tabs(
+        ["Ozet", "Model Karsilastirmasi", "Satir Bazli Karsilastirma", "Grafikler", "Taslak Nomogram"]
     )
 
     with tab_ozet:
         summary_cols = st.columns(5)
         row = overall_df.iloc[0]
-        summary_cols[0].metric("Rows", int(row["rows"]))
-        summary_cols[1].metric("MAE", f"{row['mae']:.6f}")
-        summary_cols[2].metric("RMSE", f"{row['rmse']:.6f}")
-        summary_cols[3].metric("MAPE", f"{row['mape']:.4f}")
-        summary_cols[4].metric("R2", f"{row['r2']:.6f}")
+        summary_cols[0].metric("Rows", int(row["rows"]), help=METRIC_HELP["Rows"])
+        summary_cols[1].metric("MAE", f"{row['mae']:.6f}", help=METRIC_HELP["MAE"])
+        summary_cols[2].metric("RMSE", f"{row['rmse']:.6f}", help=METRIC_HELP["RMSE"])
+        summary_cols[3].metric("MAPE", f"{row['mape']:.4f}", help=METRIC_HELP["MAPE"])
+        summary_cols[4].metric("R2", f"{row['r2']:.6f}", help=METRIC_HELP["R2"])
+        _render_metric_help()
         st.markdown("**Slice Ozeti**")
         styled_slice = slice_df.style
         if "mae" in slice_df.columns:
@@ -582,6 +598,65 @@ def _render_report_viewer() -> None:
             file_name=paths["row_level"].name,
             mime="text/csv",
         )
+
+    with tab_kiyasla:
+        st.markdown("**Her Iki Modelin Yan Yana Karsilastirmasi**")
+        st.caption("XGBoost ve FT-Transformer raporlarinin grafik ve metriklerini yan yana goruntule.")
+
+        xgb_paths = _report_paths("xgboost")
+        ft_paths_cmp = _report_paths("ft_transformer")
+
+        both_have_reports = xgb_paths["overall_summary"].exists() and ft_paths_cmp["overall_summary"].exists()
+        if both_have_reports:
+            xgb_overall = pd.read_csv(xgb_paths["overall_summary"]).iloc[0]
+            ft_overall = pd.read_csv(ft_paths_cmp["overall_summary"]).iloc[0]
+
+            st.markdown("###### Genel Metrikler")
+            m_cols = st.columns(4)
+            m_cols[0].metric("XGBoost MAE", f"{xgb_overall['mae']:.6f}", help=METRIC_HELP["MAE"])
+            m_cols[1].metric("FT-Trans. MAE", f"{ft_overall['mae']:.6f}", help=METRIC_HELP["MAE"])
+            m_cols[2].metric("XGBoost R2", f"{xgb_overall['r2']:.6f}", help=METRIC_HELP["R2"])
+            m_cols[3].metric("FT-Trans. R2", f"{ft_overall['r2']:.6f}", help=METRIC_HELP["R2"])
+
+            _render_metric_help()
+
+            st.markdown("---")
+            st.markdown("###### Actual vs Predicted (Slice Grafikleri)")
+            cmp_cols = st.columns(2)
+            with cmp_cols[0]:
+                st.markdown("**XGBoost**")
+                if xgb_paths["slice_plot"].exists():
+                    _render_clickable_image_preview(xgb_paths["slice_plot"], caption="XGBoost Slice Predictions", key="cmp_xgb_slice")
+                else:
+                    st.info("XGBoost slice grafigi bulunamadi.")
+            with cmp_cols[1]:
+                st.markdown("**FT-Transformer**")
+                if ft_paths_cmp["slice_plot"].exists():
+                    _render_clickable_image_preview(ft_paths_cmp["slice_plot"], caption="FT-Transformer Slice Predictions", key="cmp_ft_slice")
+                else:
+                    st.info("FT-Transformer slice grafigi bulunamadi.")
+
+            st.markdown("###### Slice Hata Ozeti Grafikleri")
+            cmp_cols2 = st.columns(2)
+            with cmp_cols2[0]:
+                st.markdown("**XGBoost**")
+                if xgb_paths["summary_plot"].exists():
+                    _render_clickable_image_preview(xgb_paths["summary_plot"], caption="XGBoost Slice Summary", key="cmp_xgb_summary")
+                else:
+                    st.info("XGBoost summary grafigi bulunamadi.")
+            with cmp_cols2[1]:
+                st.markdown("**FT-Transformer**")
+                if ft_paths_cmp["summary_plot"].exists():
+                    _render_clickable_image_preview(ft_paths_cmp["summary_plot"], caption="FT-Transformer Slice Summary", key="cmp_ft_summary")
+                else:
+                    st.info("FT-Transformer summary grafigi bulunamadi.")
+        else:
+            st.warning(
+                "Her iki modelin de raporlari gerekli. Eksik olanlar:\n"
+                + ("- XGBoost raporu bulunamadi\n" if not xgb_paths["overall_summary"].exists() else "")
+                + ("- FT-Transformer raporu bulunamadi\n" if not ft_paths_cmp["overall_summary"].exists() else "")
+                + "\nSetup sekmesinden ilgili rapor komutlarini calistir."
+            )
 
     with tab_grafikler:
         grafikler = []
@@ -805,7 +880,7 @@ def _render_single_input(ft_device: str) -> None:
         exact_matches = find_exact_match(reference_df, frame)
         if not exact_matches.empty:
             actual_value = float(exact_matches.iloc[0]["specific_range"])
-            st.success(f"Birebir eslesen gercek satir bulundu. actual_specific_range = {actual_value:.6f}")
+            st.success(f"Bire bir eslesen gercek satir bulundu. actual_specific_range = {actual_value:.6f}")
             metric_cols = st.columns(3)
             metric_cols[0].metric("Actual", f"{actual_value:.6f}")
             if xgb_value is not None:
@@ -814,7 +889,7 @@ def _render_single_input(ft_device: str) -> None:
                 metric_cols[2].metric("FT absolute error", f"{abs(ft_value - actual_value):.6f}")
             st.dataframe(exact_matches, use_container_width=True, height=180)
         else:
-            st.info("Birebir eslesen gercek satir bulunamadi. En yakin gercek satirlar gosteriliyor.")
+            st.info("Bire bir eslesen gercek satir bulunamadi. En yakin gercek satirlar gosteriliyor.")
             nearest = find_nearest_reference_rows(reference_df, frame, top_k=5)
             if not nearest.empty:
                 nearest_actual = float(nearest.iloc[0]["specific_range"])
