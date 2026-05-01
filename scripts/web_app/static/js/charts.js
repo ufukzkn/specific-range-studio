@@ -9,6 +9,7 @@ const ChartTheme = {
   textColor: '#94a3b8',
   font: { family: 'Inter, sans-serif', size: 12, color: '#94a3b8' },
   xgboostColor: '#fbbf24',
+  interpolationColor: '#06b6d4',
   ftColor: '#a78bfa',
   actualColor: '#34d399',
   errorXgbColor: '#f97316',
@@ -209,12 +210,27 @@ function renderSliceSummaryChart(containerId, data, modelName) {
 /**
  * Render metric comparison bar chart (two models side by side).
  */
-function renderMetricComparisonChart(containerId, xgbMetrics, ftMetrics) {
+function renderMetricComparisonChart(containerId, metrics) {
+  const xgbMetrics = metrics.xgboost;
+  const ftMetrics = metrics.ft_transformer;
+  const interpolationMetrics = metrics.interpolation;
   const metricNames = ['MAE', 'RMSE', 'MAPE'];
   const xgbValues = [xgbMetrics.mae, xgbMetrics.rmse, xgbMetrics.mape];
   const ftValues = [ftMetrics.mae, ftMetrics.rmse, ftMetrics.mape];
+  const interpolationValues = interpolationMetrics
+    ? [interpolationMetrics.mae, interpolationMetrics.rmse, interpolationMetrics.mape]
+    : null;
 
-  const traces = [
+  const traces = [];
+  if (interpolationValues) {
+    traces.push({
+      x: metricNames, y: interpolationValues, name: 'Interpolasyon', type: 'bar',
+      marker: { color: 'rgba(6, 182, 212, 0.7)', line: { color: '#06b6d4', width: 1 } },
+      text: interpolationValues.map(v => v.toFixed(6)), textposition: 'outside',
+      textfont: { size: 10, color: '#06b6d4' },
+    });
+  }
+  traces.push(
     {
       x: metricNames, y: xgbValues, name: 'XGBoost', type: 'bar',
       marker: { color: 'rgba(251, 191, 36, 0.7)', line: { color: '#fbbf24', width: 1 } },
@@ -227,7 +243,7 @@ function renderMetricComparisonChart(containerId, xgbMetrics, ftMetrics) {
       text: ftValues.map(v => v.toFixed(6)), textposition: 'outside',
       textfont: { size: 10, color: '#a78bfa' },
     },
-  ];
+  );
 
   const layout = {
     ...baseLayout,
@@ -240,39 +256,107 @@ function renderMetricComparisonChart(containerId, xgbMetrics, ftMetrics) {
 }
 
 /**
+ * Render a regression tolerance-success curve.
+ * This is the regression analogue of an F1/ROC style view: for each absolute
+ * error tolerance, it shows how many rows are "good enough".
+ */
+function renderToleranceCurve(containerId, data) {
+  const container = document.getElementById(containerId);
+  if (!container || !data?.thresholds?.length) return;
+
+  const traces = [
+    {
+      x: data.thresholds,
+      y: data.xgboost,
+      name: 'XGBoost',
+      mode: 'lines',
+      line: { color: ChartTheme.xgboostColor, width: 3, shape: 'spline' },
+      hovertemplate: 'Eşik: %{x:.6f}<br>Başarı: %{y:.2f}%<extra>XGBoost</extra>',
+    },
+    {
+      x: data.thresholds,
+      y: data.ft_transformer,
+      name: 'FT-Transformer',
+      mode: 'lines',
+      line: { color: ChartTheme.ftColor, width: 3, shape: 'spline' },
+      hovertemplate: 'Eşik: %{x:.6f}<br>Başarı: %{y:.2f}%<extra>FT-Transformer</extra>',
+    },
+  ];
+
+  const shapes = [];
+  const annotations = [];
+  const medianMarkers = [
+    { key: 'xgboost_median_error', label: 'XGB median', color: ChartTheme.xgboostColor },
+    { key: 'ft_transformer_median_error', label: 'FT median', color: ChartTheme.ftColor },
+  ];
+  medianMarkers.forEach((marker) => {
+    const x = data.summary?.[marker.key];
+    if (x == null) return;
+    shapes.push({
+      type: 'line',
+      x0: x,
+      x1: x,
+      y0: 0,
+      y1: 100,
+      xref: 'x',
+      yref: 'y',
+      line: { color: marker.color, width: 1, dash: 'dot' },
+    });
+    annotations.push({
+      x,
+      y: 8,
+      xref: 'x',
+      yref: 'y',
+      text: marker.label,
+      showarrow: false,
+      textangle: -90,
+      font: { size: 10, color: marker.color },
+    });
+  });
+
+  const layout = {
+    ...baseLayout,
+    title: { text: 'Hata Toleransı Başarı Eğrisi (yüksek = iyi)', font: { size: 14, color: '#e2e8f0' } },
+    xaxis: { ...baseLayout.xaxis, title: 'Mutlak hata toleransı' },
+    yaxis: { ...baseLayout.yaxis, title: 'Tolerans içinde kalan satır (%)', range: [0, 101] },
+    shapes,
+    annotations,
+    height: 380,
+  };
+
+  Plotly.newPlot(containerId, traces, layout, plotlyConfig);
+}
+
+/**
  * Render estimated cost components for both models.
  * Lower bars are better; fit score itself is rendered in summary cards.
  */
 function renderCostSimulatorChart(containerId, models) {
   const container = document.getElementById(containerId);
-  if (!container || !models?.xgboost || !models?.ft_transformer) return;
+  if (!container || !models) return;
 
-  const xgb = models.xgboost;
-  const ft = models.ft_transformer;
   const categories = ['Accuracy Cost', 'Latency Cost', 'Memory Cost', 'Composite Cost'];
+  const styles = {
+    interpolation: { name: 'Interpolasyon', fill: 'rgba(6, 182, 212, 0.72)', line: '#06b6d4' },
+    xgboost: { name: 'XGBoost', fill: 'rgba(251, 191, 36, 0.72)', line: '#fbbf24' },
+    ft_transformer: { name: 'FT-Transformer', fill: 'rgba(167, 139, 250, 0.72)', line: '#a78bfa' },
+  };
 
-  const traces = [
-    {
+  const traces = ['xgboost', 'ft_transformer'].filter(key => models[key]).map((key) => {
+    const model = models[key];
+    const style = styles[key] || { name: key, fill: 'rgba(59, 130, 246, 0.72)', line: '#3b82f6' };
+    const values = [model.accuracy_component, model.latency_component, model.memory_component, model.combined_cost];
+    return {
       x: categories,
-      y: [xgb.accuracy_component, xgb.latency_component, xgb.memory_component, xgb.combined_cost],
-      name: 'XGBoost',
+      y: values,
+      name: style.name,
       type: 'bar',
-      marker: { color: 'rgba(251, 191, 36, 0.72)', line: { color: '#fbbf24', width: 1 } },
-      text: [xgb.accuracy_component, xgb.latency_component, xgb.memory_component, xgb.combined_cost].map(v => v.toFixed(3)),
+      marker: { color: style.fill, line: { color: style.line, width: 1 } },
+      text: values.map(v => v.toFixed(3)),
       textposition: 'outside',
-      textfont: { size: 10, color: '#fbbf24' },
-    },
-    {
-      x: categories,
-      y: [ft.accuracy_component, ft.latency_component, ft.memory_component, ft.combined_cost],
-      name: 'FT-Transformer',
-      type: 'bar',
-      marker: { color: 'rgba(167, 139, 250, 0.72)', line: { color: '#a78bfa', width: 1 } },
-      text: [ft.accuracy_component, ft.latency_component, ft.memory_component, ft.combined_cost].map(v => v.toFixed(3)),
-      textposition: 'outside',
-      textfont: { size: 10, color: '#a78bfa' },
-    },
-  ];
+      textfont: { size: 10, color: style.line },
+    };
+  });
 
   const layout = {
     ...baseLayout,

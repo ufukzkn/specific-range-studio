@@ -15,10 +15,12 @@
   <!-- ===== HEADER ===== -->
   <header class="app-header">
     <div class="app-header__brand">
-      <div class="app-header__icon">✈</div>
+      <div class="app-header__icon app-header__icon--logo">
+        <img src="/static/img/logo.ico" alt="Lift-UP logo">
+      </div>
       <div>
         <div class="app-header__title">Specific Range Studio</div>
-        <div class="app-header__subtitle">FT-Transformer &amp; XGBoost — Uçuş Performans Tahmin Paneli</div>
+        <div class="app-header__subtitle">Interpolasyon, FT-Transformer &amp; XGBoost — Uçuş Performans Tahmin Paneli</div>
       </div>
     </div>
     <div class="app-header__status" id="status-badges">
@@ -34,14 +36,23 @@
     <button class="tab-nav__item" data-tab="compare" role="tab">
       ⚖️ Karşılaştırma
     </button>
+    <button class="tab-nav__item" data-tab="cost" role="tab">
+      💸 Maliyet
+    </button>
     <button class="tab-nav__item" data-tab="predict" role="tab">
       🎯 Tekil Tahmin
     </button>
     <button class="tab-nav__item" data-tab="nomogram" role="tab">
       📈 Nomogram
     </button>
+    <button class="tab-nav__item" data-tab="dataset" role="tab">
+      🧪 Veri Üretimi
+    </button>
     <button class="tab-nav__item" data-tab="setup" role="tab">
       ⚙️ Setup
+    </button>
+    <button class="tab-nav__item" data-tab="info" role="tab">
+      ℹ️ Bilgi
     </button>
   </nav>
 
@@ -92,18 +103,111 @@
   <div class="tab-content" id="tab-compare">
     <div class="section-header">
       <div class="section-header__title">Model Karşılaştırması</div>
-      <div class="section-header__desc">XGBoost ve FT-Transformer sonuçlarını aynı grafik ve tabloda karşılaştır</div>
+      <div class="section-header__desc">Interpolasyon, XGBoost ve FT-Transformer sonuçlarını aynı grafik ve tabloda karşılaştır</div>
     </div>
 
     <!-- Comparison Metrics -->
-    <div class="metric-grid mb-lg" id="compare-metrics" style="grid-template-columns:repeat(4,1fr)">
+    <div class="metric-grid mb-lg" id="compare-metrics">
       <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
       <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
       <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
       <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
     </div>
 
-    <!-- Cost Simulator -->
+    <!-- Report Charts: XGBoost -->
+    <div class="grid-2 mb-lg">
+      <div class="card">
+        <div class="card__header"><div class="card__title">XGBoost — Actual vs Predicted (Slice)</div></div>
+        <div id="compare-xgb-slice-plot" style="text-align:center">
+          <img src="/api/report/xgboost/plots/slice_predictions" alt="XGBoost slice predictions"
+               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
+               onclick="window.open(this.src, '_blank')"
+               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi. Rapor uretilmis mi?</div></div>'">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card__header"><div class="card__title">FT-Transformer — Actual vs Predicted (Slice)</div></div>
+        <div id="compare-ft-slice-plot" style="text-align:center">
+          <img src="/api/report/ft_transformer/plots/slice_predictions" alt="FT-Transformer slice predictions"
+               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
+               onclick="window.open(this.src, '_blank')"
+               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi. Rapor uretilmis mi?</div></div>'">
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Charts: Slice Summary -->
+    <div class="grid-2 mb-lg">
+      <div class="card">
+        <div class="card__header"><div class="card__title">XGBoost — Slice Hata Ozeti</div></div>
+        <div id="compare-xgb-summary-plot" style="text-align:center">
+          <img src="/api/report/xgboost/plots/slice_summary" alt="XGBoost slice summary"
+               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
+               onclick="window.open(this.src, '_blank')"
+               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi</div></div>'">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card__header"><div class="card__title">FT-Transformer — Slice Hata Ozeti</div></div>
+        <div id="compare-ft-summary-plot" style="text-align:center">
+          <img src="/api/report/ft_transformer/plots/slice_summary" alt="FT-Transformer slice summary"
+               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
+               onclick="window.open(this.src, '_blank')"
+               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi</div></div>'">
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric Comparison Bar Chart (Plotly — this one is fine, only 6 bars) -->
+    <div class="card mb-lg">
+      <div class="card__header"><div class="card__title">Metrik Karsilastirmasi</div></div>
+      <div class="chart-container" id="compare-metric-chart" style="min-height:340px"></div>
+    </div>
+
+    <!-- Regression tolerance curve -->
+    <div class="card mb-lg">
+      <div class="card__header">
+        <div>
+          <div class="card__title">Hata Toleransı Başarı Eğrisi</div>
+          <div class="card__subtitle">F1 curve benzeri regresyon görünümü: hata eşiği arttıkça kabul edilebilir satır oranı</div>
+        </div>
+      </div>
+      <div class="metric-grid mb-md" id="compare-tolerance-summary"></div>
+      <div class="chart-container" id="compare-tolerance-curve" style="min-height:380px"></div>
+    </div>
+
+    <!-- Merged Row Table -->
+    <div class="card mb-lg">
+      <div class="card__header">
+        <div>
+          <div class="card__title">Satır Bazlı Karşılaştırma</div>
+          <div class="card__subtitle">Her satır için interpolasyon, XGBoost ve FT-Transformer tahmini ve hatası</div>
+        </div>
+      </div>
+      <div id="compare-table">
+        <div class="loading-overlay"><div class="spinner"></div><span>Yükleniyor…</span></div>
+      </div>
+      <div id="compare-pagination"></div>
+    </div>
+
+    <!-- Row Detail -->
+    <div class="card">
+      <div class="card__header"><div class="card__title">Seçili Satır Detayı</div></div>
+      <div id="compare-row-detail">
+        <p class="text-muted">Detay görmek için tabloda bir satıra tıkla.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- TAB 3: MALİYET SİMÜLATÖRÜ                                          -->
+  <!-- ================================================================== -->
+  <div class="tab-content" id="tab-cost">
+    <div class="section-header">
+      <div class="section-header__title">Tahmini Maliyet Fonksiyonu</div>
+      <div class="section-header__desc">XGBoost ve FT-Transformer için doğruluk, hız ve bellek varsayımlarını ayrı bir karar panelinde incele</div>
+    </div>
+
     <div class="card mb-lg">
       <div class="card__header">
         <div>
@@ -159,12 +263,12 @@
           </div>
 
           <div class="simulator-help">
-            Bu bölüm gerçek benchmark değil; rapor metrikleri, model boyutu ve konfigürasyon üzerinden tahmini bir karar desteği sunar.
+            Bu bölüm gerçek benchmark değil; XGBoost ve FT-Transformer rapor metrikleri, artefact boyutu ve konfigürasyon üzerinden tahmini bir karar desteği sunar. Interpolasyon referans ailesi olduğu için maliyet yarışına dahil edilmez.
           </div>
         </div>
 
         <div>
-          <div id="compare-cost-summary" class="grid-2">
+          <div id="compare-cost-summary" class="result-grid">
             <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
             <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
           </div>
@@ -173,80 +277,10 @@
 
       <div class="chart-container" id="compare-cost-chart" style="min-height:340px"></div>
     </div>
-
-    <!-- Report Charts: XGBoost -->
-    <div class="grid-2 mb-lg">
-      <div class="card">
-        <div class="card__header"><div class="card__title">XGBoost — Actual vs Predicted (Slice)</div></div>
-        <div id="compare-xgb-slice-plot" style="text-align:center">
-          <img src="/api/report/xgboost/plots/slice_predictions" alt="XGBoost slice predictions"
-               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
-               onclick="window.open(this.src, '_blank')"
-               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi. Rapor uretilmis mi?</div></div>'">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card__header"><div class="card__title">FT-Transformer — Actual vs Predicted (Slice)</div></div>
-        <div id="compare-ft-slice-plot" style="text-align:center">
-          <img src="/api/report/ft_transformer/plots/slice_predictions" alt="FT-Transformer slice predictions"
-               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
-               onclick="window.open(this.src, '_blank')"
-               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi. Rapor uretilmis mi?</div></div>'">
-        </div>
-      </div>
-    </div>
-
-    <!-- Report Charts: Slice Summary -->
-    <div class="grid-2 mb-lg">
-      <div class="card">
-        <div class="card__header"><div class="card__title">XGBoost — Slice Hata Ozeti</div></div>
-        <div id="compare-xgb-summary-plot" style="text-align:center">
-          <img src="/api/report/xgboost/plots/slice_summary" alt="XGBoost slice summary"
-               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
-               onclick="window.open(this.src, '_blank')"
-               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi</div></div>'">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card__header"><div class="card__title">FT-Transformer — Slice Hata Ozeti</div></div>
-        <div id="compare-ft-summary-plot" style="text-align:center">
-          <img src="/api/report/ft_transformer/plots/slice_summary" alt="FT-Transformer slice summary"
-               style="width:100%;border-radius:var(--radius-md);cursor:zoom-in"
-               onclick="window.open(this.src, '_blank')"
-               onerror="this.parentElement.innerHTML='<div class=\'empty-state\'><div class=\'empty-state__text\'>Grafik bulunamadi</div></div>'">
-        </div>
-      </div>
-    </div>
-
-    <!-- Metric Comparison Bar Chart (Plotly — this one is fine, only 6 bars) -->
-    <div class="card mb-lg">
-      <div class="card__header"><div class="card__title">Metrik Karsilastirmasi</div></div>
-      <div class="chart-container" id="compare-metric-chart" style="min-height:340px"></div>
-    </div>
-
-    <!-- Merged Row Table -->
-    <div class="card mb-lg">
-      <div class="card__header">
-        <div class="card__title">Satır Bazlı Karşılaştırma</div>
-        <div class="card__subtitle">Her satır için her iki modelin tahmini ve hatası</div>
-      </div>
-      <div id="compare-table">
-        <div class="loading-overlay"><div class="spinner"></div><span>Yükleniyor…</span></div>
-      </div>
-      <div id="compare-pagination"></div>
-    </div>
-
-    <!-- Row Detail -->
-    <div class="card">
-      <div class="card__header"><div class="card__title">Seçili Satır Detayı</div></div>
-      <div id="compare-row-detail">
-        <p class="text-muted">Detay görmek için tabloda bir satıra tıkla.</p>
-      </div>
-    </div>
   </div>
 
   <!-- ================================================================== -->
-  <!-- TAB 3: TEKİL TAHMİN                                                -->
+  <!-- TAB 4: TEKİL TAHMİN                                                -->
   <!-- ================================================================== -->
   <div class="tab-content" id="tab-predict">
     <div class="section-header">
@@ -266,6 +300,28 @@
             <select id="predict-scenario" class="form-select" style="flex:1"></select>
             <button class="btn btn--secondary btn--sm" onclick="applyScenario()">Yükle</button>
           </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--glass-border);margin:var(--space-md) 0">
+
+        <div class="form-group">
+          <label class="form-label">Tahmin Yöntemi</label>
+          <select id="predict-method" class="form-select">
+            <option value="all">Tümünü karşılaştır</option>
+            <option value="interpolation">Sadece Interpolasyon</option>
+            <option value="xgboost">Sadece XGBoost</option>
+            <option value="ft_transformer">Sadece FT-Transformer</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Interpolasyon Alt Yöntemi</label>
+          <select id="predict-interp-method" class="form-select">
+            <option value="spline">Cubic Spline (varsayılan)</option>
+            <option value="linear">Piecewise Linear</option>
+            <option value="newton">Newton Divided Difference</option>
+          </select>
+          <div class="form-help">Klasik interpolasyon fuel_flow girdisini kullanmaz; tablo eksenleri altitude, gross_weight, drag_index ve mach üzerinden hesaplanır.</div>
         </div>
 
         <hr style="border:none;border-top:1px solid var(--glass-border);margin:var(--space-md) 0">
@@ -392,7 +448,184 @@
   </div>
 
   <!-- ================================================================== -->
-  <!-- TAB 5: SETUP                                                        -->
+  <!-- TAB 5: VERI ÜRETİMİ / DATASET OLUŞTURMA                             -->
+  <!-- ================================================================== -->
+  <div class="tab-content" id="tab-dataset">
+    <div class="section-header">
+      <div class="section-header__title">Veri Üretimi ve Grafik Segmentasyon</div>
+      <div class="section-header__desc">
+        İç Dataset Builder aracı: sentetik grafik üretimi, U-Net eğitimi, curve segmentation ve Excel export demo alanı
+      </div>
+    </div>
+
+    <div class="card mb-lg" style="border:1px solid rgba(6,182,212,0.25);background:rgba(6,182,212,0.05)">
+      <div class="card__header">
+        <div>
+          <div class="card__title">Bu sekme ne işe yarıyor?</div>
+          <div class="card__subtitle">Ana tahmin yöntemlerinden ayrı; verinin nasıl üretildiğini ve grafiklerden nasıl çıkarıldığını göstermek için.</div>
+        </div>
+      </div>
+      <p class="text-muted" style="margin:0">
+        Buradaki araçlar Interpolasyon, XGBoost ve FT-Transformer kıyasına doğrudan karışmaz. Ama sunumda
+        "ham grafiklerden veri nasıl çıkarıldı?" sorusunu göstermek için proje içine alınmış dataset builder scriptlerini güvenli komut butonlarıyla başlatır.
+      </p>
+    </div>
+
+    <div class="grid-2 mb-lg">
+      <div>
+        <div class="card mb-lg">
+          <div class="card__header">
+            <div>
+              <div class="card__title">Dataset Tool Durumu</div>
+              <div class="card__subtitle">İç klasör, model, Python paketleri, sistem araçları ve demo script kontrolleri</div>
+            </div>
+            <button class="btn btn--secondary btn--sm" onclick="loadDatasetToolsTab(true)">Yenile</button>
+          </div>
+          <div class="metric-grid" id="dataset-status-cards">
+            <div class="loading-overlay"><div class="spinner"></div><span>Durum yükleniyor…</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__header">
+            <div>
+              <div class="card__title">Pipeline Kartları</div>
+              <div class="card__subtitle">Komutlar otomatik başlamaz; sadece butona basınca çalışır.</div>
+            </div>
+          </div>
+          <div class="stepper" id="dataset-tool-steps">
+            <div class="loading-overlay"><div class="spinner"></div><span>Komutlar yükleniyor…</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card mb-lg dataset-web-gui" id="dataset-web-gui" hidden>
+          <div class="card__header">
+            <div>
+              <div class="card__title">Dataset GUI — Flask Versiyonu</div>
+              <div class="card__subtitle">Ayrı Tkinter penceresi yerine aynı sekmede çalışan üretim/eğitim/segmentasyon paneli.</div>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn--secondary btn--sm" onclick="saveDatasetGuiPreset()">Ayarları Kaydet</button>
+              <button class="btn btn--secondary btn--sm" onclick="loadDatasetGuiPreset()">Ayarları Yükle</button>
+            </div>
+          </div>
+
+          <div class="dataset-gui-scroll">
+            <fieldset class="dataset-fieldset">
+              <legend>1. Sentetik Veri Üretimi</legend>
+              <label class="check-row"><input type="checkbox" data-dgui="generate.enabled" checked> Aktif Et</label>
+              <label class="check-row check-row--danger"><input type="checkbox" data-dgui="generate.clean_data"> Üretim öncesi eski verileri sil</label>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Grafik Sayısı</label><input class="form-input" data-dgui="generate.num_images" value="5000"></div>
+                <div class="form-group"><label class="form-label">Worker Sayısı</label><input class="form-input" data-dgui="generate.num_workers" value="6"></div>
+              </div>
+              <div class="mini-heading">Gelişmiş Veri Artırma</div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Döndürme (Max °)</label><input class="form-input" data-dgui="generate.rotation" value="3.0"></div>
+                <div class="form-group"><label class="form-label">Gürültü</label><input class="form-input" data-dgui="generate.noise" value="15.0"></div>
+                <div class="form-group"><label class="form-label">JPEG Kalite</label><input class="form-input" data-dgui="generate.jpeg" value="70"></div>
+                <div class="form-group"><label class="form-label">Bulanıklık</label><input class="form-input" data-dgui="generate.blur" value="0"></div>
+                <div class="form-group"><label class="form-label">Gölge (0/1)</label><input class="form-input" data-dgui="generate.shadow" value="0"></div>
+                <div class="form-group"><label class="form-label">Olasılık</label><input class="form-input" data-dgui="generate.prob" value="0.7"></div>
+                <div class="form-group"><label class="form-label">Çevirme (0-3)</label><input class="form-input" data-dgui="generate.flip" value="0"></div>
+                <div class="form-group"><label class="form-label">Shear</label><input class="form-input" data-dgui="generate.shear" value="0.0"></div>
+                <div class="form-group"><label class="form-label">Hue</label><input class="form-input" data-dgui="generate.hue" value="0"></div>
+                <div class="form-group"><label class="form-label">Doygunluk</label><input class="form-input" data-dgui="generate.sat" value="0"></div>
+                <div class="form-group"><label class="form-label">Cutout</label><input class="form-input" data-dgui="generate.cutout" value="0"></div>
+                <div class="form-group"><label class="form-label">Motion Blur</label><input class="form-input" data-dgui="generate.motion" value="0"></div>
+              </div>
+            </fieldset>
+
+            <fieldset class="dataset-fieldset">
+              <legend>2. Model Eğitimi</legend>
+              <label class="check-row"><input type="checkbox" data-dgui="train.enabled" checked> Aktif Et</label>
+              <label class="check-row"><input type="checkbox" data-dgui="train.use_colab"> Google Colab üzerinden eğit</label>
+              <div class="form-group"><label class="form-label">Notebook Linki</label><input class="form-input" data-dgui="train.colab_link" value="https://colab.research.google.com/"></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Dataset Yolu</label><input class="form-input" data-dgui="train.dataset_path" value="dataset_production"></div>
+                <div class="form-group"><label class="form-label">Epoch Sayısı</label><input class="form-input" data-dgui="train.epochs" value="50"></div>
+                <div class="form-group"><label class="form-label">Batch Size</label><input class="form-input" data-dgui="train.batch_size" value="8"></div>
+                <div class="form-group"><label class="form-label">Learning Rate</label><input class="form-input" data-dgui="train.learning_rate" value="0.001"></div>
+                <div class="form-group"><label class="form-label">Image Size</label><input class="form-input" data-dgui="train.image_size" value="256"></div>
+                <div class="form-group"><label class="form-label">Early Stopping</label><select class="form-select" data-dgui="train.early_stopping_mode"><option>Otomatik</option><option>Manuel</option><option>Kapali</option></select></div>
+                <div class="form-group"><label class="form-label">Patience</label><input class="form-input" data-dgui="train.patience" value="10"></div>
+                <div class="form-group"><label class="form-label">Train Worker</label><input class="form-input" data-dgui="train.num_workers" value="0"></div>
+                <div class="form-group"><label class="form-label">Cihaz</label><select class="form-select" data-dgui="train.device"><option>cpu</option><option>cuda</option></select></div>
+              </div>
+            </fieldset>
+
+            <fieldset class="dataset-fieldset">
+              <legend>3. Eğri Çıkarımı (Inference)</legend>
+              <label class="check-row"><input type="checkbox" data-dgui="inference.enabled" checked> Aktif Et</label>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Model (.pth)</label><input class="form-input" data-dgui="inference.model_path" value="Model/best_unet_model (3).pth"></div>
+                <div class="form-group"><label class="form-label">Mod</label><select class="form-select" data-dgui="inference.mode"><option value="folder">Klasör Modu</option><option value="pdf">PDF Modu</option></select></div>
+                <div class="form-group"><label class="form-label">Giriş Klasörü</label><input class="form-input" data-dgui="inference.input_dir" value="Grafikler"></div>
+                <div class="form-group"><label class="form-label">PDF Dosyası</label><input class="form-input" data-dgui="inference.pdf_path" placeholder="grafik.pdf"></div>
+                <div class="form-group"><label class="form-label">PDF Sayfalar</label><input class="form-input" data-dgui="inference.pdf_pages" value="all"></div>
+                <div class="form-group"><label class="form-label">Threshold</label><input class="form-input" data-dgui="inference.threshold" value="0.5"></div>
+                <div class="form-group"><label class="form-label">Input Size</label><input class="form-input" data-dgui="inference.input_size" value="256"></div>
+                <div class="form-group"><label class="form-label">Çıkış Klasörü</label><input class="form-input" data-dgui="inference.output_dir" value="segmentation_results"></div>
+                <div class="form-group"><label class="form-label">Cihaz</label><select class="form-select" data-dgui="inference.device"><option>cpu</option><option>cuda</option></select></div>
+              </div>
+              <label class="check-row check-row--danger"><input type="checkbox" data-dgui="inference.clean_output" checked> Başlamadan önce çıkış klasörünü temizle</label>
+              <label class="check-row"><input type="checkbox" data-dgui="inference.no_confidence" checked> Confidence dosyası üretme</label>
+            </fieldset>
+
+            <fieldset class="dataset-fieldset">
+              <legend>4. Excel Aktarımı</legend>
+              <label class="check-row"><input type="checkbox" data-dgui="extract.enabled" checked> Tespit edilen eğrileri Excel'e aktar</label>
+              <div class="form-group"><label class="form-label">Excel Çıktı Adı</label><input class="form-input" data-dgui="extract.curve_data_output" value="curve_data.xlsx"></div>
+            </fieldset>
+
+            <fieldset class="dataset-fieldset">
+              <legend>5. Hata Düzeltme (Baseline)</legend>
+              <label class="check-row"><input type="checkbox" data-dgui="correction.enabled" checked> Aktif Et</label>
+              <div class="form-group"><label class="form-label">Düzeltme Klasörü</label><input class="form-input" data-dgui="correction.correction_dir" value="segmentation_results"></div>
+              <div class="form-help">Bu adım için 6-correction_tool.py proje içi tool klasöründe yoksa pipeline log'a uyarı yazıp devam eder.</div>
+            </fieldset>
+
+            <fieldset class="dataset-fieldset">
+              <legend>Görsel Önizleme & Düzenleme</legend>
+              <div class="dataset-preview-actions">
+                <button class="btn btn--secondary btn--sm" onclick="loadDatasetGuiPreview('training')">Rastgele Eğitim Verisi</button>
+                <button class="btn btn--secondary btn--sm" onclick="loadDatasetGuiPreview('result')">Rastgele Sonuç</button>
+                <button class="btn btn--secondary btn--sm" onclick="openCurrentDatasetPreview()">Dosyayı Aç</button>
+              </div>
+              <div class="dataset-preview" id="dataset-preview-panel">
+                <div class="empty-state">
+                  <div class="empty-state__text">Henüz önizleme seçilmedi.</div>
+                </div>
+              </div>
+              <div class="form-help">Masaüstü GUI’daki maske çizim editörü bu web panelinde şimdilik güvenli önizleme olarak taşındı; görsel ve maske yan yana açılır.</div>
+            </fieldset>
+          </div>
+
+          <div class="dataset-gui-actions">
+            <button class="btn btn--secondary" onclick="runDatasetToolCommand('env_check')">Ortamı Kontrol Et</button>
+            <button class="btn btn--primary" onclick="runDatasetGuiPipeline()">Başlat</button>
+            <button class="btn btn--danger" onclick="stopDatasetGuiPipeline()">Durdur</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__header">
+            <div>
+              <div class="card__title">Dataset Araç Günlüğü</div>
+              <div class="card__subtitle">Çalışan dataset builder script çıktıları burada canlı görünür.</div>
+            </div>
+            <button class="btn btn--secondary btn--sm" onclick="clearDatasetToolLog()">Logu Temizle</button>
+          </div>
+          <div class="log-area" id="dataset-tool-log">Henüz dataset aracı çalıştırılmadı.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- TAB 6: SETUP                                                        -->
   <!-- ================================================================== -->
   <div class="tab-content" id="tab-setup">
     <div class="section-header flex-between">
@@ -417,6 +650,66 @@
       <div class="card">
         <div class="card__header"><div class="card__title">Çalışma Günlüğü</div></div>
         <div class="log-area" id="setup-log">Henüz komut çalıştırılmadı.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- TAB 8: BİLGİ                                                       -->
+  <!-- ================================================================== -->
+  <div class="tab-content" id="tab-info">
+    <div class="section-header">
+      <div class="section-header__title">Bilgi ve Kullanım Notları</div>
+      <div class="section-header__desc">Sekmelerin amacı, yöntem rolleri ve README içeriklerinden derlenmiş hızlı başvuru alanı</div>
+    </div>
+
+    <div class="grid-2 mb-lg">
+      <div class="card">
+        <div class="card__header">
+          <div>
+            <div class="card__title">Sekme Rehberi</div>
+            <div class="card__subtitle">Sunum sırasında hangi panelin ne işe yaradığını hızlıca anlatır.</div>
+          </div>
+        </div>
+        <div id="info-tabs">
+          <div class="loading-overlay"><div class="spinner"></div><span>Bilgiler yükleniyor…</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__header">
+          <div>
+            <div class="card__title">Yöntem Rolleri</div>
+            <div class="card__subtitle">Üç yöntemin uygulama içindeki konumu.</div>
+          </div>
+        </div>
+        <div id="info-methods">
+          <div class="loading-overlay"><div class="spinner"></div><span>Bilgiler yükleniyor…</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-lg">
+      <div class="card__header">
+        <div>
+          <div class="card__title">Maliyet Hesabı Nasıl Çalışıyor?</div>
+          <div class="card__subtitle">Simülatördeki RMSE, RAM, latency ve skor değerlerinin hangi kaynaklardan türediği.</div>
+        </div>
+      </div>
+      <div id="info-cost-simulator">
+        <div class="loading-overlay"><div class="spinner"></div><span>Maliyet açıklaması yükleniyor…</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__header">
+        <div>
+          <div class="card__title">README Özetleri</div>
+          <div class="card__subtitle">Standalone uygulama, dataset builder ve yöntem dokümanları okunabilir kartlar halinde.</div>
+        </div>
+      </div>
+      <div id="info-readmes">
+        <div class="loading-overlay"><div class="spinner"></div><span>README içerikleri yükleniyor…</span></div>
       </div>
     </div>
   </div>

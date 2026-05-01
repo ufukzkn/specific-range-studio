@@ -4,6 +4,7 @@ This repository contains a modular research codebase for predicting `specific_ra
 
 - `FT-Transformer` as the main model,
 - `XGBoost` as the baseline,
+- classic table interpolation as the deterministic reference family,
 - `PSO` for hyperparameter optimization,
 - deployment-aware hooks for later ONNX / TensorRT / Jetson benchmarking.
 
@@ -41,6 +42,8 @@ The loader standardizes these to the canonical schema:
 
 ```text
 src/
+  interpolation/
+    specific_range.py
   data/
     load_data.py
     preprocess.py
@@ -67,6 +70,16 @@ scripts/
   train_xgboost.py
   run_pso.py
   compare_models.py
+tools/
+  dataset_builder/
+    2-check_env_sys.py
+    3-synthetic_production.py
+    5-segment_curves.py
+    train_unet.py
+    synthetic_data_gui.py
+report_outputs/
+  docx/
+  README.md
 ```
 
 ## Installation
@@ -137,16 +150,42 @@ python scripts/compare_models.py --dataset data/processed/combined_specific_rang
 python scripts/web_app/server.py
 ```
 
+Windows kisayolu:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start_flask_ui.ps1
+```
+
+veya dosyaya cift tiklamak icin:
+
+```bat
+scripts\start_flask_ui.bat
+```
+
 Bu arayuz Flask tabanlidir ve tarayicida `http://localhost:5000` adresinde acilir.
 Icerdigi ana sekmeler:
 
 - `Genel Bakis`
 - `Karsilastirma`
+- `Maliyet`
 - `Tekil Tahmin`
 - `Nomogram`
+- `Veri Uretimi`
 - `Setup`
+- `Bilgi`
 
 `Setup` sekmesi veri pipeline, egitim ve toplu raporlama adimlarini arayuz icinden calistirabilir.
+`Veri Uretimi` sekmesi ise proje icine alinmis `tools/dataset_builder/` altindaki grafik segmentasyon ve sentetik veri araclarini launcher panel olarak acar; ana tahmin yontemi degildir.
+`Maliyet` sekmesi XGBoost ve FT-Transformer icin tahmini dogruluk / gecikme / bellek odunlesimini gosterir; interpolasyon referans aile oldugu icin bu maliyet yarismasina dahil edilmez.
+`Bilgi` sekmesi README notlarini, yontem rollerini ve sekme aciklamalarini arayuz icinden okunabilir hale getirir.
+
+Ana Flask arayuzu artik uc ana yontemi tek panelde gosterir:
+
+- `Interpolasyon`: deterministik tablo temelli referans aile. Varsayilan alt yontem `Cubic Spline`; tekil tahminde `Piecewise Linear` ve `Newton Divided Difference` da secilebilir.
+- `XGBoost`: agac tabanli guclu baseline.
+- `FT-Transformer`: projenin ana tabular transformer modeli.
+
+Interpolasyon yontemi `altitude`, `gross_weight`, `drag_index` ve `mach` eksenlerini kullanir. `fuel_flow`, ML modellerinin girdisinde kalir; klasik interpolasyon tarafinda tablo ekseni olmadigi icin kullanilmaz.
 
 7. Launch the legacy Streamlit UI if needed:
 
@@ -191,9 +230,11 @@ It is designed for the workflow described by the project lead:
 
 - users manually enter `altitude`, `gross_weight`, `drag_index`, `mach`, `fuel_flow`, and `engine_type`,
 - the app can predict for intermediate values such as `11000 ft`, even when the original tables only contain `10000 ft` and `15000 ft`,
-- predictions can be generated with XGBoost, FT-Transformer, or both side by side.
+- predictions can be generated with Interpolation, XGBoost, FT-Transformer, or all three side by side.
 - report metrics, slice plots, row-level comparison tables, nomogram generation, and setup commands are available from the same interface,
-- the comparison tab includes a cost-function simulator for approximate accuracy / latency / memory trade-off exploration.
+- the `Maliyet` tab includes a cost-function simulator for approximate accuracy / latency / memory trade-off exploration.
+- interpolation is shown as a deterministic reference family; XGBoost and FT-Transformer are learned regressors trained from the processed table.
+- the `Veri Uretimi` tab can launch the internal Dataset Builder GUI and whitelisted demo scripts with live logs.
 
 Legacy interfaces are still present:
 
@@ -201,6 +242,36 @@ Legacy interfaces are still present:
 - `scripts/desktop_app_qt.py` for a native Qt window.
 
 The old `tkinter` desktop version is kept only for reference and is not the primary interface anymore.
+
+## Project Tools
+
+This repository is designed to run as a standalone project. Runtime logic lives under `src/`, `scripts/`, and `tools/`.
+
+- `src/interpolation/` contains the project-internal interpolation service for Linear, Spline, and Newton-style table interpolation.
+- `tools/dataset_builder/` contains the graph segmentation, synthetic data generation, U-Net training, and Excel export tooling used by the Flask `Veri Uretimi` tab.
+
+## Dataset Builder Tool
+
+The Flask `Veri Uretimi` tab exposes `tools/dataset_builder/` as a controlled launcher:
+
+- `Dataset Python Bagimliliklarini Kur`: installs Python packages such as `opencv-python`, `pdf2image`, `pytesseract`, `tqdm`, and `scikit-image` into the main project `.venv`.
+- `Poppler Kur`: installs the Poppler system binary with `winget` when available.
+- `Tesseract OCR Kur`: installs the Tesseract OCR system binary with `winget` when available.
+- `Ortam Kontrolu`: checks dataset-tool Python dependencies.
+- `Dataset GUI Ac`: starts `synthetic_data_gui.py` in a separate desktop process.
+- `Sentetik Grafik Uret`: runs a small sequential `3-synthetic_production.py` demo command and creates `dataset_production/`.
+- `U-Net Egit`: runs a short CPU demo for `train_unet.py`.
+- `Segmentasyon / Excel Export`: runs `5-segment_curves.py` on the small `demo_graphs/` subset with the bundled model path when available.
+
+For safety, the UI cannot run arbitrary commands; it can only call backend-defined command IDs through `/api/dataset-tools/run`.
+
+Python package dependencies are listed in `requirements.txt`. PDF/OCR workflows can also require system binaries:
+
+- `Poppler`: needed by `pdf2image` for PDF-to-image conversion.
+- `Tesseract`: needed by `pytesseract` for OCR.
+
+The Flask Dataset Tool status cards show both Python package status and system binary status. Missing Poppler/Tesseract does not break the main prediction UI; it only affects OCR/PDF-specific dataset workflows.
+If a missing dependency has an install command, the status card shows a `Kur` button. Python packages are installed into the project `.venv`; Poppler/Tesseract are Windows system tools and may require restarting the Flask app or terminal so PATH changes are picked up.
 
 ## Full-Table Reports
 
@@ -271,5 +342,5 @@ At the moment:
 ## Extension Points
 
 - Replace benchmark stubs with real ONNX export, TensorRT engine build, and Jetson latency measurement.
-- Add interpolation or lookup-table baselines for direct comparison against modern ML models.
+- Add more interpolation/reporting diagnostics for direct comparison against modern ML models.
 - Extend PSO to XGBoost using the same objective function for a fully standardized comparison protocol.

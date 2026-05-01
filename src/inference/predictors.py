@@ -167,7 +167,12 @@ def find_nearest_reference_rows(
 
 
 def build_test_scenarios(reference_df: pd.DataFrame) -> list[dict[str, object]]:
-    """Create UI-friendly preset scenarios from real rows and interpolated midpoints."""
+    """Create UI-friendly preset scenarios from real rows.
+
+    Presets intentionally avoid synthetic intermediate points. In this UI the
+    interpolation result is used as the custom-input reference, so exact real
+    rows are clearer and less surprising for quick demos.
+    """
 
     scenarios: list[dict[str, object]] = [
         {
@@ -191,84 +196,76 @@ def build_test_scenarios(reference_df: pd.DataFrame) -> list[dict[str, object]]:
         ["engine_type", "altitude", "gross_weight", "drag_index", "mach", "fuel_flow"]
     ).reset_index(drop=True)
 
+    def add_scenario(row: pd.Series, name: str, description: str) -> None:
+        key = (
+            float(row["altitude"]),
+            float(row["gross_weight"]),
+            float(row["drag_index"]),
+            float(row["mach"]),
+            float(row["fuel_flow"]),
+            str(row["engine_type"]),
+        )
+        if key in seen_rows:
+            return
+        seen_rows.add(key)
+        scenarios.append(
+            {
+                "name": name,
+                "description": description,
+                "altitude": float(row["altitude"]),
+                "gross_weight": float(row["gross_weight"]),
+                "drag_index": float(row["drag_index"]),
+                "mach": float(row["mach"]),
+                "fuel_flow": float(row["fuel_flow"]),
+                "engine_type": str(row["engine_type"]),
+                "source": "exact",
+            }
+        )
+
     for engine_type, engine_group in sorted_reference.groupby("engine_type", dropna=False):
         if engine_group.empty:
             continue
-        candidate_indices = sorted(
-            {
-                0,
-                max(len(engine_group) // 4, 0),
-                max(len(engine_group) // 2, 0),
-                max((3 * len(engine_group)) // 4, 0),
-                max(len(engine_group) - 1, 0),
-            }
+        engine_label = "Tek motor" if str(engine_type) == "one_engine" else "Cift motor"
+        candidate_specs = (
+            ("Dusuk irtifa / hafif konfigurasyon", 0.15, 0.20, 0.15),
+            ("Orta irtifa / nominal konfigurasyon", 0.45, 0.50, 0.45),
+            ("Yuksek irtifa / hizli cruise", 0.80, 0.75, 0.80),
         )
-        for idx in candidate_indices:
-            row = engine_group.iloc[int(idx)]
-            key = (
-                float(row["altitude"]),
-                float(row["gross_weight"]),
-                float(row["drag_index"]),
-                float(row["mach"]),
-                float(row["fuel_flow"]),
-                str(row["engine_type"]),
-            )
-            if key in seen_rows:
-                continue
-            seen_rows.add(key)
-            scenarios.append(
-                {
-                    "name": f"Exact row: {row['engine_type']} @ {int(row['altitude'])} ft / DI {int(row['drag_index'])}",
-                    "description": f"Real dataset row with actual specific_range={float(row['specific_range']):.6f}.",
-                    "altitude": float(row["altitude"]),
-                    "gross_weight": float(row["gross_weight"]),
-                    "drag_index": float(row["drag_index"]),
-                    "mach": float(row["mach"]),
-                    "fuel_flow": float(row["fuel_flow"]),
-                    "engine_type": str(row["engine_type"]),
-                    "source": "exact",
-                }
+        for label, altitude_q, weight_q, mach_q in candidate_specs:
+            target_altitude = engine_group["altitude"].quantile(altitude_q)
+            altitude_group = engine_group.iloc[
+                (engine_group["altitude"].astype(float) - float(target_altitude)).abs().argsort()[: max(20, len(engine_group) // 12)]
+            ]
+            target_weight = altitude_group["gross_weight"].quantile(weight_q)
+            weight_group = altitude_group.iloc[
+                (altitude_group["gross_weight"].astype(float) - float(target_weight)).abs().argsort()[: max(10, len(altitude_group) // 4)]
+            ]
+            target_mach = weight_group["mach"].quantile(mach_q)
+            row = weight_group.iloc[(weight_group["mach"].astype(float) - float(target_mach)).abs().argsort().iloc[0]]
+            add_scenario(
+                row,
+                f"{engine_label}: {label}",
+                (
+                    f"Gercek tablo satiri. actual specific_range="
+                    f"{float(row['specific_range']):.6f}, altitude={int(row['altitude'])} ft."
+                ),
             )
 
-    grouped = reference_df.sort_values(["engine_type", "gross_weight", "drag_index", "altitude", "mach"]).groupby(
-        ["engine_type", "gross_weight", "drag_index"],
-        dropna=False,
-    )
-    for (_, _, _), group in grouped:
-        if len(group) < 2:
-            continue
-        group = group.reset_index(drop=True)
-        for idx in range(len(group) - 1):
-            first = group.iloc[idx]
-            second = group.iloc[idx + 1]
-            altitude_gap = abs(float(second["altitude"]) - float(first["altitude"]))
-            if altitude_gap < 1000:
-                continue
-            scenarios.append(
-                {
-                    "name": (
-                        f"Intermediate: {first['engine_type']} "
-                        f"{int((float(first['altitude']) + float(second['altitude'])) / 2)} ft / "
-                        f"DI {int(first['drag_index'])}"
-                    ),
-                    "description": (
-                        "Midpoint scenario between two real altitude rows for interpolation-style testing."
-                    ),
-                    "altitude": float(first["altitude"] + second["altitude"]) / 2.0,
-                    "gross_weight": float(first["gross_weight"]),
-                    "drag_index": float(first["drag_index"]),
-                    "mach": float(first["mach"] + second["mach"]) / 2.0,
-                    "fuel_flow": float(first["fuel_flow"] + second["fuel_flow"]) / 2.0,
-                    "engine_type": str(first["engine_type"]),
-                    "source": "intermediate",
-                }
+        # Add one high-drag / endurance-style exact row per engine when present.
+        high_drag = engine_group[engine_group["drag_index"].astype(float) >= engine_group["drag_index"].quantile(0.80)]
+        if not high_drag.empty:
+            row = high_drag.iloc[(high_drag["specific_range"].astype(float) - high_drag["specific_range"].median()).abs().argsort().iloc[0]]
+            add_scenario(
+                row,
+                f"{engine_label}: yuksek drag kontrol senaryosu",
+                (
+                    f"Gercek tablo satiri; yuksek drag bolgesinde model davranisini kontrol eder. "
+                    f"actual specific_range={float(row['specific_range']):.6f}."
+                ),
             )
-            if len(scenarios) >= 16:
-                return scenarios
-        if len(scenarios) >= 16:
-            break
 
-    return scenarios
+    # Keep the list compact and demo-friendly.
+    return scenarios[:10]
 
 
 def list_engine_types(reference_df: pd.DataFrame) -> list[str]:
