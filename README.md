@@ -77,10 +77,14 @@ tools/
     5-segment_curves.py
     train_unet.py
     synthetic_data_gui.py
-report_outputs/
-  docx/
-  README.md
 ```
+
+Generated outputs are intentionally not tracked in Git:
+
+- `artifacts/` for trained model files and table reports,
+- `data/processed/` for the cleaned combined CSV,
+- `report_outputs/` for draft document/report generation artifacts,
+- `external_apps/` for archived/reference apps that are not part of the standalone runtime.
 
 ## Installation
 
@@ -104,6 +108,12 @@ python scripts/web_app/server.py
 ```
 
 GPU yoksa FT-Transformer komutunda `--device cpu`, toplu raporda da `--ft-device cpu` kullanin.
+
+Fresh clone note:
+
+- `One_Engine_Data.xlsx` and `Two_Engine_Data.xlsx` are tracked with the repository, so `python scripts/run_data_pipeline.py` can rebuild `data/processed/combined_specific_range.csv`.
+- Trained model artifacts are not tracked. The Flask UI opens without them, but prediction/comparison/model report panels become fully usable after running the XGBoost and FT-Transformer training commands above.
+- Dataset Builder demo code and selected sample assets live under `tools/dataset_builder/`; generated datasets, segmentation outputs and checkpoints remain ignored.
 
 ## Typical Workflow
 
