@@ -56,6 +56,7 @@ src/
     pso_search.py
   evaluation/
     benchmark.py
+    pi_benchmark.py
     metrics.py
   utils/
     config.py
@@ -70,6 +71,7 @@ scripts/
   train_xgboost.py
   run_pso.py
   compare_models.py
+  run_pi_benchmark.py
 tools/
   dataset_builder/
     2-check_env_sys.py
@@ -82,6 +84,7 @@ tools/
 Generated outputs are intentionally not tracked in Git:
 
 - `artifacts/` for trained model files and table reports,
+- `artifacts/benchmarks/` for Raspberry Pi benchmark JSON/CSV outputs,
 - `data/processed/` for the cleaned combined CSV,
 - `report_outputs/` for draft document/report generation artifacts,
 - `external_apps/` for archived/reference apps that are not part of the standalone runtime.
@@ -104,10 +107,12 @@ python scripts/run_data_pipeline.py
 python scripts/train_xgboost.py --dataset data/processed/combined_specific_range.csv --device cuda --run-table-report
 python scripts/train_ft_transformer.py --dataset data/processed/combined_specific_range.csv --device cuda --run-table-report
 python scripts/run_table_report.py --dataset data/processed/combined_specific_range.csv --model both --ft-device cuda
+python scripts/run_pi_benchmark.py --models xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu
 python scripts/web_app/server.py
 ```
 
 GPU yoksa FT-Transformer komutunda `--device cpu`, toplu raporda da `--ft-device cpu` kullanin.
+Raspberry Pi 3 gibi edge cihazlarda egitim yapmayin; egitilmis `artifacts/` klasorunu cihaza tasiyip yalniz `run_pi_benchmark.py` ile inference olcumu alin.
 
 Fresh clone note:
 
@@ -186,7 +191,7 @@ Icerdigi ana sekmeler:
 
 `Setup` sekmesi veri pipeline, egitim ve toplu raporlama adimlarini arayuz icinden calistirabilir.
 `Veri Uretimi` sekmesi ise proje icine alinmis `tools/dataset_builder/` altindaki grafik segmentasyon ve sentetik veri araclarini launcher panel olarak acar; ana tahmin yontemi degildir.
-`Maliyet` sekmesi XGBoost ve FT-Transformer icin tahmini dogruluk / gecikme / bellek odunlesimini gosterir; interpolasyon referans aile oldugu icin bu maliyet yarismasina dahil edilmez.
+`Maliyet` sekmesi XGBoost ve FT-Transformer icin gercek benchmark dosyasindan okunan dogruluk / gecikme / bellek / CPU odunlesimini gosterir. Bu sekmenin beslenmesi icin once `scripts/run_pi_benchmark.py` calistirilmalidir; interpolasyon referans aile oldugu icin bu maliyet yarismasina dahil edilmez.
 `Bilgi` sekmesi README notlarini, yontem rollerini ve sekme aciklamalarini arayuz icinden okunabilir hale getirir.
 
 Ana Flask arayuzu artik uc ana yontemi tek panelde gosterir:
@@ -218,6 +223,27 @@ Qt masaustu uygulamasinda da `Setup` sekmesi bulunur; veri pipeline, egitim ve t
 ```bash
 python scripts/run_table_report.py --dataset data/processed/combined_specific_range.csv --model both --ft-device cpu
 ```
+
+10. Run real Raspberry Pi / edge inference benchmark:
+
+```bash
+python scripts/run_pi_benchmark.py --models xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu
+```
+
+Bu komut su dosyalari uretir:
+
+- `artifacts/benchmarks/pi_benchmark_latest.json`
+- `artifacts/benchmarks/pi_benchmark_history.csv`
+- `artifacts/benchmarks/pi_benchmark_<timestamp>.json`
+
+Olculen metrikler:
+
+- p50 / p95 / p99 inference latency,
+- process peak RSS RAM,
+- ortalama ve orneklenmis peak CPU kullanimi,
+- model boyutu,
+- RMSE / MAE / MAPE / R2,
+- Raspberry Pi'de `vcgencmd` varsa sicaklik ve throttle bilgisi.
 
 10. Generate a draft nomogram-style comparison plot for one categorical slice:
 

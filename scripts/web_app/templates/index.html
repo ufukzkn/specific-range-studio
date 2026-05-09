@@ -200,21 +200,23 @@
   </div>
 
   <!-- ================================================================== -->
-  <!-- TAB 3: MALİYET SİMÜLATÖRÜ                                          -->
+  <!-- TAB 3: GERÇEK PI MALİYET ÖLÇÜMÜ                                    -->
   <!-- ================================================================== -->
   <div class="tab-content" id="tab-cost">
     <div class="section-header">
-      <div class="section-header__title">Tahmini Maliyet Fonksiyonu</div>
-      <div class="section-header__desc">XGBoost ve FT-Transformer için doğruluk, hız ve bellek varsayımlarını ayrı bir karar panelinde incele</div>
+      <div class="section-header__title">Gerçek Pi Maliyet Ölçümü</div>
+      <div class="section-header__desc">XGBoost ve FT-Transformer için Pi benchmark çıktısından doğruluk, hız, bellek ve CPU maliyetini incele</div>
     </div>
 
     <div class="card mb-lg">
       <div class="card__header">
         <div>
-          <div class="card__title">Tahmini Maliyet Fonksiyonu Simülatörü</div>
-          <div class="card__subtitle">Doğruluk, hız ve bellek ağırlıklarını değiştir; model tercihinin nasıl kaydığını gör</div>
+          <div class="card__title">Benchmark Tabanlı Maliyet Fonksiyonu</div>
+          <div class="card__subtitle">Önce Pi üzerinde benchmark al; sonra ağırlıkları değiştirerek gerçek ölçümlerin karar skoruna etkisini gör</div>
         </div>
       </div>
+
+      <div id="pi-benchmark-status" class="metric-grid mb-lg"></div>
 
       <div class="simulator-layout mb-lg">
         <div class="simulator-panel">
@@ -223,9 +225,9 @@
           <div class="range-control">
             <div class="range-control__header">
               <label for="cost-accuracy">Doğruluk Önceliği</label>
-              <span id="cost-accuracy-value">55%</span>
+              <span id="cost-accuracy-value">45%</span>
             </div>
-            <input type="range" id="cost-accuracy" class="form-range" min="0" max="100" step="1" value="55" oninput="debounceCostSimulation()">
+            <input type="range" id="cost-accuracy" class="form-range" min="0" max="100" step="1" value="45" oninput="debounceCostSimulation()">
           </div>
 
           <div class="range-control">
@@ -244,7 +246,15 @@
             <input type="range" id="cost-memory" class="form-range" min="0" max="100" step="1" value="20" oninput="debounceCostSimulation()">
           </div>
 
-          <div class="simulator-panel__title" style="margin-top:var(--space-lg)">Donanım Varsayımları</div>
+          <div class="range-control">
+            <div class="range-control__header">
+              <label for="cost-cpu">CPU Önceliği</label>
+              <span id="cost-cpu-value">10%</span>
+            </div>
+            <input type="range" id="cost-cpu" class="form-range" min="0" max="100" step="1" value="10" oninput="debounceCostSimulation()">
+          </div>
+
+          <div class="simulator-panel__title" style="margin-top:var(--space-lg)">Ölçümden Ölçeklenmiş Senaryo</div>
 
           <div class="range-control">
             <div class="range-control__header">
@@ -257,13 +267,13 @@
           <div class="range-control">
             <div class="range-control__header">
               <label for="cost-ram-budget">RAM Bütçesi</label>
-              <span id="cost-ram-budget-value">8.0 GB</span>
+              <span id="cost-ram-budget-value">1.0 GB</span>
             </div>
-            <input type="range" id="cost-ram-budget" class="form-range" min="2" max="32" step="0.5" value="8" oninput="debounceCostSimulation()">
+            <input type="range" id="cost-ram-budget" class="form-range" min="0.5" max="8" step="0.25" value="1" oninput="debounceCostSimulation()">
           </div>
 
           <div class="simulator-help">
-            Bu bölüm gerçek benchmark değil; XGBoost ve FT-Transformer rapor metrikleri, artefact boyutu ve konfigürasyon üzerinden tahmini bir karar desteği sunar. Interpolasyon referans ailesi olduğu için maliyet yarışına dahil edilmez.
+            Bu bölüm gerçek Pi benchmark dosyasını okur. CPU hız faktörü yalnızca ölçülen p95 gecikmeyi senaryo amaçlı ölçekler; ana kaynak yine ölçüm dosyasıdır. Interpolasyon referans ailesi olduğu için maliyet yarışına dahil edilmez.
           </div>
         </div>
 

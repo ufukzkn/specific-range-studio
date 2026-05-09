@@ -70,6 +70,8 @@ _ft_predictor: FTTransformerPredictor | None = None
 _interpolation_service: SpecificRangeInterpolationService | None = None
 
 DATASET_APP_DIR = PROJECT_ROOT / "tools" / "dataset_builder"
+BENCHMARK_DIR = _data_config.artifacts_dir / "benchmarks"
+PI_BENCHMARK_LATEST = BENCHMARK_DIR / "pi_benchmark_latest.json"
 _dataset_gui_process: subprocess.Popen | None = None
 _dataset_gui_lock = threading.Lock()
 
@@ -199,71 +201,90 @@ def _load_model_summary(model_key: str) -> dict:
     }
 
 
-def _estimate_runtime_profile(model_key: str, config: dict, model_size_mb: float, cpu_speed_factor: float) -> dict[str, float]:
-    cpu_speed_factor = max(cpu_speed_factor, 0.35)
+def _load_pi_benchmark_latest() -> dict | None:
+    if not PI_BENCHMARK_LATEST.exists():
+        return None
+    with PI_BENCHMARK_LATEST.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
 
-    if model_key == "interpolation":
-        estimated_latency_ms = 0.35 / cpu_speed_factor
-        estimated_peak_ram_mb = max(32.0, model_size_mb * 24.0)
-    elif model_key == "xgboost":
-        n_estimators = float(config.get("n_estimators", 300))
-        max_depth = float(config.get("max_depth", 6))
-        estimated_latency_ms = (2.50 + 0.0080 * n_estimators + 0.28 * max_depth) / cpu_speed_factor
-        estimated_peak_ram_mb = max(
-            72.0,
-            42.0 + (model_size_mb * 12.0) + (n_estimators * 0.05) + (max_depth * 2.0),
-        )
-    else:
-        d_model = float(config.get("d_model", 64))
-        n_layers = float(config.get("n_layers", 3))
-        n_heads = float(config.get("n_heads", 4))
-        d_ff = float(config.get("d_ff", 128))
-        batch_size = float(config.get("batch_size", 128))
-        head_load = n_layers * n_heads
-        estimated_latency_ms = (
-            3.60 + (0.006 * d_model) + (0.090 * head_load) + (0.0015 * d_ff) + (0.0008 * batch_size)
-        ) / cpu_speed_factor
-        estimated_peak_ram_mb = max(
-            128.0,
-            110.0 + (model_size_mb * 8.0) + (0.40 * d_model) + (0.25 * d_ff) + (3.0 * head_load),
-        )
 
+def _metric_float(source: dict | None, key: str) -> float | None:
+    if not source or key not in source:
+        return None
+    try:
+        value = float(source[key])
+    except (TypeError, ValueError):
+        return None
+    return value if np.isfinite(value) else None
+
+
+def _benchmark_model_payload(benchmark: dict, model_key: str) -> dict | None:
+    item = (benchmark.get("models") or {}).get(model_key)
+    if not item or not item.get("available"):
+        return None
+    latency = item.get("latency_ms") or {}
+    memory = item.get("memory_mb") or {}
+    cpu = item.get("cpu_percent") or {}
+    accuracy = item.get("accuracy") or {}
+    if "error" in accuracy:
+        accuracy = {}
+    required = [
+        _metric_float(latency, "p95"),
+        _metric_float(memory, "rss_peak"),
+        _metric_float(cpu, "process_avg"),
+        _metric_float(accuracy, "rmse"),
+        _metric_float(accuracy, "mae"),
+        _metric_float(accuracy, "mape"),
+        _metric_float(accuracy, "r2"),
+    ]
+    if any(value is None for value in required):
+        return None
     return {
-        "estimated_latency_ms": float(estimated_latency_ms),
-        "estimated_peak_ram_mb": float(estimated_peak_ram_mb),
+        "raw": item,
+        "display_name": "XGBoost" if model_key == "xgboost" else "FT-Transformer",
+        "latency_p50_ms": _metric_float(latency, "p50") or _metric_float(latency, "median"),
+        "latency_p95_ms": _metric_float(latency, "p95"),
+        "peak_rss_mb": _metric_float(memory, "rss_peak"),
+        "cpu_avg_percent": _metric_float(cpu, "process_avg"),
+        "cpu_peak_percent": _metric_float(cpu, "process_peak_sample"),
+        "model_size_mb": _metric_float(item, "model_size_mb"),
+        "metrics": {
+            "rmse": _metric_float(accuracy, "rmse"),
+            "mae": _metric_float(accuracy, "mae"),
+            "mape": _metric_float(accuracy, "mape"),
+            "r2": _metric_float(accuracy, "r2"),
+        },
     }
 
 
 def _cost_simulator_explanation() -> dict:
     return {
-        "title": "Maliyet simülatörü neyi hesaplıyor?",
+        "title": "Maliyet paneli neyi hesaplıyor?",
         "summary": (
-            "Bu panel gerçek benchmark ölçümü değildir. XGBoost ve FT-Transformer için üretilmiş "
-            "rapor metriklerini, kayıtlı model artefact boyutunu ve eğitim konfigürasyonunu kullanarak "
-            "tahmini bir karar skoru üretir. Interpolasyon referans yöntem olduğu için bu yarışa dahil edilmez."
+            "Bu panel artık Pi benchmark runner çıktısını ana kaynak olarak kullanır. XGBoost ve "
+            "FT-Transformer için ölçülen p95 gecikme, peak RSS bellek, CPU kullanımı, model boyutu "
+            "ve benchmark sırasında hesaplanan doğruluk metrikleri tek bir karar skoruna çevrilir."
         ),
         "sources": [
             {
+                "name": "Gerçek benchmark dosyası",
+                "detail": (
+                    "Önce artifacts/benchmarks/pi_benchmark_latest.json okunur. Bu dosya "
+                    "scripts/run_pi_benchmark.py komutuyla Pi üzerinde üretilir."
+                ),
+            },
+            {
                 "name": "Doğruluk metrikleri",
                 "detail": (
-                    "Önce artifacts/<model>/reports/<model>_overall_summary.csv okunur. Burada rmse, mae, "
-                    "mape ve r2 varsa doğrudan bunlar kullanılır. Bu dosya yoksa artifacts/<model>/metrics.json "
-                    "içindeki test metriklerine düşülür."
+                    "Benchmark runner seçilen gerçek tablo satırlarında tahmin alır ve RMSE, MAE, "
+                    "MAPE ve R2 metriklerini aynı koşuda hesaplar."
                 ),
             },
             {
-                "name": "Model boyutu",
+                "name": "Runtime metrikleri",
                 "detail": (
-                    "XGBoost için artifacts/xgboost/model.json, FT-Transformer için "
-                    "artifacts/ft_transformer/model.pt dosyasının disk boyutu MB cinsinden alınır."
-                ),
-            },
-            {
-                "name": "Tahmini gecikme ve RAM",
-                "detail": (
-                    "Gerçek zamanlayıcıyla ölçülmez. Model konfigürasyonundan gelen n_estimators, max_depth, "
-                    "d_model, n_layers, n_heads, d_ff ve batch_size gibi değerler ile model boyutundan yaklaşık "
-                    "latency ve peak RAM profili hesaplanır."
+                    "Tekil inference tekrarlarından p50/p95 latency, process peak RSS RAM ve process CPU "
+                    "kullanımı ölçülür. Pi'de vcgencmd varsa sıcaklık ve throttle bilgisi de dosyaya yazılır."
                 ),
             },
         ],
@@ -273,7 +294,8 @@ def _cost_simulator_explanation() -> dict:
             {"label": "MAPE hedefi", "value": "2.0"},
             {"label": "R2 gap hedefi", "value": "0.0010"},
             {"label": "Gecikme hedefi", "value": "10 ms"},
-            {"label": "Bellek hedefi", "value": "256 MB"},
+            {"label": "Bellek hedefi", "value": "seçilen RAM bütçesi"},
+            {"label": "CPU hedefi", "value": "80%"},
         ],
         "formulas": [
             {
@@ -286,25 +308,30 @@ def _cost_simulator_explanation() -> dict:
             },
             {
                 "name": "Latency Cost",
-                "formula": "estimated_latency_ms / 10.0",
+                "formula": "measured_p95_latency_ms / 10.0",
                 "detail": (
-                    "Tahmini tekil çıkarım gecikmesi 10 ms hedefine göre normalize edilir. CPU speed slider'ı "
-                    "bu tahmini gecikmeyi böler; yani daha güçlü işlemci varsayımı gecikme cost'unu düşürür."
+                    "Ölçülen p95 tekil çıkarım gecikmesi 10 ms hedefine göre normalize edilir. CPU speed "
+                    "slider'ı sadece ölçümden ölçeklenmiş senaryo üretir."
                 ),
             },
             {
                 "name": "Memory Cost",
-                "formula": "effective_memory_mb / 256.0",
+                "formula": "measured_peak_rss_mb / memory_budget_mb",
                 "detail": (
-                    "Tahmini peak RAM 256 MB hedefine göre normalize edilir. Kullanıcının seçtiği RAM bütçesi "
-                    "aşılırsa effective_memory ayrıca ceza alır."
+                    "Ölçülen peak RSS değeri seçilen RAM bütçesine bölünür. Pi 3 için bu bütçe genelde "
+                    "1 GB civarında tutulmalıdır."
                 ),
             },
             {
+                "name": "CPU Cost",
+                "formula": "measured_avg_cpu_percent / 80.0",
+                "detail": "Benchmark koşusundaki ortalama process CPU kullanımı %80 hedefe göre normalize edilir.",
+            },
+            {
                 "name": "Composite Cost",
-                "formula": "w_accuracy * Accuracy + w_latency * Latency + w_memory * Memory",
+                "formula": "w_accuracy*Accuracy + w_latency*Latency + w_memory*Memory + w_cpu*CPU",
                 "detail": (
-                    "Slider ağırlıkları önce toplamı 1 olacak şekilde normalize edilir. Son maliyet bu üç "
+                    "Slider ağırlıkları önce toplamı 1 olacak şekilde normalize edilir. Son maliyet bu dört "
                     "bileşenin ağırlıklı toplamıdır; düşük composite cost daha iyi aday anlamına gelir."
                 ),
             },
@@ -317,28 +344,11 @@ def _cost_simulator_explanation() -> dict:
                 ),
             },
         ],
-        "runtime_formulas": [
-            {
-                "name": "XGBoost latency",
-                "formula": "(2.50 + 0.0080*n_estimators + 0.28*max_depth) / cpu_speed_factor",
-            },
-            {
-                "name": "XGBoost peak RAM",
-                "formula": "max(72, 42 + 12*model_size_mb + 0.05*n_estimators + 2*max_depth)",
-            },
-            {
-                "name": "FT latency",
-                "formula": "(3.60 + 0.006*d_model + 0.090*(n_layers*n_heads) + 0.0015*d_ff + 0.0008*batch_size) / cpu_speed_factor",
-            },
-            {
-                "name": "FT peak RAM",
-                "formula": "max(128, 110 + 8*model_size_mb + 0.40*d_model + 0.25*d_ff + 3*(n_layers*n_heads))",
-            },
-        ],
+        "runtime_formulas": [],
         "notes": [
-            "Bu formüller sunum ve hızlı karar desteği içindir; nihai performans için gerçek benchmark alınmalıdır.",
+            "Ölçüm yoksa maliyet paneli skor üretmez; önce Pi benchmark komutu çalıştırılmalıdır.",
             "Interpolasyon maliyet simülatöründen özellikle çıkarılmıştır; çünkü uygulamada referans üretici gibi davranır.",
-            "RMSE, MAE ve MAPE düşük oldukça iyidir; R2 için 1'e yakın olmak iyidir, bu yüzden maliyette 1 - R2 kullanılır.",
+            "RMSE, MAE, MAPE, latency, bellek ve CPU düşük oldukça iyidir; R2 için 1'e yakın olmak iyidir.",
         ],
     }
 
@@ -1211,6 +1221,74 @@ def api_report_plot(model: str, plot_name: str):
 # Comparison (both models merged)
 # ---------------------------------------------------------------------------
 
+@app.route("/api/benchmark/pi/latest")
+def api_pi_benchmark_latest():
+    benchmark = _load_pi_benchmark_latest()
+    if benchmark is None:
+        return jsonify({
+            "error": "Henüz gerçek Pi benchmark ölçümü yok.",
+            "command": (
+                "python scripts/run_pi_benchmark.py --models xgboost,ft_transformer "
+                "--sample-size 200 --warmup 20 --repetitions 200 --device cpu"
+            ),
+            "benchmark_path": str(PI_BENCHMARK_LATEST),
+        }), 404
+    return jsonify(benchmark)
+
+
+@app.route("/api/benchmark/pi/run", methods=["POST"])
+def api_pi_benchmark_run():
+    body = request.get_json(silent=True) or {}
+    models = str(body.get("models", "xgboost,ft_transformer"))
+    allowed_models = {"interpolation", "xgboost", "ft_transformer"}
+    requested_models = [item.strip() for item in models.split(",") if item.strip()]
+    if not requested_models or any(item not in allowed_models for item in requested_models):
+        return jsonify({"error": "Geçersiz model listesi."}), 400
+    sample_size = max(1, min(int(body.get("sample_size", 200)), 5000))
+    warmup = max(0, min(int(body.get("warmup", 20)), 1000))
+    repetitions = max(1, min(int(body.get("repetitions", 200)), 10000))
+    device = str(body.get("device", "cpu"))
+    if device != "cpu":
+        return jsonify({"error": "Pi benchmark endpoint'i şu an yalnız cpu device destekler."}), 400
+
+    command = [
+        sys.executable,
+        "scripts/run_pi_benchmark.py",
+        "--models",
+        ",".join(requested_models),
+        "--sample-size",
+        str(sample_size),
+        "--warmup",
+        str(warmup),
+        "--repetitions",
+        str(repetitions),
+        "--device",
+        "cpu",
+    ]
+
+    def generate():
+        yield f"data: {json.dumps({'type': 'output', 'text': '$ ' + ' '.join(command)})}\n\n"
+        process = subprocess.Popen(
+            command,
+            cwd=str(PROJECT_ROOT),
+            env=_subprocess_env(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,
+            shell=False,
+        )
+        assert process.stdout is not None
+        for line in iter(process.stdout.readline, ""):
+            yield f"data: {json.dumps({'type': 'output', 'text': line.rstrip()})}\n\n"
+        process.wait()
+        yield f"data: {json.dumps({'type': 'done', 'exit_code': process.returncode})}\n\n"
+
+    return Response(generate(), mimetype="text/event-stream")
+
+
 @app.route("/api/compare/metrics")
 def api_compare_metrics():
     result = {}
@@ -1439,36 +1517,35 @@ def api_compare_tolerance_curve_svg():
 
 @app.route("/api/compare/cost-simulator")
 def api_compare_cost_simulator():
-    accuracy_weight = request.args.get("accuracy_weight", 55, type=float)
+    accuracy_weight = request.args.get("accuracy_weight", 45, type=float)
     latency_weight = request.args.get("latency_weight", 25, type=float)
     memory_weight = request.args.get("memory_weight", 20, type=float)
+    cpu_weight = request.args.get("cpu_weight", 10, type=float)
     cpu_speed_factor = request.args.get("cpu_speed_factor", 1.0, type=float)
-    ram_budget_gb = request.args.get("ram_budget_gb", 8.0, type=float)
+    ram_budget_gb = request.args.get("ram_budget_gb", 1.0, type=float)
 
-    accuracy_weight, latency_weight, memory_weight = _normalize_weights(
+    accuracy_weight, latency_weight, memory_weight, cpu_weight = _normalize_weights(
         accuracy_weight,
         latency_weight,
         memory_weight,
+        cpu_weight,
     )
 
-    bundles = {
-        model_key: _load_model_summary(model_key)
-        for model_key in ("xgboost", "ft_transformer")
-    }
-
-    available = {
-        key: value
-        for key, value in bundles.items()
-        if value["metrics"] and value["model_size_mb"] is not None
-    }
-    if len(available) < 2:
-        return jsonify({"error": "Kıyas için yeterli metrik ve artefact bulunamadı"}), 404
+    benchmark = _load_pi_benchmark_latest()
+    benchmark_command = (
+        "python scripts/run_pi_benchmark.py --models xgboost,ft_transformer "
+        "--sample-size 200 --warmup 20 --repetitions 200 --device cpu"
+    )
+    if benchmark is None:
+        return jsonify({
+            "error": "Henüz gerçek Pi benchmark ölçümü yok.",
+            "command": benchmark_command,
+            "benchmark_path": str(PI_BENCHMARK_LATEST),
+        }), 404
 
     ram_budget_mb = max(ram_budget_gb * 1024.0, 256.0)
+    cpu_speed_factor = max(float(cpu_speed_factor), 0.35)
 
-    # Fixed "good enough for local demo" targets. Scores are no longer scaled
-    # against the current winner, so the best model does not automatically get
-    # 100. Lower cost is better; fit_score is an absolute suitability score.
     accuracy_targets = {
         "rmse": 0.0030,
         "mae": 0.0015,
@@ -1476,17 +1553,17 @@ def api_compare_cost_simulator():
         "r2_gap": 0.0010,
     }
     latency_target_ms = 10.0
-    memory_target_mb = 256.0
+    cpu_target_percent = 80.0
 
     prepared: dict[str, dict] = {}
-    for model_key, bundle in available.items():
-        runtime = _estimate_runtime_profile(
-            model_key,
-            bundle["config"],
-            float(bundle["model_size_mb"]),
-            cpu_speed_factor,
-        )
-        metrics = bundle["metrics"]
+    skipped: dict[str, str] = {}
+    for model_key in ("xgboost", "ft_transformer"):
+        measured = _benchmark_model_payload(benchmark, model_key)
+        if measured is None:
+            raw_item = (benchmark.get("models") or {}).get(model_key) or {}
+            skipped[model_key] = raw_item.get("skipped_reason") or "Bu model için eksiksiz ölçüm/metrik bulunamadı."
+            continue
+        metrics = measured["metrics"]
         accuracy_component = float(np.mean([
             float(metrics["rmse"]) / accuracy_targets["rmse"],
             float(metrics["mae"]) / accuracy_targets["mae"],
@@ -1494,28 +1571,38 @@ def api_compare_cost_simulator():
             max(1.0 - float(metrics["r2"]), 0.0) / accuracy_targets["r2_gap"],
         ]))
 
-        over_budget_ratio = max(runtime["estimated_peak_ram_mb"] - ram_budget_mb, 0.0) / ram_budget_mb
-        effective_memory = runtime["estimated_peak_ram_mb"] * (1.0 + over_budget_ratio)
+        scenario_latency_p95 = measured["latency_p95_ms"] / cpu_speed_factor
+        over_budget_ratio = max(measured["peak_rss_mb"] - ram_budget_mb, 0.0) / ram_budget_mb
 
         prepared[model_key] = {
-            **bundle,
-            **runtime,
+            **measured,
             "accuracy_component": accuracy_component,
-            "effective_memory_mb": effective_memory,
-            "ram_budget_utilization": runtime["estimated_peak_ram_mb"] / ram_budget_mb,
+            "scenario_latency_p95_ms": scenario_latency_p95,
+            "ram_budget_utilization": measured["peak_rss_mb"] / ram_budget_mb,
             "over_budget_ratio": over_budget_ratio,
         }
 
+    if not prepared:
+        return jsonify({
+            "error": "Benchmark dosyası bulundu ama XGBoost/FT-Transformer için kullanılabilir ölçüm yok.",
+            "command": benchmark_command,
+            "benchmark_path": str(PI_BENCHMARK_LATEST),
+            "skipped": skipped,
+        }), 404
+
     for model_key, item in prepared.items():
-        latency_component = item["estimated_latency_ms"] / latency_target_ms
-        memory_component = item["effective_memory_mb"] / memory_target_mb
+        latency_component = item["scenario_latency_p95_ms"] / latency_target_ms
+        memory_component = item["peak_rss_mb"] / ram_budget_mb
+        cpu_component = item["cpu_avg_percent"] / cpu_target_percent
         combined_cost = (
             accuracy_weight * item["accuracy_component"]
             + latency_weight * latency_component
             + memory_weight * memory_component
+            + cpu_weight * cpu_component
         )
         item["latency_component"] = latency_component
         item["memory_component"] = memory_component
+        item["cpu_component"] = cpu_component
         item["combined_cost"] = combined_cost
         item["fit_score"] = 100.0 / (1.0 + 0.30 * max(combined_cost, 0.0))
 
@@ -1526,31 +1613,48 @@ def api_compare_cost_simulator():
         response_models[model_key] = {
             "display_name": item["display_name"],
             "metrics": item["metrics"],
-            "model_size_mb": float(item["model_size_mb"]),
-            "estimated_latency_ms": item["estimated_latency_ms"],
-            "estimated_peak_ram_mb": item["estimated_peak_ram_mb"],
+            "model_size_mb": item["model_size_mb"],
+            "measured_latency_p50_ms": item["latency_p50_ms"],
+            "measured_latency_p95_ms": item["latency_p95_ms"],
+            "scenario_latency_p95_ms": item["scenario_latency_p95_ms"],
+            "measured_peak_rss_mb": item["peak_rss_mb"],
+            "measured_cpu_avg_percent": item["cpu_avg_percent"],
+            "measured_cpu_peak_percent": item["cpu_peak_percent"],
             "ram_budget_utilization": item["ram_budget_utilization"],
             "over_budget_ratio": item["over_budget_ratio"],
             "accuracy_component": item["accuracy_component"],
             "latency_component": item["latency_component"],
             "memory_component": item["memory_component"],
+            "cpu_component": item["cpu_component"],
             "combined_cost": item["combined_cost"],
             "fit_score": item["fit_score"],
             "note": (
-                "Tahmini maliyet modeli; gerçek benchmark değil."
+                "Gerçek Pi benchmark ölçümünden hesaplandı."
+                + (" CPU hız faktörüyle ölçeklenmiş senaryo gösteriliyor." if abs(cpu_speed_factor - 1.0) > 1e-9 else "")
                 + (" RAM bütçesini aşıyor." if item["over_budget_ratio"] > 0 else "")
             ),
         }
 
     return jsonify({
+        "source": "pi_benchmark",
+        "benchmark": {
+            "path": str(PI_BENCHMARK_LATEST),
+            "run_id": benchmark.get("run_id"),
+            "created_at": benchmark.get("created_at"),
+            "system": benchmark.get("system") or {},
+            "config": benchmark.get("config") or {},
+            "command": benchmark_command,
+        },
         "weights": {
             "accuracy": accuracy_weight,
             "latency": latency_weight,
             "memory": memory_weight,
+            "cpu": cpu_weight,
         },
         "hardware": {
             "cpu_speed_factor": cpu_speed_factor,
             "ram_budget_gb": ram_budget_gb,
+            "ram_budget_mb": ram_budget_mb,
         },
         "targets": {
             "rmse": accuracy_targets["rmse"],
@@ -1558,11 +1662,13 @@ def api_compare_cost_simulator():
             "mape": accuracy_targets["mape"],
             "r2_gap": accuracy_targets["r2_gap"],
             "latency_ms": latency_target_ms,
-            "memory_mb": memory_target_mb,
+            "memory_mb": ram_budget_mb,
+            "cpu_percent": cpu_target_percent,
         },
         "winner": winner,
         "models": response_models,
-        "note": "Bu paneldeki hız ve RAM değerleri yerel tekil istek ölçümlerine yaklaştırılmış tahmini değerlerdir; gerçek Jetson/TensorRT benchmark değildir.",
+        "skipped": skipped,
+        "note": "Bu panel gerçek Pi benchmark ölçümünden beslenir. CPU slider'ı yalnız ölçümden türetilmiş senaryo etkisi gösterir.",
     })
 
 

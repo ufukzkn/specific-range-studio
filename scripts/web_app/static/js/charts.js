@@ -328,14 +328,14 @@ function renderToleranceCurve(containerId, data) {
 }
 
 /**
- * Render estimated cost components for both models.
+ * Render measured benchmark cost components for both models.
  * Lower bars are better; fit score itself is rendered in summary cards.
  */
 function renderCostSimulatorChart(containerId, models) {
   const container = document.getElementById(containerId);
   if (!container || !models) return;
 
-  const categories = ['Accuracy Cost', 'Latency Cost', 'Memory Cost', 'Composite Cost'];
+  const categories = ['Accuracy Cost', 'Latency Cost', 'Memory Cost', 'CPU Cost', 'Composite Cost'];
   const styles = {
     interpolation: { name: 'Interpolasyon', fill: 'rgba(6, 182, 212, 0.72)', line: '#06b6d4' },
     xgboost: { name: 'XGBoost', fill: 'rgba(251, 191, 36, 0.72)', line: '#fbbf24' },
@@ -345,7 +345,7 @@ function renderCostSimulatorChart(containerId, models) {
   const traces = ['xgboost', 'ft_transformer'].filter(key => models[key]).map((key) => {
     const model = models[key];
     const style = styles[key] || { name: key, fill: 'rgba(59, 130, 246, 0.72)', line: '#3b82f6' };
-    const values = [model.accuracy_component, model.latency_component, model.memory_component, model.combined_cost];
+    const values = [model.accuracy_component, model.latency_component, model.memory_component, model.cpu_component, model.combined_cost];
     return {
       x: categories,
       y: values,
@@ -360,7 +360,7 @@ function renderCostSimulatorChart(containerId, models) {
 
   const layout = {
     ...baseLayout,
-    title: { text: 'Tahmini Maliyet Bileşenleri (düşük = iyi)', font: { size: 14, color: '#e2e8f0' } },
+    title: { text: 'Ölçülen Benchmark Maliyet Bileşenleri (düşük = iyi)', font: { size: 14, color: '#e2e8f0' } },
     barmode: 'group',
     yaxis: { ...baseLayout.yaxis, title: 'Göreli Maliyet' },
     height: 340,

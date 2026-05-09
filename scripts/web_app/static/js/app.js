@@ -14,7 +14,9 @@ async function api(endpoint, options = {}) {
   });
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({ error: resp.statusText }));
-    throw new Error(err.error || `API error ${resp.status}`);
+    const error = new Error(err.error || `API error ${resp.status}`);
+    Object.assign(error, err);
+    throw error;
   }
   return resp.json();
 }
@@ -225,11 +227,12 @@ async function loadCostTab() {
 
 function getCostInputs() {
   return {
-    accuracy_weight: parseFloat(document.getElementById('cost-accuracy')?.value || '55'),
+    accuracy_weight: parseFloat(document.getElementById('cost-accuracy')?.value || '45'),
     latency_weight: parseFloat(document.getElementById('cost-latency')?.value || '25'),
     memory_weight: parseFloat(document.getElementById('cost-memory')?.value || '20'),
+    cpu_weight: parseFloat(document.getElementById('cost-cpu')?.value || '10'),
     cpu_speed_factor: parseFloat(document.getElementById('cost-cpu-speed')?.value || '1'),
-    ram_budget_gb: parseFloat(document.getElementById('cost-ram-budget')?.value || '8'),
+    ram_budget_gb: parseFloat(document.getElementById('cost-ram-budget')?.value || '1'),
   };
 }
 
@@ -242,6 +245,7 @@ function updateCostControlLabels() {
   setText('cost-accuracy-value', `${Math.round(inputs.accuracy_weight)}%`);
   setText('cost-latency-value', `${Math.round(inputs.latency_weight)}%`);
   setText('cost-memory-value', `${Math.round(inputs.memory_weight)}%`);
+  setText('cost-cpu-value', `${Math.round(inputs.cpu_weight)}%`);
   setText('cost-cpu-speed-value', `${inputs.cpu_speed_factor.toFixed(2)}x`);
   setText('cost-ram-budget-value', `${inputs.ram_budget_gb.toFixed(1)} GB`);
 }
@@ -266,13 +270,110 @@ async function loadCostSimulation() {
   try {
     const params = new URLSearchParams(getCostInputs());
     const data = await api(`/api/compare/cost-simulator?${params}`);
+    renderBenchmarkStatus(data.benchmark);
     renderCostSummary(data);
     renderCostSimulatorChart('compare-cost-chart', data.models);
   } catch (err) {
+    renderBenchmarkStatus(null);
     if (summary) {
-      summary.innerHTML = `<div class="empty-state"><div class="empty-state__text text-warning">${err.message}</div></div>`;
+      const command = err.command || 'python scripts/run_pi_benchmark.py --models xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu';
+      summary.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state__text text-warning">${escapeHTML(err.message || 'Gerçek benchmark ölçümü bulunamadı.')}</div>
+          <div class="step__command mt-md">${escapeHTML(command)}</div>
+          <button class="btn btn--primary mt-md" onclick="runPiBenchmarkFromCostTab()">Bu cihazda benchmark çalıştır</button>
+        </div>
+      `;
     }
+    const chart = document.getElementById('compare-cost-chart');
+    if (chart) chart.innerHTML = '';
   }
+}
+
+async function runPiBenchmarkFromCostTab() {
+  const summary = document.getElementById('compare-cost-summary');
+  if (summary) {
+    summary.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="loading-overlay"><div class="spinner"></div><span>Gerçek benchmark çalışıyor…</span></div>
+        <pre class="readme-body" id="pi-benchmark-run-log" style="margin-top:var(--space-lg);text-align:left;max-height:260px"></pre>
+      </div>
+    `;
+    upgradePlaneLoaders(summary);
+  }
+  const log = document.getElementById('pi-benchmark-run-log');
+  try {
+    const resp = await fetch('/api/benchmark/pi/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ models: 'xgboost,ft_transformer', sample_size: 200, warmup: 20, repetitions: 200, device: 'cpu' }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: resp.statusText }));
+      throw new Error(err.error || `API error ${resp.status}`);
+    }
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const text = decoder.decode(value);
+      const lines = text.split('\n').filter(l => l.startsWith('data: '));
+      for (const line of lines) {
+        const data = JSON.parse(line.replace('data: ', ''));
+        if (data.type === 'output' && log) {
+          log.textContent += data.text + '\n';
+          log.scrollTop = log.scrollHeight;
+        } else if (data.type === 'done') {
+          showToast(`Pi benchmark ${data.exit_code === 0 ? 'tamamlandı' : 'başarısız'}`, data.exit_code === 0 ? 'success' : 'error');
+        }
+      }
+    }
+    await loadCostSimulation();
+  } catch (err) {
+    if (log) log.textContent += `\nFATAL: ${err.message}\n`;
+    showToast('Pi benchmark çalıştırılamadı: ' + err.message, 'error');
+  }
+}
+
+function renderBenchmarkStatus(benchmark) {
+  const container = document.getElementById('pi-benchmark-status');
+  if (!container) return;
+  if (!benchmark) {
+    container.innerHTML = `
+      <div class="metric-card">
+        <div class="metric-card__label">Benchmark Durumu</div>
+        <div class="metric-card__value metric-card__value--warning">Ölçüm yok</div>
+        <div class="metric-card__desc metric-card__desc--visible">Pi üzerinde benchmark komutunu çalıştırınca burada gerçek cihaz bilgileri görünür.</div>
+      </div>
+    `;
+    return;
+  }
+  const system = benchmark.system || {};
+  const config = benchmark.config || {};
+  const created = benchmark.created_at ? new Date(benchmark.created_at).toLocaleString('tr-TR') : '-';
+  container.innerHTML = `
+    <div class="metric-card">
+      <div class="metric-card__label">Son Ölçüm</div>
+      <div class="metric-card__value">${escapeHTML(created)}</div>
+      <div class="metric-card__desc metric-card__desc--visible">Run ID: ${escapeHTML(benchmark.run_id || '-')}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card__label">Cihaz</div>
+      <div class="metric-card__value">${escapeHTML(system.hostname || '-')}</div>
+      <div class="metric-card__desc metric-card__desc--visible">${escapeHTML(system.machine || system.platform || '-')}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card__label">Python / RAM</div>
+      <div class="metric-card__value">${escapeHTML(system.python || '-')}</div>
+      <div class="metric-card__desc metric-card__desc--visible">${system.total_ram_mb ? `${Number(system.total_ram_mb).toFixed(0)} MB toplam RAM` : 'RAM bilgisi yok'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card__label">Örnek / Tekrar</div>
+      <div class="metric-card__value">${escapeHTML(config.sample_size || '-')} / ${escapeHTML(config.repetitions || '-')}</div>
+      <div class="metric-card__desc metric-card__desc--visible">${escapeHTML(benchmark.path || '')}</div>
+    </div>
+  `;
 }
 
 function renderCostSummary(data) {
@@ -288,6 +389,12 @@ function renderCostSummary(data) {
     const style = modelStyles[modelKey] || { cls: '', color: 'var(--accent)' };
     const isWinner = data.winner === modelKey;
     const ramPct = model.ram_budget_utilization * 100;
+    const latencyLabel = Math.abs((data.hardware?.cpu_speed_factor || 1) - 1) > 0.001
+      ? 'Senaryo p95 Gecikme'
+      : 'Ölçülen p95 Gecikme';
+    const latencyValue = Math.abs((data.hardware?.cpu_speed_factor || 1) - 1) > 0.001
+      ? model.scenario_latency_p95_ms
+      : model.measured_latency_p95_ms;
     return `
       <div class="result-card ${style.cls}">
         <div class="result-card__model">${model.display_name}${isWinner ? ' • önerilen' : ''}</div>
@@ -295,20 +402,28 @@ function renderCostSummary(data) {
         <div class="text-muted" style="font-size:0.78rem;margin-top:4px">Uyum skoru / 100</div>
         <div class="sim-meta">
           <div class="sim-meta__item">
-            <div class="sim-meta__label">Tahmini Gecikme</div>
-            <div class="sim-meta__value">${model.estimated_latency_ms.toFixed(2)} ms</div>
+            <div class="sim-meta__label">${latencyLabel}</div>
+            <div class="sim-meta__value">${latencyValue.toFixed(2)} ms</div>
           </div>
           <div class="sim-meta__item">
-            <div class="sim-meta__label">Tahmini Peak RAM</div>
-            <div class="sim-meta__value">${model.estimated_peak_ram_mb.toFixed(0)} MB</div>
+            <div class="sim-meta__label">Ölçülen p50 Gecikme</div>
+            <div class="sim-meta__value">${(model.measured_latency_p50_ms || 0).toFixed(2)} ms</div>
+          </div>
+          <div class="sim-meta__item">
+            <div class="sim-meta__label">Ölçülen Peak RSS</div>
+            <div class="sim-meta__value">${model.measured_peak_rss_mb.toFixed(0)} MB</div>
           </div>
           <div class="sim-meta__item">
             <div class="sim-meta__label">Model Boyutu</div>
-            <div class="sim-meta__value">${model.model_size_mb.toFixed(2)} MB</div>
+            <div class="sim-meta__value">${model.model_size_mb === null || model.model_size_mb === undefined ? '-' : model.model_size_mb.toFixed(2) + ' MB'}</div>
           </div>
           <div class="sim-meta__item">
             <div class="sim-meta__label">RAM Kullanımı</div>
             <div class="sim-meta__value">${ramPct.toFixed(1)}%</div>
+          </div>
+          <div class="sim-meta__item">
+            <div class="sim-meta__label">Ortalama CPU</div>
+            <div class="sim-meta__value">${model.measured_cpu_avg_percent.toFixed(1)}%</div>
           </div>
         </div>
         <div style="margin-top:var(--space-md);padding-top:var(--space-md);border-top:1px solid var(--glass-border)">
@@ -323,6 +438,10 @@ function renderCostSummary(data) {
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <span style="font-size:0.78rem;color:var(--text-muted)">Memory Cost</span>
             <span class="text-mono">${model.memory_component.toFixed(3)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:0.78rem;color:var(--text-muted)">CPU Cost</span>
+            <span class="text-mono">${model.cpu_component.toFixed(3)}</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="font-size:0.78rem;color:var(--text-muted)">Composite Cost</span>
@@ -1393,13 +1512,15 @@ function renderCostSimulatorInfo(info) {
       <div class="cost-info__section-title">Maliyet Formülleri</div>
       <div class="cost-info__formula-grid">${renderFormulas(info.formulas || [])}</div>
 
-      <details class="readme-card cost-info__details">
-        <summary>
-          <span>Tahmini latency ve RAM formülleri</span>
-          <small>gerçek benchmark değil</small>
-        </summary>
-        <div class="cost-info__formula-list">${renderFormulas(info.runtime_formulas || [])}</div>
-      </details>
+      ${(info.runtime_formulas || []).length ? `
+        <details class="readme-card cost-info__details">
+          <summary>
+            <span>Ölçümden türetilmiş senaryo formülleri</span>
+            <small>benchmark tabanlı</small>
+          </summary>
+          <div class="cost-info__formula-list">${renderFormulas(info.runtime_formulas || [])}</div>
+        </details>
+      ` : ''}
 
       <div class="simulator-help">
         ${(info.notes || []).map(note => `<div>${escapeHTML(note)}</div>`).join('')}
