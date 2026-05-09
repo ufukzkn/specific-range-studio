@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import joblib
 import numpy as np
@@ -10,9 +11,11 @@ import pandas as pd
 
 from src.data.load_data import load_combined_dataset
 from src.data.preprocess import PreprocessorState, transform_split
-from src.models.ft_transformer import FTTransformerTrainer
 from src.models.xgboost_baseline import XGBoostRegressorWrapper
 from src.utils.config import DataConfig
+
+if TYPE_CHECKING:
+    from src.models.ft_transformer import FTTransformerTrainer
 
 
 def build_single_row_frame(
@@ -75,7 +78,7 @@ class XGBoostPredictor:
 class FTTransformerPredictor:
     """Artifact-backed FT-Transformer inference helper."""
 
-    def __init__(self, trainer: FTTransformerTrainer, preprocessor: PreprocessorState) -> None:
+    def __init__(self, trainer: "FTTransformerTrainer", preprocessor: PreprocessorState) -> None:
         self.trainer = trainer
         self.preprocessor = preprocessor
 
@@ -86,6 +89,8 @@ class FTTransformerPredictor:
         *,
         device: str = "cpu",
     ) -> "FTTransformerPredictor":
+        from src.models.ft_transformer import FTTransformerTrainer
+
         data_config = DataConfig()
         artifact_dir = artifact_dir or data_config.ft_transformer_artifact_dir
         trainer = FTTransformerTrainer.load_checkpoint(artifact_dir / "model.pt", device=device)
