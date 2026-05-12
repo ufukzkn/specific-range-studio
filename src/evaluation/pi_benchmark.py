@@ -27,7 +27,7 @@ from src.interpolation import DEFAULT_INTERPOLATION_METHOD, SpecificRangeInterpo
 from src.utils.config import DataConfig
 
 
-DEFAULT_MODELS = ("xgboost", "ft_transformer")
+DEFAULT_MODELS = ("interpolation", "xgboost", "ft_transformer")
 OPTIONAL_MODELS = ("interpolation", "xgboost", "ft_transformer")
 
 
@@ -188,7 +188,14 @@ def benchmark_model(
         cpu_avg = float((cpu_delta / elapsed) * 100.0)
 
     accuracy = None
-    if "specific_range" in sample_df.columns:
+    if model_key == "interpolation":
+        accuracy = {
+            "note": (
+                "Not scored as model accuracy. Interpolation is treated as the deterministic "
+                "table/reference family; benchmark records runtime, memory, CPU and artifact size."
+            )
+        }
+    elif "specific_range" in sample_df.columns:
         try:
             y_true = sample_df["specific_range"].to_numpy(dtype=float)
             y_pred = _predict_many(model_key, predictor, sample_df, device)
@@ -266,6 +273,7 @@ def run_pi_benchmark(
         "notes": [
             "Inference-only benchmark. Training is intentionally not performed on Raspberry Pi.",
             "Latency includes the same artifact-backed prediction path used by the app.",
+            "Interpolation is benchmarked for runtime cost only; accuracy comparison is for XGBoost and FT-Transformer.",
         ],
     }
 

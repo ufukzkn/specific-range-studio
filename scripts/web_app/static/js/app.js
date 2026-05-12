@@ -276,7 +276,7 @@ async function loadCostSimulation() {
   } catch (err) {
     renderBenchmarkStatus(null);
     if (summary) {
-      const command = err.command || 'python scripts/run_pi_benchmark.py --models xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu';
+      const command = err.command || 'python scripts/run_pi_benchmark.py --models interpolation,xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu';
       summary.innerHTML = `
         <div class="empty-state" style="grid-column:1/-1">
           <div class="empty-state__text text-warning">${escapeHTML(err.message || 'Gerçek benchmark ölçümü bulunamadı.')}</div>
@@ -306,7 +306,7 @@ async function runPiBenchmarkFromCostTab() {
     const resp = await fetch('/api/benchmark/pi/run', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ models: 'xgboost,ft_transformer', sample_size: 200, warmup: 20, repetitions: 200, device: 'cpu' }),
+      body: JSON.stringify({ models: 'interpolation,xgboost,ft_transformer', sample_size: 200, warmup: 20, repetitions: 200, device: 'cpu' }),
     });
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({ error: resp.statusText }));
@@ -381,13 +381,15 @@ function renderCostSummary(data) {
   if (!container || !data?.models) return;
 
   const modelStyles = {
+    interpolation: { cls: 'result-card--interp', color: '#06b6d4' },
     xgboost: { cls: 'result-card--xgboost', color: '#fbbf24' },
     ft_transformer: { cls: 'result-card--ft', color: '#a78bfa' },
   };
 
   const renderModelCard = (modelKey, model) => {
     const style = modelStyles[modelKey] || { cls: '', color: 'var(--accent)' };
-    const isWinner = data.winner === modelKey;
+    const isRuntimeWinner = data.runtime_winner === modelKey;
+    const isLearnedWinner = data.learned_winner === modelKey;
     const ramPct = model.ram_budget_utilization * 100;
     const latencyLabel = Math.abs((data.hardware?.cpu_speed_factor || 1) - 1) > 0.001
       ? 'Senaryo p95 Gecikme'
@@ -397,7 +399,11 @@ function renderCostSummary(data) {
       : model.measured_latency_p95_ms;
     return `
       <div class="result-card ${style.cls}">
-        <div class="result-card__model">${model.display_name}${isWinner ? ' • önerilen' : ''}</div>
+        <div class="result-card__model">
+          ${model.display_name}
+          ${isRuntimeWinner ? ' • runtime lideri' : ''}
+          ${isLearnedWinner ? ' • ML doğruluk/maliyet lideri' : ''}
+        </div>
         <div class="sim-score" style="color:${style.color}">${model.fit_score.toFixed(1)}</div>
         <div class="text-muted" style="font-size:0.78rem;margin-top:4px">Uyum skoru / 100</div>
         <div class="sim-meta">
@@ -429,7 +435,7 @@ function renderCostSummary(data) {
         <div style="margin-top:var(--space-md);padding-top:var(--space-md);border-top:1px solid var(--glass-border)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <span style="font-size:0.78rem;color:var(--text-muted)">Accuracy Cost</span>
-            <span class="text-mono">${model.accuracy_component.toFixed(3)}</span>
+            <span class="text-mono">${model.accuracy_included && model.accuracy_component != null ? model.accuracy_component.toFixed(3) : 'Referans dışı'}</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <span style="font-size:0.78rem;color:var(--text-muted)">Latency Cost</span>
@@ -444,7 +450,7 @@ function renderCostSummary(data) {
             <span class="text-mono">${model.cpu_component.toFixed(3)}</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.78rem;color:var(--text-muted)">Composite Cost</span>
+            <span style="font-size:0.78rem;color:var(--text-muted)">${model.accuracy_included ? 'Composite Cost' : 'Runtime Cost'}</span>
             <span class="text-mono">${model.combined_cost.toFixed(3)}</span>
           </div>
         </div>
@@ -453,7 +459,7 @@ function renderCostSummary(data) {
     `;
   };
 
-  const order = ['xgboost', 'ft_transformer'];
+  const order = ['interpolation', 'xgboost', 'ft_transformer'];
   container.innerHTML = order
     .filter(key => data.models[key])
     .map(key => renderModelCard(key, data.models[key]))

@@ -107,7 +107,7 @@ python scripts/run_data_pipeline.py
 python scripts/train_xgboost.py --dataset data/processed/combined_specific_range.csv --device cuda --run-table-report
 python scripts/train_ft_transformer.py --dataset data/processed/combined_specific_range.csv --device cuda --run-table-report
 python scripts/run_table_report.py --dataset data/processed/combined_specific_range.csv --model both --ft-device cuda
-python scripts/run_pi_benchmark.py --models xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu
+python scripts/run_pi_benchmark.py --models interpolation,xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu
 python scripts/web_app/server.py
 ```
 
@@ -191,7 +191,7 @@ Icerdigi ana sekmeler:
 
 `Setup` sekmesi veri pipeline, egitim ve toplu raporlama adimlarini arayuz icinden calistirabilir.
 `Veri Uretimi` sekmesi ise proje icine alinmis `tools/dataset_builder/` altindaki grafik segmentasyon ve sentetik veri araclarini launcher panel olarak acar; ana tahmin yontemi degildir.
-`Maliyet` sekmesi XGBoost ve FT-Transformer icin gercek benchmark dosyasindan okunan dogruluk / gecikme / bellek / CPU odunlesimini gosterir. Bu sekmenin beslenmesi icin once `scripts/run_pi_benchmark.py` calistirilmalidir; interpolasyon referans aile oldugu icin bu maliyet yarismasina dahil edilmez.
+`Maliyet` sekmesi gercek benchmark dosyasindan okunan gecikme / bellek / CPU odunlesimini Interpolasyon, XGBoost ve FT-Transformer icin gosterir. Dogruluk maliyeti yalniz XGBoost ve FT-Transformer arasinda hesaplanir; interpolasyon referans aile oldugu icin accuracy yarisina dahil edilmez.
 `Bilgi` sekmesi README notlarini, yontem rollerini ve sekme aciklamalarini arayuz icinden okunabilir hale getirir.
 
 Ana Flask arayuzu artik uc ana yontemi tek panelde gosterir:
@@ -227,7 +227,7 @@ python scripts/run_table_report.py --dataset data/processed/combined_specific_ra
 10. Run real Raspberry Pi / edge inference benchmark:
 
 ```bash
-python scripts/run_pi_benchmark.py --models xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu
+python scripts/run_pi_benchmark.py --models interpolation,xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu
 ```
 
 Bu komut su dosyalari uretir:
@@ -242,7 +242,8 @@ Olculen metrikler:
 - process peak RSS RAM,
 - ortalama ve orneklenmis peak CPU kullanimi,
 - model boyutu,
-- RMSE / MAE / MAPE / R2,
+- XGBoost ve FT-Transformer icin RMSE / MAE / MAPE / R2,
+- Interpolasyon icin runtime maliyeti; doğruluk yarışında referans aile notu,
 - Raspberry Pi'de `vcgencmd` varsa sicaklik ve throttle bilgisi.
 
 10. Generate a draft nomogram-style comparison plot for one categorical slice:

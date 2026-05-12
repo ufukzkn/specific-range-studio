@@ -26,4 +26,5 @@ Klasik interpolasyon tarafında `fuel_flow` doğrudan eksen olarak kullanılmaz.
 
 - Tekil tahminde exact match yoksa tahmini gerçek değer olarak interpolasyon sonucu gösterilir.
 - XGBoost ve FT-Transformer hataları bu referansa göre hesaplanabilir.
-- Maliyet simülatörüne dahil edilmez; çünkü referans aile olarak her durumda ML modelleriyle aynı yarışa sokulması anlamlı değildir.
+- Benchmark ve maliyet ekranında latency / RAM / CPU maliyetiyle görünür.
+- Doğruluk yarışına dahil edilmez; çünkü referans aile olarak XGBoost ve FT-Transformer ile aynı accuracy skoruna sokulması anlamlı değildir.

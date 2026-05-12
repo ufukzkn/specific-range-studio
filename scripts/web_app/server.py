@@ -228,32 +228,42 @@ def _benchmark_model_payload(benchmark: dict, model_key: str) -> dict | None:
     accuracy = item.get("accuracy") or {}
     if "error" in accuracy:
         accuracy = {}
-    required = [
+    runtime_required = [
         _metric_float(latency, "p95"),
         _metric_float(memory, "rss_peak"),
         _metric_float(cpu, "process_avg"),
-        _metric_float(accuracy, "rmse"),
-        _metric_float(accuracy, "mae"),
-        _metric_float(accuracy, "mape"),
-        _metric_float(accuracy, "r2"),
     ]
-    if any(value is None for value in required):
+    if any(value is None for value in runtime_required):
         return None
+
+    accuracy_metrics = {
+        "rmse": _metric_float(accuracy, "rmse"),
+        "mae": _metric_float(accuracy, "mae"),
+        "mape": _metric_float(accuracy, "mape"),
+        "r2": _metric_float(accuracy, "r2"),
+    }
+    accuracy_available = all(value is not None for value in accuracy_metrics.values())
+    if model_key in {"xgboost", "ft_transformer"} and not accuracy_available:
+        return None
+    if model_key == "interpolation":
+        accuracy_metrics = {key: None for key in ("rmse", "mae", "mape", "r2")}
+
+    display_names = {
+        "interpolation": "Interpolasyon",
+        "xgboost": "XGBoost",
+        "ft_transformer": "FT-Transformer",
+    }
     return {
         "raw": item,
-        "display_name": "XGBoost" if model_key == "xgboost" else "FT-Transformer",
+        "display_name": display_names.get(model_key, model_key),
         "latency_p50_ms": _metric_float(latency, "p50") or _metric_float(latency, "median"),
         "latency_p95_ms": _metric_float(latency, "p95"),
         "peak_rss_mb": _metric_float(memory, "rss_peak"),
         "cpu_avg_percent": _metric_float(cpu, "process_avg"),
         "cpu_peak_percent": _metric_float(cpu, "process_peak_sample"),
         "model_size_mb": _metric_float(item, "model_size_mb"),
-        "metrics": {
-            "rmse": _metric_float(accuracy, "rmse"),
-            "mae": _metric_float(accuracy, "mae"),
-            "mape": _metric_float(accuracy, "mape"),
-            "r2": _metric_float(accuracy, "r2"),
-        },
+        "metrics": accuracy_metrics,
+        "accuracy_included": model_key in {"xgboost", "ft_transformer"},
     }
 
 
@@ -261,23 +271,26 @@ def _cost_simulator_explanation() -> dict:
     return {
         "title": "Maliyet paneli neyi hesaplıyor?",
         "summary": (
-            "Bu panel artık Pi benchmark runner çıktısını ana kaynak olarak kullanır. XGBoost ve "
-            "FT-Transformer için ölçülen p95 gecikme, peak RSS bellek, CPU kullanımı, model boyutu "
-            "ve benchmark sırasında hesaplanan doğruluk metrikleri tek bir karar skoruna çevrilir."
+            "Bu panel artık benchmark runner çıktısını ana kaynak olarak kullanır. Interpolasyon, "
+            "XGBoost ve FT-Transformer için ölçülen p95 gecikme, peak RSS bellek, CPU kullanımı "
+            "ve model/artefakt boyutu görünür. Doğruluk maliyeti yalnız learned model ailesi olan "
+            "XGBoost ve FT-Transformer için hesaplanır; interpolasyon referans aile olarak runtime "
+            "maliyetiyle gösterilir."
         ),
         "sources": [
             {
                 "name": "Gerçek benchmark dosyası",
                 "detail": (
                     "Önce artifacts/benchmarks/pi_benchmark_latest.json okunur. Bu dosya "
-                    "scripts/run_pi_benchmark.py komutuyla Pi üzerinde üretilir."
+                    "scripts/run_pi_benchmark.py komutuyla Pi/WSL/hedef cihaz üzerinde üretilir."
                 ),
             },
             {
                 "name": "Doğruluk metrikleri",
                 "detail": (
-                    "Benchmark runner seçilen gerçek tablo satırlarında tahmin alır ve RMSE, MAE, "
-                    "MAPE ve R2 metriklerini aynı koşuda hesaplar."
+                    "Benchmark runner seçilen gerçek tablo satırlarında tahmin alır ve learned modeller "
+                    "için RMSE, MAE, MAPE ve R2 metriklerini aynı koşuda hesaplar. Interpolasyon bu "
+                    "doğruluk yarışına sokulmaz; referans tablo ailesi olarak değerlendirilir."
                 ),
             },
             {
@@ -347,7 +360,7 @@ def _cost_simulator_explanation() -> dict:
         "runtime_formulas": [],
         "notes": [
             "Ölçüm yoksa maliyet paneli skor üretmez; önce Pi benchmark komutu çalıştırılmalıdır.",
-            "Interpolasyon maliyet simülatöründen özellikle çıkarılmıştır; çünkü uygulamada referans üretici gibi davranır.",
+            "Interpolasyon doğruluk yarışına sokulmaz; fakat latency, RAM ve CPU maliyeti üçlü runtime kıyasında gösterilir.",
             "RMSE, MAE, MAPE, latency, bellek ve CPU düşük oldukça iyidir; R2 için 1'e yakın olmak iyidir.",
         ],
     }
@@ -975,7 +988,7 @@ def api_info():
         "tabs": [
             {"name": "Genel Bakış", "description": "Model rapor metrikleri, slice özetleri ve hata dağılımı."},
             {"name": "Karşılaştırma", "description": "Interpolasyon referansı yanında XGBoost ve FT-Transformer çıktılarını satır/grafik bazında kıyaslar."},
-            {"name": "Maliyet", "description": "XGBoost ve FT-Transformer için tahmini doğruluk-hız-bellek karar desteği."},
+            {"name": "Maliyet", "description": "Interpolasyon, XGBoost ve FT-Transformer için gerçek benchmark tabanlı hız-bellek-CPU kıyası; doğruluk kıyası XGBoost ve FT-Transformer arasındadır."},
             {"name": "Tekil Tahmin", "description": "Custom input veya hazır senaryo ile tek uçuş koşulu tahmini."},
             {"name": "Nomogram", "description": "Handbook benzeri kesit grafikleri üretir."},
             {"name": "Veri Üretimi", "description": "Grafik segmentasyon ve sentetik dataset araçlarını demo olarak çalıştırır."},
@@ -1228,7 +1241,7 @@ def api_pi_benchmark_latest():
         return jsonify({
             "error": "Henüz gerçek Pi benchmark ölçümü yok.",
             "command": (
-                "python scripts/run_pi_benchmark.py --models xgboost,ft_transformer "
+                "python scripts/run_pi_benchmark.py --models interpolation,xgboost,ft_transformer "
                 "--sample-size 200 --warmup 20 --repetitions 200 --device cpu"
             ),
             "benchmark_path": str(PI_BENCHMARK_LATEST),
@@ -1239,7 +1252,7 @@ def api_pi_benchmark_latest():
 @app.route("/api/benchmark/pi/run", methods=["POST"])
 def api_pi_benchmark_run():
     body = request.get_json(silent=True) or {}
-    models = str(body.get("models", "xgboost,ft_transformer"))
+    models = str(body.get("models", "interpolation,xgboost,ft_transformer"))
     allowed_models = {"interpolation", "xgboost", "ft_transformer"}
     requested_models = [item.strip() for item in models.split(",") if item.strip()]
     if not requested_models or any(item not in allowed_models for item in requested_models):
@@ -1533,7 +1546,7 @@ def api_compare_cost_simulator():
 
     benchmark = _load_pi_benchmark_latest()
     benchmark_command = (
-        "python scripts/run_pi_benchmark.py --models xgboost,ft_transformer "
+        "python scripts/run_pi_benchmark.py --models interpolation,xgboost,ft_transformer "
         "--sample-size 200 --warmup 20 --repetitions 200 --device cpu"
     )
     if benchmark is None:
@@ -1557,19 +1570,21 @@ def api_compare_cost_simulator():
 
     prepared: dict[str, dict] = {}
     skipped: dict[str, str] = {}
-    for model_key in ("xgboost", "ft_transformer"):
+    for model_key in ("interpolation", "xgboost", "ft_transformer"):
         measured = _benchmark_model_payload(benchmark, model_key)
         if measured is None:
             raw_item = (benchmark.get("models") or {}).get(model_key) or {}
             skipped[model_key] = raw_item.get("skipped_reason") or "Bu model için eksiksiz ölçüm/metrik bulunamadı."
             continue
         metrics = measured["metrics"]
-        accuracy_component = float(np.mean([
-            float(metrics["rmse"]) / accuracy_targets["rmse"],
-            float(metrics["mae"]) / accuracy_targets["mae"],
-            float(metrics["mape"]) / accuracy_targets["mape"],
-            max(1.0 - float(metrics["r2"]), 0.0) / accuracy_targets["r2_gap"],
-        ]))
+        accuracy_component = None
+        if measured["accuracy_included"]:
+            accuracy_component = float(np.mean([
+                float(metrics["rmse"]) / accuracy_targets["rmse"],
+                float(metrics["mae"]) / accuracy_targets["mae"],
+                float(metrics["mape"]) / accuracy_targets["mape"],
+                max(1.0 - float(metrics["r2"]), 0.0) / accuracy_targets["r2_gap"],
+            ]))
 
         scenario_latency_p95 = measured["latency_p95_ms"] / cpu_speed_factor
         over_budget_ratio = max(measured["peak_rss_mb"] - ram_budget_mb, 0.0) / ram_budget_mb
@@ -1584,7 +1599,7 @@ def api_compare_cost_simulator():
 
     if not prepared:
         return jsonify({
-            "error": "Benchmark dosyası bulundu ama XGBoost/FT-Transformer için kullanılabilir ölçüm yok.",
+            "error": "Benchmark dosyası bulundu ama kullanılabilir ölçüm yok.",
             "command": benchmark_command,
             "benchmark_path": str(PI_BENCHMARK_LATEST),
             "skipped": skipped,
@@ -1594,24 +1609,43 @@ def api_compare_cost_simulator():
         latency_component = item["scenario_latency_p95_ms"] / latency_target_ms
         memory_component = item["peak_rss_mb"] / ram_budget_mb
         cpu_component = item["cpu_avg_percent"] / cpu_target_percent
-        combined_cost = (
-            accuracy_weight * item["accuracy_component"]
-            + latency_weight * latency_component
-            + memory_weight * memory_component
-            + cpu_weight * cpu_component
+        runtime_weight_total = latency_weight + memory_weight + cpu_weight
+        runtime_only_cost = (
+            (latency_weight / runtime_weight_total) * latency_component
+            + (memory_weight / runtime_weight_total) * memory_component
+            + (cpu_weight / runtime_weight_total) * cpu_component
+            if runtime_weight_total > 0
+            else float(np.mean([latency_component, memory_component, cpu_component]))
         )
+        if item["accuracy_component"] is None:
+            combined_cost = runtime_only_cost
+        else:
+            combined_cost = (
+                accuracy_weight * item["accuracy_component"]
+                + latency_weight * latency_component
+                + memory_weight * memory_component
+                + cpu_weight * cpu_component
+            )
         item["latency_component"] = latency_component
         item["memory_component"] = memory_component
         item["cpu_component"] = cpu_component
+        item["runtime_only_cost"] = runtime_only_cost
         item["combined_cost"] = combined_cost
         item["fit_score"] = 100.0 / (1.0 + 0.30 * max(combined_cost, 0.0))
 
-    winner = min(prepared, key=lambda key: prepared[key]["combined_cost"])
+    runtime_winner = min(prepared, key=lambda key: prepared[key]["runtime_only_cost"])
+    learned_candidates = {key: item for key, item in prepared.items() if item["accuracy_component"] is not None}
+    learned_winner = (
+        min(learned_candidates, key=lambda key: learned_candidates[key]["combined_cost"])
+        if learned_candidates
+        else None
+    )
 
     response_models = {}
     for model_key, item in prepared.items():
         response_models[model_key] = {
             "display_name": item["display_name"],
+            "accuracy_included": item["accuracy_included"],
             "metrics": item["metrics"],
             "model_size_mb": item["model_size_mb"],
             "measured_latency_p50_ms": item["latency_p50_ms"],
@@ -1626,10 +1660,13 @@ def api_compare_cost_simulator():
             "latency_component": item["latency_component"],
             "memory_component": item["memory_component"],
             "cpu_component": item["cpu_component"],
+            "runtime_only_cost": item["runtime_only_cost"],
             "combined_cost": item["combined_cost"],
             "fit_score": item["fit_score"],
             "note": (
-                "Gerçek Pi benchmark ölçümünden hesaplandı."
+                ("Doğruluk bileşeni hariç runtime maliyetiyle hesaplandı; interpolasyon referans ailedir."
+                 if not item["accuracy_included"]
+                 else "Gerçek benchmark ölçümünden doğruluk ve runtime bileşenleriyle hesaplandı.")
                 + (" CPU hız faktörüyle ölçeklenmiş senaryo gösteriliyor." if abs(cpu_speed_factor - 1.0) > 1e-9 else "")
                 + (" RAM bütçesini aşıyor." if item["over_budget_ratio"] > 0 else "")
             ),
@@ -1665,10 +1702,12 @@ def api_compare_cost_simulator():
             "memory_mb": ram_budget_mb,
             "cpu_percent": cpu_target_percent,
         },
-        "winner": winner,
+        "winner": learned_winner or runtime_winner,
+        "runtime_winner": runtime_winner,
+        "learned_winner": learned_winner,
         "models": response_models,
         "skipped": skipped,
-        "note": "Bu panel gerçek Pi benchmark ölçümünden beslenir. CPU slider'ı yalnız ölçümden türetilmiş senaryo etkisi gösterir.",
+        "note": "Bu panel gerçek benchmark ölçümünden beslenir. Runtime kıyası üç yöntemi kapsar; doğruluk bileşeni yalnız XGBoost ve FT-Transformer için kullanılır.",
     })
 
 

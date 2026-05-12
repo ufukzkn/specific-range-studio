@@ -328,7 +328,7 @@ function renderToleranceCurve(containerId, data) {
 }
 
 /**
- * Render measured benchmark cost components for both models.
+ * Render measured benchmark cost components for all benchmarked methods.
  * Lower bars are better; fit score itself is rendered in summary cards.
  */
 function renderCostSimulatorChart(containerId, models) {
@@ -342,17 +342,23 @@ function renderCostSimulatorChart(containerId, models) {
     ft_transformer: { name: 'FT-Transformer', fill: 'rgba(167, 139, 250, 0.72)', line: '#a78bfa' },
   };
 
-  const traces = ['xgboost', 'ft_transformer'].filter(key => models[key]).map((key) => {
+  const traces = ['interpolation', 'xgboost', 'ft_transformer'].filter(key => models[key]).map((key) => {
     const model = models[key];
     const style = styles[key] || { name: key, fill: 'rgba(59, 130, 246, 0.72)', line: '#3b82f6' };
-    const values = [model.accuracy_component, model.latency_component, model.memory_component, model.cpu_component, model.combined_cost];
+    const values = [
+      model.accuracy_included ? model.accuracy_component : null,
+      model.latency_component,
+      model.memory_component,
+      model.cpu_component,
+      model.combined_cost,
+    ];
     return {
       x: categories,
       y: values,
       name: style.name,
       type: 'bar',
       marker: { color: style.fill, line: { color: style.line, width: 1 } },
-      text: values.map(v => v.toFixed(3)),
+      text: values.map(v => v == null ? 'ref' : v.toFixed(3)),
       textposition: 'outside',
       textfont: { size: 10, color: style.line },
     };
@@ -360,7 +366,7 @@ function renderCostSimulatorChart(containerId, models) {
 
   const layout = {
     ...baseLayout,
-    title: { text: 'Ölçülen Benchmark Maliyet Bileşenleri (düşük = iyi)', font: { size: 14, color: '#e2e8f0' } },
+    title: { text: 'Ölçülen Benchmark Maliyet Bileşenleri (düşük = iyi; interpolasyon accuracy dışı)', font: { size: 14, color: '#e2e8f0' } },
     barmode: 'group',
     yaxis: { ...baseLayout.yaxis, title: 'Göreli Maliyet' },
     height: 340,
