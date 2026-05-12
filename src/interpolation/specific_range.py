@@ -245,28 +245,36 @@ class SpecificRangeInterpolationModel:
         self.data, self.altitudes, self.weights, self.drags = _load_excel_grid(self.excel_path)
         if not self.data:
             raise ValueError(f"No interpolation data could be loaded from {self.excel_path}")
+        self._mach_interpolators: dict[InterpolationMethod, dict[tuple[int, int, int], object]] = {}
+
+    def _get_mach_interpolator(self, method: InterpolationMethod, altitude: int, weight: int, drag: int):
+        method_cache = self._mach_interpolators.setdefault(method, {})
+        key = (altitude, weight, drag)
+        if key not in method_cache:
+            group = self.data.get(altitude, {}).get(weight, {}).get(drag)
+            if not group:
+                return None
+            method_cache[key] = _make_interpolator(method, group["mach"], group["sr"])
+        return method_cache[key]
 
     def _interpolate_mach(self, method: InterpolationMethod, altitude: int, weight: int, drag: int, mach: float) -> float | None:
-        group = self.data.get(altitude, {}).get(weight, {}).get(drag)
-        if not group:
+        interpolator = self._get_mach_interpolator(method, altitude, weight, drag)
+        if interpolator is None:
             return None
-        return _make_interpolator(method, group["mach"], group["sr"]).evaluate(mach)
+        return interpolator.evaluate(mach)
 
     def compute(self, method: InterpolationMethod, altitude: float, weight: float, drag_index: float, mach: float) -> float | None:
         alt_values: list[float] = []
         sr_at_alt: list[float] = []
 
         for alt in self.altitudes:
+            alt_bucket = self.data.get(alt, {})
             weight_values: list[float] = []
             sr_at_weight: list[float] = []
-            for weight_key in self.weights:
-                if weight_key not in self.data.get(alt, {}):
-                    continue
+            for weight_key, weight_bucket in alt_bucket.items():
                 drag_values: list[float] = []
                 sr_at_drag: list[float] = []
-                for drag_key in self.drags:
-                    if drag_key not in self.data.get(alt, {}).get(weight_key, {}):
-                        continue
+                for drag_key in weight_bucket:
                     sr_value = self._interpolate_mach(method, alt, weight_key, drag_key, mach)
                     if sr_value is not None and np.isfinite(sr_value):
                         drag_values.append(float(drag_key))
@@ -334,17 +342,14 @@ class SpecificRangeInterpolationService:
         return float(value)
 
     def predict_many_from_frame(self, frame: pd.DataFrame, method: str = DEFAULT_INTERPOLATION_METHOD) -> np.ndarray:
-        values = [
-            self.predict_one(
-                engine_type=str(row["engine_type"]),
-                altitude=float(row["altitude"]),
-                gross_weight=float(row["gross_weight"]),
-                drag_index=float(row["drag_index"]),
-                mach=float(row["mach"]),
-                method=method,
-            )
-            for _, row in frame.iterrows()
-        ]
+        method_key = self.normalize_method(method)
+        values = []
+        for row in frame[["engine_type", "altitude", "gross_weight", "drag_index", "mach"]].itertuples(index=False, name=None):
+            model = self._get_model(str(row[0]))
+            value = model.compute(method_key, float(row[1]), float(row[2]), float(row[3]), float(row[4]))
+            if value is None or not np.isfinite(value):
+                raise ValueError("Interpolation could not produce a value for this input.")
+            values.append(float(value))
         return np.asarray(values, dtype=float)
 
     @staticmethod
