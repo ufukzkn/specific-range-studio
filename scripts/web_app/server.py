@@ -72,6 +72,9 @@ _interpolation_service: SpecificRangeInterpolationService | None = None
 DATASET_APP_DIR = PROJECT_ROOT / "tools" / "dataset_builder"
 BENCHMARK_DIR = _data_config.artifacts_dir / "benchmarks"
 PI_BENCHMARK_LATEST = BENCHMARK_DIR / "pi_benchmark_latest.json"
+REFERENCE_BENCHMARK_LATEST = PROJECT_ROOT / "docs" / "benchmark_reference" / "pi_benchmark_latest_reference.json"
+PSO_DIR = _data_config.artifacts_dir / "pso"
+PSO_LATEST = PSO_DIR / "pso_latest.json"
 _dataset_gui_process: subprocess.Popen | None = None
 _dataset_gui_lock = threading.Lock()
 
@@ -202,10 +205,15 @@ def _load_model_summary(model_key: str) -> dict:
 
 
 def _load_pi_benchmark_latest() -> dict | None:
-    if not PI_BENCHMARK_LATEST.exists():
+    benchmark_path = _active_pi_benchmark_path()
+    if not benchmark_path.exists():
         return None
-    with PI_BENCHMARK_LATEST.open("r", encoding="utf-8") as handle:
+    with benchmark_path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def _active_pi_benchmark_path() -> Path:
+    return PI_BENCHMARK_LATEST if PI_BENCHMARK_LATEST.exists() else REFERENCE_BENCHMARK_LATEST
 
 
 def _metric_float(source: dict | None, key: str) -> float | None:
@@ -1244,7 +1252,7 @@ def api_pi_benchmark_latest():
                 "python scripts/run_pi_benchmark.py --models interpolation,xgboost,ft_transformer "
                 "--sample-size 200 --warmup 20 --repetitions 200 --device cpu"
             ),
-            "benchmark_path": str(PI_BENCHMARK_LATEST),
+            "benchmark_path": str(_active_pi_benchmark_path()),
         }), 404
     return jsonify(benchmark)
 
@@ -1553,7 +1561,7 @@ def api_compare_cost_simulator():
         return jsonify({
             "error": "Henüz gerçek Pi benchmark ölçümü yok.",
             "command": benchmark_command,
-            "benchmark_path": str(PI_BENCHMARK_LATEST),
+            "benchmark_path": str(_active_pi_benchmark_path()),
         }), 404
 
     ram_budget_mb = max(ram_budget_gb * 1024.0, 256.0)
@@ -1601,7 +1609,7 @@ def api_compare_cost_simulator():
         return jsonify({
             "error": "Benchmark dosyası bulundu ama kullanılabilir ölçüm yok.",
             "command": benchmark_command,
-            "benchmark_path": str(PI_BENCHMARK_LATEST),
+            "benchmark_path": str(_active_pi_benchmark_path()),
             "skipped": skipped,
         }), 404
 
@@ -1675,7 +1683,8 @@ def api_compare_cost_simulator():
     return jsonify({
         "source": "pi_benchmark",
         "benchmark": {
-            "path": str(PI_BENCHMARK_LATEST),
+            "path": str(_active_pi_benchmark_path()),
+            "reference_fallback_path": str(REFERENCE_BENCHMARK_LATEST),
             "run_id": benchmark.get("run_id"),
             "created_at": benchmark.get("created_at"),
             "system": benchmark.get("system") or {},
@@ -1708,6 +1717,46 @@ def api_compare_cost_simulator():
         "models": response_models,
         "skipped": skipped,
         "note": "Bu panel gerçek benchmark ölçümünden beslenir. Runtime kıyası üç yöntemi kapsar; doğruluk bileşeni yalnız XGBoost ve FT-Transformer için kullanılır.",
+    })
+
+
+@app.route("/api/pso/latest")
+def api_pso_latest():
+    if not PSO_LATEST.exists():
+        return jsonify({
+            "available": False,
+            "message": "Henüz PSO optimizasyon çıktısı bulunamadı.",
+            "command": (
+                f'"{sys.executable}" scripts/run_pso.py --dataset "{_data_config.processed_path}" '
+                "--device cpu --population 4 --iterations 3"
+            ),
+        })
+    try:
+        payload = json.loads(PSO_LATEST.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return jsonify({"available": False, "message": f"PSO çıktısı okunamadı: {exc}"}), 500
+
+    history = payload.get("history") or []
+    best_score = payload.get("best_score")
+    best_row = None
+    if history and best_score is not None:
+        try:
+            best_row = min(history, key=lambda row: abs(float(row.get("score", 0.0)) - float(best_score)))
+        except Exception:
+            best_row = None
+
+    return jsonify({
+        "available": True,
+        "path": str(PSO_LATEST),
+        "run_id": payload.get("run_id"),
+        "dataset": payload.get("dataset"),
+        "best_score": best_score,
+        "best_params": payload.get("best_params") or {},
+        "best_row": best_row or {},
+        "objective": payload.get("objective") or {},
+        "history_count": len(history),
+        "pareto_front": (payload.get("pareto_front") or [])[:20],
+        "history_csv": payload.get("latest_history_csv") or payload.get("history_csv"),
     })
 
 
@@ -1798,6 +1847,16 @@ def api_setup_commands():
             "command": f"{python} scripts/run_table_report.py --dataset {ds} --model both --ft-device cuda",
             "eta": "~20 sn - 3 dk",
             "artifacts": ["artifacts/*/reports/*"],
+        },
+        {
+            "id": "pso_search",
+            "label": "Çok Amaçlı FT PSO",
+            "command": (
+                f'"{python}" scripts/run_pso.py --dataset "{ds}" --device cpu '
+                "--population 4 --iterations 3 --w-rmse 0.70 --w-latency 0.20 --w-size 0.10"
+            ),
+            "eta": "~5-30 dk",
+            "artifacts": ["artifacts/pso/pso_latest.json", "artifacts/pso/pso_history_latest.csv"],
         },
     ])
 

@@ -110,10 +110,12 @@ class PSOConfig:
     inertia: float = 0.7
     cognitive: float = 1.4
     social: float = 1.4
-    weights: tuple[float, float, float] = (1.0, 0.0, 0.0)
-    rmse_ref: float = 1.0
-    latency_ref: float = 1.0
+    weights: tuple[float, float, float] = (0.70, 0.20, 0.10)
+    rmse_ref: float = 0.003
+    latency_ref: float = 10.0
     size_ref: float = 1.0
+    latency_repetitions: int = 30
+    latency_warmup: int = 5
     random_state: int = 42
 
 

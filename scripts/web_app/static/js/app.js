@@ -223,6 +223,7 @@ async function loadCostTab() {
   window._costLoaded = true;
   updateCostControlLabels();
   await loadCostSimulation();
+  await loadLatestPsoSummary();
 }
 
 function getCostInputs() {
@@ -287,6 +288,58 @@ async function loadCostSimulation() {
     }
     const chart = document.getElementById('compare-cost-chart');
     if (chart) chart.innerHTML = '';
+  }
+}
+
+async function loadLatestPsoSummary() {
+  const container = document.getElementById('pso-latest-summary');
+  if (!container) return;
+  container.innerHTML = '<div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>';
+  try {
+    const data = await api('/api/pso/latest');
+    if (!data.available) {
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state__text text-warning">${escapeHTML(data.message || 'Henüz PSO sonucu yok.')}</div>
+          <div class="step__command mt-md">${escapeHTML(data.command || 'python scripts/run_pso.py --dataset data/processed/combined_specific_range.csv --device cpu --population 4 --iterations 3')}</div>
+        </div>
+      `;
+      return;
+    }
+    const best = data.best_row || {};
+    const params = data.best_params || {};
+    const objective = data.objective || {};
+    const weights = objective.weights || {};
+    const references = objective.references || {};
+    const fmt = (value, digits = 4) => value === null || value === undefined || Number.isNaN(Number(value)) ? '-' : Number(value).toFixed(digits);
+    container.innerHTML = `
+      <div class="result-card result-card--ft">
+        <div class="result-card__model">En iyi PSO FT-Transformer adayı</div>
+        <div class="sim-score">${fmt(data.best_score, 3)}</div>
+        <div class="text-muted" style="font-size:0.78rem;margin-top:4px">Toplam maliyet skoru; düşük daha iyi</div>
+        <div class="sim-meta">
+          <div class="sim-meta__item"><div class="sim-meta__label">RMSE</div><div class="sim-meta__value">${fmt(best.rmse, 6)}</div></div>
+          <div class="sim-meta__item"><div class="sim-meta__label">MAE</div><div class="sim-meta__value">${fmt(best.mae, 6)}</div></div>
+          <div class="sim-meta__item"><div class="sim-meta__label">p95 Gecikme</div><div class="sim-meta__value">${fmt(best.latency_ms, 2)} ms</div></div>
+          <div class="sim-meta__item"><div class="sim-meta__label">Model Boyutu</div><div class="sim-meta__value">${fmt(best.model_size_mb, 3)} MB</div></div>
+          <div class="sim-meta__item"><div class="sim-meta__label">Aday Sayısı</div><div class="sim-meta__value">${escapeHTML(data.history_count || '-')}</div></div>
+          <div class="sim-meta__item"><div class="sim-meta__label">Pareto Benzeri Aday</div><div class="sim-meta__value">${escapeHTML((data.pareto_front || []).length || '-')}</div></div>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-card__model">Seçilen hiperparametreler</div>
+        <div class="step__command">
+          layers=${escapeHTML(params.n_layers ?? '-')} · heads=${escapeHTML(params.n_heads ?? '-')} · d_model=${escapeHTML(params.d_model ?? '-')} · d_ff=${escapeHTML(params.d_ff ?? '-')} · dropout=${fmt(params.dropout, 3)} · lr=${fmt(params.learning_rate, 6)}
+        </div>
+        <div class="simulator-help" style="margin-top:var(--space-md)">
+          Ağırlıklar: RMSE ${fmt(weights.rmse, 2)}, latency ${fmt(weights.latency, 2)}, size ${fmt(weights.size, 2)}.
+          Referanslar: RMSE ${fmt(references.rmse_ref, 4)}, latency ${fmt(references.latency_ref_ms, 1)} ms, size ${fmt(references.size_ref_mb, 2)} MB.
+        </div>
+        <div class="simulator-help" style="margin-top:var(--space-sm)">Çıktı: ${escapeHTML(data.path || '')}</div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state__text text-danger">PSO sonucu okunamadı: ${escapeHTML(err.message)}</div></div>`;
   }
 }
 

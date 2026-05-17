@@ -17,6 +17,7 @@ class SearchResult:
     best_score: float
     best_params: dict[str, float | int]
     history: list[dict[str, float]]
+    pareto_front: list[dict[str, float]]
 
 
 class FTTransformerSearchSpace:
@@ -101,14 +102,31 @@ def run_pso(
             if score < global_best_score:
                 global_best_score = score
                 global_best_position = positions[idx].copy()
+            params = FTTransformerSearchSpace.project(positions[idx])
             history.append(
                 {
                     "iteration": float(iteration),
                     "particle": float(idx),
                     "score": float(score),
                     "rmse": float(result.rmse),
+                    "mae": float(result.mae),
+                    "mape": float(result.mape),
+                    "r2": float(result.r2),
                     "latency_ms": float(result.latency_ms),
                     "model_size_mb": float(result.model_size_mb),
+                    "param_count": float(result.param_count),
+                    "rmse_component": float(result.score_components.get("rmse_component", 0.0)),
+                    "latency_component": float(result.score_components.get("latency_component", 0.0)),
+                    "size_component": float(result.score_components.get("size_component", 0.0)),
+                    "weighted_rmse": float(result.score_components.get("weighted_rmse", 0.0)),
+                    "weighted_latency": float(result.score_components.get("weighted_latency", 0.0)),
+                    "weighted_size": float(result.score_components.get("weighted_size", 0.0)),
+                    "n_layers": float(params["n_layers"]),
+                    "n_heads": float(params["n_heads"]),
+                    "d_model": float(params["d_model"]),
+                    "d_ff": float(params["d_ff"]),
+                    "dropout": float(params["dropout"]),
+                    "learning_rate": float(params["learning_rate"]),
                 }
             )
 
@@ -126,4 +144,22 @@ def run_pso(
         best_score=float(global_best_score),
         best_params=FTTransformerSearchSpace.project(global_best_position),
         history=history,
+        pareto_front=non_dominated_history(history),
     )
+
+
+def _dominates(left: dict[str, float], right: dict[str, float]) -> bool:
+    objectives = ("rmse", "latency_ms", "model_size_mb")
+    no_worse = all(float(left[key]) <= float(right[key]) for key in objectives)
+    strictly_better = any(float(left[key]) < float(right[key]) for key in objectives)
+    return no_worse and strictly_better
+
+
+def non_dominated_history(history: list[dict[str, float]]) -> list[dict[str, float]]:
+    """Return Pareto-like diagnostic candidates from scalarized PSO history."""
+
+    front: list[dict[str, float]] = []
+    for candidate in history:
+        if not any(_dominates(other, candidate) for other in history):
+            front.append(candidate)
+    return sorted(front, key=lambda item: float(item["score"]))

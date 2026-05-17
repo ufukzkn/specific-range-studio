@@ -150,7 +150,7 @@ python scripts/train_xgboost.py --dataset data/processed/combined_specific_range
 4. Run PSO for FT-Transformer hyperparameters:
 
 ```bash
-python scripts/run_pso.py --dataset data/processed/combined_specific_range.csv --iterations 5 --population 6
+python scripts/run_pso.py --dataset data/processed/combined_specific_range.csv --iterations 5 --population 6 --w-rmse 0.70 --w-latency 0.20 --w-size 0.10
 ```
 
 5. Compare both models:
@@ -363,9 +363,13 @@ The optimization objective follows the planned multi-objective scalarization:
 
 At the moment:
 
-- validation `RMSE` is fully operational,
-- inference latency and model size are wired through benchmark interfaces,
+- validation `RMSE`, `MAE`, `MAPE` and `R2` are recorded for each candidate,
+- single-row p95 inference latency is measured during the PSO objective evaluation,
+- model size is estimated from FT-Transformer parameter count,
+- `artifacts/pso/pso_latest.json` and `artifacts/pso/pso_history_latest.csv` store the latest search output,
 - ONNX export and TensorRT build functions are intentionally left as extension stubs until the target deployment environment is available.
+
+Default weights are accuracy-first but deployment-aware: `0.70` RMSE, `0.20` latency and `0.10` model size. Passing `--w-rmse 1 --w-latency 0 --w-size 0` reproduces the older RMSE-only search behaviour.
 
 ## Assumptions
 
@@ -373,7 +377,7 @@ At the moment:
 - `Sea Level` is interpreted as `0 ft`.
 - `engine_type` is derived from workbook identity: `one_engine` or `two_engine`.
 - The target column is `specific_range`.
-- Current scripts do not fabricate benchmark numbers; placeholder latency/size values are clearly labeled in the benchmark stub.
+- PSO latency is a local micro-benchmark for candidate ranking, while the `Maliyet` tab still uses the real Pi benchmark JSON for final runtime comparison.
 - The UI expects trained artifacts to exist under `artifacts/xgboost` and `artifacts/ft_transformer`.
 
 ## Extension Points
