@@ -5,9 +5,10 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from src.data.preprocess import PreparedSplit
+from src.data.preprocess import PreparedSplit, combine_for_tree_model
 from src.models.ft_transformer import FTTransformerTrainer
-from src.utils.config import FTTransformerConfig, PSOConfig
+from src.models.xgboost_baseline import XGBoostRegressorWrapper
+from src.utils.config import FTTransformerConfig, PSOConfig, XGBoostConfig
 
 
 @dataclass(slots=True)
@@ -122,6 +123,56 @@ def measure_trainer_latency_ms(
     return float(np.percentile(np.asarray(timings, dtype=float), 95))
 
 
+def measure_xgboost_latency_ms(
+    model: XGBoostRegressorWrapper,
+    split: PreparedSplit,
+    *,
+    repetitions: int,
+    warmup: int,
+) -> float:
+    """Measure single-row XGBoost inference p95 latency for a trained candidate."""
+
+    if len(split.y) == 0:
+        return 0.0
+    sample = combine_for_tree_model(split)[:1]
+    warmup = max(0, int(warmup))
+    repetitions = max(1, int(repetitions))
+
+    for _ in range(warmup):
+        model.predict(sample)
+
+    timings: list[float] = []
+    for _ in range(repetitions):
+        start = time.perf_counter()
+        model.predict(sample)
+        timings.append((time.perf_counter() - start) * 1000.0)
+    return float(np.percentile(np.asarray(timings, dtype=float), 95))
+
+
+def estimate_xgboost_size_mb(model: XGBoostRegressorWrapper) -> float:
+    """Estimate serialized booster size without writing candidate artifacts to disk."""
+
+    try:
+        raw = model.model.get_booster().save_raw()
+        return float(len(raw) / (1024 * 1024))
+    except Exception:
+        dump = "\n".join(model.model.get_booster().get_dump())
+        return float(len(dump.encode("utf-8")) / (1024 * 1024))
+
+
+def estimate_xgboost_node_count(model: XGBoostRegressorWrapper) -> int:
+    """Return a lightweight structural complexity proxy for XGBoost candidates."""
+
+    try:
+        frame = model.model.get_booster().trees_to_dataframe()
+        return int(len(frame))
+    except Exception:
+        try:
+            return int(model.model.get_booster().num_boosted_rounds())
+        except Exception:
+            return 0
+
+
 def evaluate_ft_transformer_config(
     train_split: PreparedSplit,
     valid_split: PreparedSplit,
@@ -172,5 +223,52 @@ def evaluate_ft_transformer_config(
             "epochs_trained": float(fit_result.epochs_trained),
             "best_validation_rmse": fit_result.best_validation_rmse,
             "benchmark_note": "Measured single-row p95 latency during PSO objective evaluation.",
+        },
+    )
+
+
+def evaluate_xgboost_config(
+    train_split: PreparedSplit,
+    valid_split: PreparedSplit,
+    xgboost_config: XGBoostConfig,
+    pso_config: PSOConfig,
+) -> ObjectiveResult:
+    """Train and score an XGBoost candidate with the shared deployment-aware objective."""
+
+    model = XGBoostRegressorWrapper(xgboost_config).fit(train_split, valid_split)
+    valid_metrics = model.evaluate(valid_split)
+    latency_ms = measure_xgboost_latency_ms(
+        model,
+        valid_split,
+        repetitions=pso_config.latency_repetitions,
+        warmup=pso_config.latency_warmup,
+    )
+    model_size_mb = estimate_xgboost_size_mb(model)
+    node_count = estimate_xgboost_node_count(model)
+    components = score_components(
+        rmse=valid_metrics["rmse"],
+        latency_ms=latency_ms,
+        model_size_mb=model_size_mb,
+        config=pso_config,
+    )
+    score = scalarized_cost(
+        rmse=valid_metrics["rmse"],
+        latency_ms=latency_ms,
+        model_size_mb=model_size_mb,
+        config=pso_config,
+    )
+    return ObjectiveResult(
+        score=score,
+        rmse=valid_metrics["rmse"],
+        mae=valid_metrics["mae"],
+        mape=valid_metrics["mape"],
+        r2=valid_metrics["r2"],
+        latency_ms=latency_ms,
+        model_size_mb=model_size_mb,
+        param_count=node_count,
+        score_components=components,
+        metadata={
+            "node_count": float(node_count),
+            "benchmark_note": "Measured single-row p95 latency during XGBoost PSO objective evaluation.",
         },
     )

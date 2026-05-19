@@ -75,6 +75,8 @@ PI_BENCHMARK_LATEST = BENCHMARK_DIR / "pi_benchmark_latest.json"
 REFERENCE_BENCHMARK_LATEST = PROJECT_ROOT / "docs" / "benchmark_reference" / "pi_benchmark_latest_reference.json"
 PSO_DIR = _data_config.artifacts_dir / "pso"
 PSO_LATEST = PSO_DIR / "pso_latest.json"
+FT_PSO_LATEST = PSO_DIR / "ft_transformer_pso_latest.json"
+XGB_PSO_LATEST = PSO_DIR / "xgboost_pso_latest.json"
 _dataset_gui_process: subprocess.Popen | None = None
 _dataset_gui_lock = threading.Lock()
 
@@ -1722,42 +1724,54 @@ def api_compare_cost_simulator():
 
 @app.route("/api/pso/latest")
 def api_pso_latest():
-    if not PSO_LATEST.exists():
+    candidates = {
+        "xgboost": XGB_PSO_LATEST,
+        "ft_transformer": FT_PSO_LATEST,
+    }
+    available_paths = {model: path for model, path in candidates.items() if path.exists()}
+    if not available_paths and PSO_LATEST.exists():
+        available_paths["latest"] = PSO_LATEST
+    if not available_paths:
         return jsonify({
             "available": False,
             "message": "Henüz PSO optimizasyon çıktısı bulunamadı.",
             "command": (
                 f'"{sys.executable}" scripts/run_pso.py --dataset "{_data_config.processed_path}" '
-                "--device cpu --population 4 --iterations 3"
+                "--model ft_transformer --device cpu --population 4 --iterations 3"
             ),
         })
+
+    def summarize_payload(path: Path) -> dict:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        history = payload.get("history") or []
+        best_score = payload.get("best_score")
+        best_row = None
+        if history and best_score is not None:
+            try:
+                best_row = min(history, key=lambda row: abs(float(row.get("score", 0.0)) - float(best_score)))
+            except Exception:
+                best_row = None
+        return {
+            "path": str(path),
+            "run_id": payload.get("run_id"),
+            "model": payload.get("model") or path.name.replace("_pso_latest.json", ""),
+            "dataset": payload.get("dataset"),
+            "best_score": best_score,
+            "best_params": payload.get("best_params") or {},
+            "best_row": best_row or {},
+            "objective": payload.get("objective") or {},
+            "history_count": len(history),
+            "pareto_front": (payload.get("pareto_front") or [])[:20],
+            "history_csv": payload.get("latest_history_csv") or payload.get("history_csv"),
+        }
+
     try:
-        payload = json.loads(PSO_LATEST.read_text(encoding="utf-8"))
+        summaries = {model: summarize_payload(path) for model, path in available_paths.items()}
     except Exception as exc:
         return jsonify({"available": False, "message": f"PSO çıktısı okunamadı: {exc}"}), 500
 
-    history = payload.get("history") or []
-    best_score = payload.get("best_score")
-    best_row = None
-    if history and best_score is not None:
-        try:
-            best_row = min(history, key=lambda row: abs(float(row.get("score", 0.0)) - float(best_score)))
-        except Exception:
-            best_row = None
-
-    return jsonify({
-        "available": True,
-        "path": str(PSO_LATEST),
-        "run_id": payload.get("run_id"),
-        "dataset": payload.get("dataset"),
-        "best_score": best_score,
-        "best_params": payload.get("best_params") or {},
-        "best_row": best_row or {},
-        "objective": payload.get("objective") or {},
-        "history_count": len(history),
-        "pareto_front": (payload.get("pareto_front") or [])[:20],
-        "history_csv": payload.get("latest_history_csv") or payload.get("history_csv"),
-    })
+    primary = summaries.get("ft_transformer") or next(iter(summaries.values()))
+    return jsonify({"available": True, "models": summaries, **primary})
 
 
 # ---------------------------------------------------------------------------
@@ -1853,10 +1867,20 @@ def api_setup_commands():
             "label": "Çok Amaçlı FT PSO",
             "command": (
                 f'"{python}" scripts/run_pso.py --dataset "{ds}" --device cpu '
-                "--population 4 --iterations 3 --w-rmse 0.70 --w-latency 0.20 --w-size 0.10"
+                "--model ft_transformer --population 4 --iterations 3 --w-rmse 0.70 --w-latency 0.20 --w-size 0.10"
             ),
             "eta": "~5-30 dk",
-            "artifacts": ["artifacts/pso/pso_latest.json", "artifacts/pso/pso_history_latest.csv"],
+            "artifacts": ["artifacts/pso/ft_transformer_pso_latest.json", "artifacts/pso/ft_transformer_pso_history_latest.csv"],
+        },
+        {
+            "id": "xgboost_pso_search",
+            "label": "Çok Amaçlı XGBoost PSO",
+            "command": (
+                f'"{python}" scripts/run_pso.py --dataset "{ds}" --device cpu '
+                "--model xgboost --population 4 --iterations 3 --w-rmse 0.70 --w-latency 0.20 --w-size 0.10"
+            ),
+            "eta": "~2-15 dk",
+            "artifacts": ["artifacts/pso/xgboost_pso_latest.json", "artifacts/pso/xgboost_pso_history_latest.csv"],
         },
     ])
 

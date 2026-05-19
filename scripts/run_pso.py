@@ -14,13 +14,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.data.load_data import load_combined_dataset
 from src.data.preprocess import category_cardinalities, fit_preprocessor, transform_split
 from src.data.split import split_dataframe
-from src.optimization.objective import evaluate_ft_transformer_config
-from src.optimization.pso_search import FTTransformerSearchSpace, run_pso
-from src.utils.config import DataConfig, FTTransformerConfig, PSOConfig, PreprocessConfig, SplitConfig
+from src.optimization.objective import evaluate_ft_transformer_config, evaluate_xgboost_config
+from src.optimization.pso_search import FTTransformerSearchSpace, XGBoostSearchSpace, run_pso
+from src.utils.config import DataConfig, FTTransformerConfig, PSOConfig, PreprocessConfig, SplitConfig, XGBoostConfig
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run PSO search for FT-Transformer hyperparameters.")
+    parser = argparse.ArgumentParser(description="Run deployment-aware PSO hyperparameter search.")
+    parser.add_argument(
+        "--model",
+        choices=["ft_transformer", "xgboost"],
+        default="ft_transformer",
+        help="Model family to optimize.",
+    )
     parser.add_argument("--dataset", type=str, default=None, help="Optional path to a preprocessed CSV.")
     parser.add_argument("--device", type=str, default="cpu", help="Torch device, e.g. cpu or cuda.")
     parser.add_argument("--iterations", type=int, default=5)
@@ -57,19 +63,24 @@ def main() -> None:
         latency_warmup=args.latency_warmup,
     )
     base_ft_config = FTTransformerConfig(device=args.device, epochs=args.ft_epochs, patience=args.ft_patience)
+    base_xgb_config = XGBoostConfig(device=args.device)
     cat_cardinalities = category_cardinalities(state)
 
     def objective(position):
+        if args.model == "xgboost":
+            xgb_config = XGBoostSearchSpace.to_config(position, base_xgb_config)
+            return evaluate_xgboost_config(train, valid, xgb_config, pso_config)
         ft_config = FTTransformerSearchSpace.to_config(position, base_ft_config)
         return evaluate_ft_transformer_config(train, valid, cat_cardinalities, ft_config, pso_config)
 
-    result = run_pso(objective, pso_config)
+    search_space = XGBoostSearchSpace if args.model == "xgboost" else FTTransformerSearchSpace
+    result = run_pso(objective, pso_config, search_space=search_space)
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_dir = args.output
     output_dir.mkdir(parents=True, exist_ok=True)
     history_frame = pd.DataFrame(result.history)
-    history_csv = output_dir / f"pso_history_{run_id}.csv"
-    latest_history_csv = output_dir / "pso_history_latest.csv"
+    history_csv = output_dir / f"{args.model}_pso_history_{run_id}.csv"
+    latest_history_csv = output_dir / f"{args.model}_pso_history_latest.csv"
     history_frame.to_csv(history_csv, index=False)
     history_frame.to_csv(latest_history_csv, index=False)
     raw_weights = [max(args.w_rmse, 0.0), max(args.w_latency, 0.0), max(args.w_size, 0.0)]
@@ -78,6 +89,7 @@ def main() -> None:
 
     payload = {
         "run_id": run_id,
+        "model": args.model,
         "dataset": str(args.dataset) if args.dataset else str(data_config.processed_path),
         "best_score": result.best_score,
         "best_params": result.best_params,
@@ -100,11 +112,13 @@ def main() -> None:
         "history": result.history,
         "pareto_front": result.pareto_front,
     }
-    run_json = output_dir / f"pso_result_{run_id}.json"
-    latest_json = output_dir / "pso_latest.json"
+    run_json = output_dir / f"{args.model}_pso_result_{run_id}.json"
+    latest_json = output_dir / f"{args.model}_pso_latest.json"
     text = json.dumps(payload, indent=2, ensure_ascii=False)
     run_json.write_text(text, encoding="utf-8")
     latest_json.write_text(text, encoding="utf-8")
+    legacy_latest_json = output_dir / "pso_latest.json"
+    legacy_latest_json.write_text(text, encoding="utf-8")
     print(text)
     print(f"Saved PSO result: {latest_json}")
 

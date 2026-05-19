@@ -365,11 +365,25 @@ At the moment:
 
 - validation `RMSE`, `MAE`, `MAPE` and `R2` are recorded for each candidate,
 - single-row p95 inference latency is measured during the PSO objective evaluation,
-- model size is estimated from FT-Transformer parameter count,
-- `artifacts/pso/pso_latest.json` and `artifacts/pso/pso_history_latest.csv` store the latest search output,
+- FT-Transformer model size is estimated from parameter count,
+- XGBoost model size is estimated from the serialized booster,
+- `artifacts/pso/ft_transformer_pso_latest.json` and `artifacts/pso/xgboost_pso_latest.json` store model-specific latest search outputs,
+- `artifacts/pso/pso_latest.json` is kept as a backwards-compatible pointer to the most recently run PSO search,
 - ONNX export and TensorRT build functions are intentionally left as extension stubs until the target deployment environment is available.
 
 Default weights are accuracy-first but deployment-aware: `0.70` RMSE, `0.20` latency and `0.10` model size. Passing `--w-rmse 1 --w-latency 0 --w-size 0` reproduces the older RMSE-only search behaviour.
+
+Run FT-Transformer PSO:
+
+```bash
+python scripts/run_pso.py --model ft_transformer --dataset data/processed/combined_specific_range.csv --device cpu --population 4 --iterations 3
+```
+
+Run XGBoost PSO with the same scalarized objective:
+
+```bash
+python scripts/run_pso.py --model xgboost --dataset data/processed/combined_specific_range.csv --device cpu --population 4 --iterations 3
+```
 
 ## Assumptions
 
@@ -379,9 +393,10 @@ Default weights are accuracy-first but deployment-aware: `0.70` RMSE, `0.20` lat
 - The target column is `specific_range`.
 - PSO latency is a local micro-benchmark for candidate ranking, while the `Maliyet` tab still uses the real Pi benchmark JSON for final runtime comparison.
 - The UI expects trained artifacts to exist under `artifacts/xgboost` and `artifacts/ft_transformer`.
+- Interpolation is the deterministic reference family; it is benchmarked for runtime and resource use, but it is not scored as a learned model on the accuracy axis.
 
 ## Extension Points
 
 - Replace benchmark stubs with real ONNX export, TensorRT engine build, and Jetson latency measurement.
 - Add more interpolation/reporting diagnostics for direct comparison against modern ML models.
-- Extend PSO to XGBoost using the same objective function for a fully standardized comparison protocol.
+- Add optional ONNX/quantized deployment profiles for the PSO-selected XGBoost and FT-Transformer candidates.

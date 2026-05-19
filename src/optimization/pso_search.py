@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Protocol
 
 import numpy as np
 
 from src.optimization.objective import ObjectiveResult
-from src.utils.config import FTTransformerConfig, PSOConfig
+from src.utils.config import FTTransformerConfig, PSOConfig, XGBoostConfig
 
 
 @dataclass(slots=True)
@@ -73,15 +73,74 @@ class FTTransformerSearchSpace:
         )
 
 
+class SearchSpace(Protocol):
+    """Minimal interface needed by the shared PSO loop."""
+
+    bounds: np.ndarray
+
+    @classmethod
+    def project(cls, position: np.ndarray) -> dict[str, float | int]:
+        ...
+
+
+class XGBoostSearchSpace:
+    """Continuous search space plus projection into valid XGBoost hyperparameters."""
+
+    bounds = np.array(
+        [
+            [80, 800],
+            [2, 10],
+            [0.01, 0.20],
+            [0.60, 1.0],
+            [0.60, 1.0],
+            [0.0, 1.0],
+            [0.10, 5.0],
+        ],
+        dtype=np.float64,
+    )
+
+    @classmethod
+    def project(cls, position: np.ndarray) -> dict[str, float | int]:
+        clipped = np.clip(position, cls.bounds[:, 0], cls.bounds[:, 1])
+        return {
+            "n_estimators": int(round(clipped[0])),
+            "max_depth": int(round(clipped[1])),
+            "learning_rate": float(clipped[2]),
+            "subsample": float(clipped[3]),
+            "colsample_bytree": float(clipped[4]),
+            "reg_alpha": float(clipped[5]),
+            "reg_lambda": float(clipped[6]),
+        }
+
+    @classmethod
+    def to_config(cls, position: np.ndarray, base_config: XGBoostConfig) -> XGBoostConfig:
+        params = cls.project(position)
+        return XGBoostConfig(
+            n_estimators=int(params["n_estimators"]),
+            max_depth=int(params["max_depth"]),
+            learning_rate=float(params["learning_rate"]),
+            subsample=float(params["subsample"]),
+            colsample_bytree=float(params["colsample_bytree"]),
+            reg_alpha=float(params["reg_alpha"]),
+            reg_lambda=float(params["reg_lambda"]),
+            random_state=base_config.random_state,
+            objective=base_config.objective,
+            eval_metric=base_config.eval_metric,
+            tree_method=base_config.tree_method,
+            device=base_config.device,
+        )
+
+
 def run_pso(
     objective_fn: Callable[[np.ndarray], ObjectiveResult],
     config: PSOConfig | None = None,
+    search_space: type[SearchSpace] = FTTransformerSearchSpace,
 ) -> SearchResult:
-    """Run a simple PSO loop over the FT-Transformer search space."""
+    """Run a simple PSO loop over a projected hyperparameter search space."""
 
     config = config or PSOConfig()
     rng = np.random.default_rng(config.random_state)
-    bounds = FTTransformerSearchSpace.bounds
+    bounds = search_space.bounds
     low, high = bounds[:, 0], bounds[:, 1]
 
     positions = rng.uniform(low=low, high=high, size=(config.population_size, bounds.shape[0]))
@@ -102,33 +161,27 @@ def run_pso(
             if score < global_best_score:
                 global_best_score = score
                 global_best_position = positions[idx].copy()
-            params = FTTransformerSearchSpace.project(positions[idx])
-            history.append(
-                {
-                    "iteration": float(iteration),
-                    "particle": float(idx),
-                    "score": float(score),
-                    "rmse": float(result.rmse),
-                    "mae": float(result.mae),
-                    "mape": float(result.mape),
-                    "r2": float(result.r2),
-                    "latency_ms": float(result.latency_ms),
-                    "model_size_mb": float(result.model_size_mb),
-                    "param_count": float(result.param_count),
-                    "rmse_component": float(result.score_components.get("rmse_component", 0.0)),
-                    "latency_component": float(result.score_components.get("latency_component", 0.0)),
-                    "size_component": float(result.score_components.get("size_component", 0.0)),
-                    "weighted_rmse": float(result.score_components.get("weighted_rmse", 0.0)),
-                    "weighted_latency": float(result.score_components.get("weighted_latency", 0.0)),
-                    "weighted_size": float(result.score_components.get("weighted_size", 0.0)),
-                    "n_layers": float(params["n_layers"]),
-                    "n_heads": float(params["n_heads"]),
-                    "d_model": float(params["d_model"]),
-                    "d_ff": float(params["d_ff"]),
-                    "dropout": float(params["dropout"]),
-                    "learning_rate": float(params["learning_rate"]),
-                }
-            )
+            params = search_space.project(positions[idx])
+            row = {
+                "iteration": float(iteration),
+                "particle": float(idx),
+                "score": float(score),
+                "rmse": float(result.rmse),
+                "mae": float(result.mae),
+                "mape": float(result.mape),
+                "r2": float(result.r2),
+                "latency_ms": float(result.latency_ms),
+                "model_size_mb": float(result.model_size_mb),
+                "param_count": float(result.param_count),
+                "rmse_component": float(result.score_components.get("rmse_component", 0.0)),
+                "latency_component": float(result.score_components.get("latency_component", 0.0)),
+                "size_component": float(result.score_components.get("size_component", 0.0)),
+                "weighted_rmse": float(result.score_components.get("weighted_rmse", 0.0)),
+                "weighted_latency": float(result.score_components.get("weighted_latency", 0.0)),
+                "weighted_size": float(result.score_components.get("weighted_size", 0.0)),
+            }
+            row.update({key: float(value) for key, value in params.items()})
+            history.append(row)
 
         r1 = rng.random(size=velocities.shape)
         r2 = rng.random(size=velocities.shape)
@@ -142,7 +195,7 @@ def run_pso(
     return SearchResult(
         best_position=global_best_position,
         best_score=float(global_best_score),
-        best_params=FTTransformerSearchSpace.project(global_best_position),
+        best_params=search_space.project(global_best_position),
         history=history,
         pareto_front=non_dominated_history(history),
     )

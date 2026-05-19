@@ -306,38 +306,41 @@ async function loadLatestPsoSummary() {
       `;
       return;
     }
-    const best = data.best_row || {};
-    const params = data.best_params || {};
-    const objective = data.objective || {};
-    const weights = objective.weights || {};
-    const references = objective.references || {};
     const fmt = (value, digits = 4) => value === null || value === undefined || Number.isNaN(Number(value)) ? '-' : Number(value).toFixed(digits);
-    container.innerHTML = `
-      <div class="result-card result-card--ft">
-        <div class="result-card__model">En iyi PSO FT-Transformer adayı</div>
-        <div class="sim-score">${fmt(data.best_score, 3)}</div>
-        <div class="text-muted" style="font-size:0.78rem;margin-top:4px">Toplam maliyet skoru; düşük daha iyi</div>
-        <div class="sim-meta">
-          <div class="sim-meta__item"><div class="sim-meta__label">RMSE</div><div class="sim-meta__value">${fmt(best.rmse, 6)}</div></div>
-          <div class="sim-meta__item"><div class="sim-meta__label">MAE</div><div class="sim-meta__value">${fmt(best.mae, 6)}</div></div>
-          <div class="sim-meta__item"><div class="sim-meta__label">p95 Gecikme</div><div class="sim-meta__value">${fmt(best.latency_ms, 2)} ms</div></div>
-          <div class="sim-meta__item"><div class="sim-meta__label">Model Boyutu</div><div class="sim-meta__value">${fmt(best.model_size_mb, 3)} MB</div></div>
-          <div class="sim-meta__item"><div class="sim-meta__label">Aday Sayısı</div><div class="sim-meta__value">${escapeHTML(data.history_count || '-')}</div></div>
-          <div class="sim-meta__item"><div class="sim-meta__label">Pareto Benzeri Aday</div><div class="sim-meta__value">${escapeHTML((data.pareto_front || []).length || '-')}</div></div>
+    const modelLabels = { xgboost: 'XGBoost', ft_transformer: 'FT-Transformer', latest: 'Son PSO' };
+    const cardClasses = { xgboost: 'result-card--xgboost', ft_transformer: 'result-card--ft', latest: 'result-card--ft' };
+    const summaries = data.models || { [data.model || 'latest']: data };
+    const cards = Object.entries(summaries).map(([key, summary]) => {
+      const best = summary.best_row || {};
+      const params = summary.best_params || {};
+      const objective = summary.objective || {};
+      const weights = objective.weights || {};
+      const references = objective.references || {};
+      const paramText = Object.entries(params)
+        .map(([paramKey, value]) => `${escapeHTML(paramKey)}=${typeof value === 'number' ? fmt(value, paramKey.includes('rate') || paramKey.includes('dropout') ? 5 : 3) : escapeHTML(value ?? '-')}`)
+        .join(' · ');
+      return `
+        <div class="result-card ${cardClasses[key] || ''}">
+          <div class="result-card__model">En iyi PSO ${escapeHTML(modelLabels[key] || key)} adayı</div>
+          <div class="sim-score">${fmt(summary.best_score, 3)}</div>
+          <div class="text-muted" style="font-size:0.78rem;margin-top:4px">Toplam maliyet skoru; düşük daha iyi</div>
+          <div class="sim-meta">
+            <div class="sim-meta__item"><div class="sim-meta__label">RMSE</div><div class="sim-meta__value">${fmt(best.rmse, 6)}</div></div>
+            <div class="sim-meta__item"><div class="sim-meta__label">MAE</div><div class="sim-meta__value">${fmt(best.mae, 6)}</div></div>
+            <div class="sim-meta__item"><div class="sim-meta__label">p95 Gecikme</div><div class="sim-meta__value">${fmt(best.latency_ms, 2)} ms</div></div>
+            <div class="sim-meta__item"><div class="sim-meta__label">Model Boyutu</div><div class="sim-meta__value">${fmt(best.model_size_mb, 3)} MB</div></div>
+            <div class="sim-meta__item"><div class="sim-meta__label">Aday Sayısı</div><div class="sim-meta__value">${escapeHTML(summary.history_count || '-')}</div></div>
+            <div class="sim-meta__item"><div class="sim-meta__label">Pareto Benzeri Aday</div><div class="sim-meta__value">${escapeHTML((summary.pareto_front || []).length || '-')}</div></div>
+          </div>
+          <div class="step__command mt-md">${paramText || 'Hiperparametre bilgisi yok'}</div>
+          <div class="simulator-help" style="margin-top:var(--space-sm)">
+            Ağırlıklar: RMSE ${fmt(weights.rmse, 2)}, latency ${fmt(weights.latency, 2)}, size ${fmt(weights.size, 2)}.
+            Referanslar: RMSE ${fmt(references.rmse_ref, 4)}, latency ${fmt(references.latency_ref_ms, 1)} ms, size ${fmt(references.size_ref_mb, 2)} MB.
+          </div>
         </div>
-      </div>
-      <div class="result-card">
-        <div class="result-card__model">Seçilen hiperparametreler</div>
-        <div class="step__command">
-          layers=${escapeHTML(params.n_layers ?? '-')} · heads=${escapeHTML(params.n_heads ?? '-')} · d_model=${escapeHTML(params.d_model ?? '-')} · d_ff=${escapeHTML(params.d_ff ?? '-')} · dropout=${fmt(params.dropout, 3)} · lr=${fmt(params.learning_rate, 6)}
-        </div>
-        <div class="simulator-help" style="margin-top:var(--space-md)">
-          Ağırlıklar: RMSE ${fmt(weights.rmse, 2)}, latency ${fmt(weights.latency, 2)}, size ${fmt(weights.size, 2)}.
-          Referanslar: RMSE ${fmt(references.rmse_ref, 4)}, latency ${fmt(references.latency_ref_ms, 1)} ms, size ${fmt(references.size_ref_mb, 2)} MB.
-        </div>
-        <div class="simulator-help" style="margin-top:var(--space-sm)">Çıktı: ${escapeHTML(data.path || '')}</div>
-      </div>
-    `;
+      `;
+    }).join('');
+    container.innerHTML = cards;
   } catch (err) {
     container.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state__text text-danger">PSO sonucu okunamadı: ${escapeHTML(err.message)}</div></div>`;
   }
@@ -405,6 +408,9 @@ function renderBenchmarkStatus(benchmark) {
   const system = benchmark.system || {};
   const config = benchmark.config || {};
   const created = benchmark.created_at ? new Date(benchmark.created_at).toLocaleString('tr-TR') : '-';
+  const deviceLabel = system.display_name || system.target_profile || system.hostname || '-';
+  const deviceDesc = system.display_description || system.profile_note || system.machine || system.platform || '-';
+  const ramLabel = system.display_total_ram_mb || system.target_total_ram_mb || system.total_ram_mb;
   container.innerHTML = `
     <div class="metric-card">
       <div class="metric-card__label">Son Ölçüm</div>
@@ -413,13 +419,13 @@ function renderBenchmarkStatus(benchmark) {
     </div>
     <div class="metric-card">
       <div class="metric-card__label">Cihaz</div>
-      <div class="metric-card__value">${escapeHTML(system.hostname || '-')}</div>
-      <div class="metric-card__desc metric-card__desc--visible">${escapeHTML(system.machine || system.platform || '-')}</div>
+      <div class="metric-card__value">${escapeHTML(deviceLabel)}</div>
+      <div class="metric-card__desc metric-card__desc--visible">${escapeHTML(deviceDesc)}</div>
     </div>
     <div class="metric-card">
       <div class="metric-card__label">Python / RAM</div>
       <div class="metric-card__value">${escapeHTML(system.python || '-')}</div>
-      <div class="metric-card__desc metric-card__desc--visible">${system.total_ram_mb ? `${Number(system.total_ram_mb).toFixed(0)} MB toplam RAM` : 'RAM bilgisi yok'}</div>
+      <div class="metric-card__desc metric-card__desc--visible">${ramLabel ? `${Number(ramLabel).toFixed(0)} MB RAM profili` : 'RAM bilgisi yok'}</div>
     </div>
     <div class="metric-card">
       <div class="metric-card__label">Örnek / Tekrar</div>
