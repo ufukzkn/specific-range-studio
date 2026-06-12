@@ -1,0 +1,110 @@
+
+
+--- PAGE 1 ---
+ 
+ 
+1 
+ 
+ 
+LIFT UP SANAYİ ODAKLI LİSANS BİTİRME PROJESİ 
+ARA DEĞERLENDİRME RAPORU 
+1. GENEL BİLGİLER  
+ 
+Proje Başlığı 
+Muharip bir hava aracının performans veri setinin farklı 
+yöntemlerle (Polinom, Yapay Sinir Ağları, Pekiştirmeli 
+Öğrenme vb.) modellenerek kıyaslanması. 
+Üniversite Eskişehir Teknik Üniversitesi 
+Bölüm Havacılık Elektrik Elektroniği – Bilgisayar Mühendisliği 
+– Endüstri Mühendisliği 
+Akademik Danışman Doç. Dr. Aziz KABA 
+Sanayi Danışmanı Zeynel Abidin AYDOĞAN 
+Lisans Öğrencileri Ahmet Soner GÜLEÇ, Umut ÇÖRDÜK , Ufuk ÖZKAN, 
+Semanur ÜNAL, Enes ABA 
+Rapor Teslim Tarihi 15.02.2026 
+ 
+İlgili dönemde gerçekleştirilen faaliyetler ile bir sonraki dönemde planlanan çalışmaları kapsayan raporun, Arial 11 
+punto ile hazırlanarak toplamda 2 sayfayı aşmayacak şekilde sunulması beklenmektedir. 
+2. PROJE KAPSAMINDA GERÇEKLEŞTİRİLEN ÇALIŞMALAR VE ELDE 
+EDİLEN BULGULAR 
+Proje konusu hakkında kısaca bilgi verilmesi, ilgili dönem içinde gerçekleştirilen araştırma çalışmaları ve elde edilen 
+bulguların özetlenmesi beklenmektedir.  
+    Proje kapsamında, muharip hava araçlarının aviyonik sistemlerinde uçuş performans 
+verilerinin depolanması amacıyla geleneksel olarak kullanılan arama tablosu (Look-up 
+Table- LUT) yöntemlerinin yarattığı doğruluk kaybı ve yüksek donanım kaynağı tüketimi 
+problemlerinin aşılması hedeflenmektedir. Bu doğrultuda, söz konusu performans verilerinin 
+XGBoost ve Tabular Transformer gibi güncel makine öğrenmesi modelleriyle, kısıtlı 
+endüstriyel gömülü sis temlerde yüksek verimlilikle çalışacak şekilde modellenmesi 
+amaçlanmaktadır. Modellerin, Sürü Zekâsı ( Particle Swarm Optimization  - PSO) tabanlı 
+meta-sezgisel algoritmalarla optimize edilerek doğruluk, çıkarım hızı ve bellek kullanımı gibi 
+donanım metrikleri açısından geleneksel nümerik yöntemlerle kıyaslanması projenin temel 
+odak noktasını oluşturmaktadır. 
+ 
+    İlgili rapor döneminde, projenin temelini oluşturan “Veri Di jitasyonu ve Veri Seti 
+Oluşturma" faaliyetlerine odaklanılmıştır. Başlangıçta öngörülen piksel yoğunluğu eşiğine 
+dayalı geleneksel algoritmaların, havacılık nomografları üzerindeki yoğun ızgara (grid) 
+çizgileri ve çakışan metinler nedeniyle yüksek hata oranlarına sebep olduğu tespit edilmiştir. 
+Bu problemi aşmak ve hedef performans eğrilerini arka plan gürültüsünden izole edebilmek 
+amacıyla, görüntü işleme altyapısı Python ortamına taşınmış ve derin öğrenme (U -Net) 
+tabanlı, uçtan uca çalışan yeni bir yazılım mimaris i geliştirilmiştir. Bu kapsamda öncelikle, 
+derin öğrenme modelini eğitmek için ihtiyaç duyulan binlerce uçak performans grafiğini ve 
+bunlara karşılık gelen maskeleri çok çekirdekli mimariyle otomatik üreten sentetik veri üretim 
+altyapısı kurulmuştur. Görse l bir kullanıcı arayüzü ile desteklenen bu sistem üzerinden 
+üretilen verilerin Eğitim, Doğrulama ve Test alt kümelerine ayrılması da otomatikleştirilmiştir. 
+Oluşturulan bu geniş çaplı veri seti kullanılarak U -Net mimarisi, donanım imkanlarına göre 
+hem yerel iş istasyonlarında hem de bulut tabanlı GPU ortamlarında başarıyla eğitilmiş ve 
+
+
+--- PAGE 2 ---
+ 
+ 
+2 
+ 
+segmentasyon görevini yerine getiren nihai yapay zekâ modeli elde edilmiştir. Eğitim 
+aşamasının ardından  bu model kullanılarak tekil görseller veya çoklu PDF dokümanları 
+üzerindeki hedef eğrileri izole eden bir çıkarım  modülü geliştirilmiştir. Ayrıştırılan eğriler 
+üzerindeki sayısal değerler ve koordinat bilgileri, optik karakter tanıma (OCR) entegrasyonu 
+ile otomatik olarak okunmakta ve uygun yapısal veri tablolarına dönüştürülmektedir. Tüm bu 
+sisteminin farklı donanıml arda sorunsuz çalışabilirliğini güvence altına almak için 
+donanım/ortam doğrulama araçları, bulut yedekleme sistemleri ve tüm operasyonel 
+adımların detaylandırıldığı kapsamlı dokümantasyonlar da hazırlanarak projeye 
+kazandırılmıştır. Mevcut durum itibarıyla, karmaşık havacılık grafiklerinden çok boyutlu 
+yapısal nokta bulutları elde etme süreci otomatikleştirilmiş olup, projenin bir sonraki aşaması 
+olan XGBoost ve Tabular Transformer tabanlı modelleme çalışmalarına planlanan takvime 
+uygun şekilde geçiş yapılmıştır. 
+3. PROJE KAPSAMINDA BİR SONRAKİ DÖNEMDE 
+GERÇEKLEŞTİRİLMESİ PLANLANAN ÇALIŞMALAR  
+Proje kapsamında bir sonraki dönem içinde gerçekleştirilmesi planlanan araştırma faaliyetlerine ilişkin detaylı planın 
+açıklanması beklenmektedir. Bir sonraki proje döneminde mevcut çalışmalardan farklı bir yaklaşım uygulanacaksa 
+bu durum gerekçeleriyle birlikte belirtilmelidir. 
+    Başarıyla tamamlanan "Veri Dijitasyonu ve Veri Seti Oluşturma" aşamasından elde edilen 
+ve yüksek doğruluk oranına sahip veri seti kullanılarak, projenin temelini oluşturan "Modelleme, 
+Optimizasyon ve Donanım Performans Analizi" safhalarına geçilmesi planlanmaktadır. Bu 
+doğrultuda ilk olarak, U-Net mimarisi ve entegre karakter tanıma sistemleriyle sayısallaştırılan 
+çok boyutlu F -18 uçuş performans verileri (irtifa, brüt ağırlık, sürükleme indeksi ve Mach 
+numarası gibi girdiler ile spesifik menzil, yakıt akışı gibi çıktılar) istatistiksel ön işleme ve 
+normalizasyon adımlarından geçirilecektir. Hazırlanan bu veri seti üzerinde, geleneksel Arama 
+Tablosu yönteminin yarattığı hafıza yükü ve enterpolasyon hatalarına yenilikçi bir alternatif 
+olarak önerilen XGBo ost ile dikkat mekanizması tabanlı derin öğrenme modeli Tabular 
+Transformer’ın kurulumları ve temel eğitimleri gerçekleştirilecektir. Ardından, kurulan bu 
+modellerin tahmin başarımını maksimize etmek ve aşırı öğrenme (overfitting) riskini minimize 
+etmek am acıyla Sürü Zekâsı  tabanlı meta -sezgisel optimizasyon algoritmaları devreye 
+alınacaktır. Bu süreçte PSO, modellerin hiperparametre uzayında iteratif olarak global 
+optimum noktaları arayarak en düşük hata oranını (MSE/RMSE) sağlayan parametre setlerini 
+otonom olarak belirleyecektir. Elde edilen optimize edilmiş nihai makine öğrenmesi modelleri, 
+havacılık gömülü sistemlerinin kısıtlı kaynak (düşük güç tüketimi, sınırlı RAM ve gerçek 
+zamanlı işlem gereksinimi) koşullarını simüle etmek üzere endüstriyel Edge AI  (Sınır Bilişim) 
+donanımları üzerine entegre edilecektir. Entegrasyon sonrasında algoritmalar; tahmin 
+doğruluğu, milisaniye cinsinden çıkarım gecikmesi ve megabayt cinsinden bellek ayak izi 
+metrikleri üzerinden geleneksel LUT yöntemleriyle kapsamlı bir şekilde kıyaslanacaktır. 
+    Bir sonraki proje döneminde, araştırma önerisinde taahhüt edilen temel hedeflere ve 
+metodolojik çerçeveye sadık kalınacak olup, uygulanacak yegâne farklılık projenin iş paketleri 
+arasındaki efor dağılımında yapılacak stratejik optimizasyondur. Bu durumun temel gerekçesi, 
+ilk dönemdeki veri sayısallaştırma süreçlerinde klasik piksel tabanlı algoritmalar yerine derin 
+öğrenme tabanlı U -Net mimarisinin sisteme entegre edilmesiyle elde edilen veri setinin 
+bütünlüğünün hedeflenenin üzerine çıkmasıdır. Bu başarılı metodoloji sayesinde, tablo verileri 
+üzerinde gerçekleştirilmesi planlanan gürültü giderme ve aykırı değer temizleme 
+operasyonlarına duyulan ihtiyaç azalmıştır. Veri ön işlemeden tasarruf edilen zaman, yapay 
+zekâ modellerinin kısıtlı aviyonik donanımlarda düşük gecikmeyle çalışmasını sağlayacak 
+donanım-yazılım optimizasyonlarına (kuantizasyon, TensorRT) aktarılarak projenin 
+endüstriyel uygulanabilirliği artırılacaktır. 

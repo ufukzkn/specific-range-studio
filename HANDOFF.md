@@ -37,23 +37,35 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## 3. Restore Runtime Artifacts
+## 3. Check Runtime Artifacts
 
-Some files are intentionally not committed because they are generated or can be large:
+On this handoff branch, the important generated context has also been committed so the next machine can start with fewer missing pieces:
 
 - processed CSV
 - trained model artifacts
 - benchmark JSON/CSV files
 - PSO history/result files
 - generated report figures
+- final/report DOCX files
+- `raporlar__/` review/reference reports
 
-Ask for `specific_range_handoff_artifacts.zip`, then restore it:
+Check that these exist:
+
+```powershell
+Test-Path data/processed/combined_specific_range.csv
+Test-Path artifacts/xgboost/model.json
+Test-Path artifacts/ft_transformer/model.pt
+Test-Path artifacts/benchmarks/pi_benchmark_latest.json
+Test-Path docs/final_reports/LIFT_UP_TASLAK_duzeltilmis.docx
+```
+
+If a teammate receives a separate `specific_range_handoff_artifacts.zip`, restore it:
 
 ```powershell
 .\scripts\restore_handoff_artifacts.ps1 -ZipPath C:\path\to\specific_range_handoff_artifacts.zip
 ```
 
-If no artifact zip is available, rebuild the minimum:
+If files are missing and no zip is available, rebuild the minimum:
 
 ```powershell
 python scripts/run_data_pipeline.py
@@ -113,4 +125,3 @@ Use `--device cpu` if CUDA is unavailable.
 ## 8. If Codex Continues the Work
 
 Paste the content of `CODEX_CONTINUATION_PROMPT.md` into the new Codex chat/session after cloning and restoring artifacts.
-

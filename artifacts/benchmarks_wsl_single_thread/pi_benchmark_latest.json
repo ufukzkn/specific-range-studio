@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "run_id": "20260512_195247",
+  "created_at": "2026-05-12T16:52:47.158417+00:00",
+  "system": {
+    "hostname": "mesi",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor": "",
+    "python": "3.12.13",
+    "cpu_count_logical": 16,
+    "cpu_count_physical": 8,
+    "total_ram_mb": 15844.07421875,
+    "psutil_available": true
+  },
+  "config": {
+    "models": [
+      "xgboost",
+      "ft_transformer"
+    ],
+    "sample_size": 200,
+    "warmup": 20,
+    "repetitions": 200,
+    "device": "cpu",
+    "seed": 42,
+    "dataset_path": "/home/ufuk_/specific-range-studio-bench/data/processed/combined_specific_range.csv"
+  },
+  "models": {
+    "xgboost": {
+      "model_key": "xgboost",
+      "available": true,
+      "started_at": "2026-05-12T16:52:47.161152+00:00",
+      "finished_at": "2026-05-12T16:52:49.593647+00:00",
+      "device": "cpu",
+      "sample_count": 200,
+      "warmup_count": 20,
+      "repetitions": 200,
+      "elapsed_sec": 0.34961018100000274,
+      "throughput_per_sec": 572.0657202485714,
+      "latency_ms": {
+        "min": 1.458633999959602,
+        "mean": 1.7277333550060803,
+        "median": 1.6484309999782454,
+        "p50": 1.6484309999782454,
+        "p90": 2.026049099958982,
+        "p95": 2.244839349970107,
+        "p99": 2.632590589951176,
+        "max": 3.0220339999686985
+      },
+      "memory_mb": {
+        "rss_before": 302.65234375,
+        "rss_after": 304.56640625,
+        "rss_peak": 304.56640625
+      },
+      "cpu_percent": {
+        "process_avg": 120.13380125220003,
+        "process_peak_sample": 254.6,
+        "sample_count": 41
+      },
+      "model_size_mb": 1.9188594818115234,
+      "accuracy": {
+        "rmse": 0.003467587830872,
+        "mae": 0.001371793530324101,
+        "r2": 0.9984771534136355,
+        "mape": 1.5602427180279066
+      },
+      "raspberry_pi": {
+        "before": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        },
+        "after": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        }
+      }
+    },
+    "ft_transformer": {
+      "model_key": "ft_transformer",
+      "available": true,
+      "started_at": "2026-05-12T16:52:49.594602+00:00",
+      "finished_at": "2026-05-12T16:52:52.533803+00:00",
+      "device": "cpu",
+      "sample_count": 200,
+      "warmup_count": 20,
+      "repetitions": 200,
+      "elapsed_sec": 0.4300748670000303,
+      "throughput_per_sec": 465.0353120959889,
+      "latency_ms": {
+        "min": 1.7718390000709405,
+        "mean": 2.1259426550034277,
+        "median": 2.0229334999726234,
+        "p50": 2.0229334999726234,
+        "p90": 2.4917415000231813,
+        "p95": 2.7091518500242264,
+        "p99": 3.156628670061536,
+        "max": 3.603029999908358
+      },
+      "memory_mb": {
+        "rss_before": 461.40625,
+        "rss_after": 471.53125,
+        "rss_peak": 471.53125
+      },
+      "cpu_percent": {
+        "process_avg": 118.58400458447721,
+        "process_peak_sample": 171.0,
+        "sample_count": 41
+      },
+      "model_size_mb": 0.4170999526977539,
+      "accuracy": {
+        "rmse": 0.00367126960034109,
+        "mae": 0.0020441893267571926,
+        "r2": 0.9982929990213002,
+        "mape": 2.887864226583545
+      },
+      "raspberry_pi": {
+        "before": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        },
+        "after": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        }
+      }
+    }
+  },
+  "notes": [
+    "Inference-only benchmark. Training is intentionally not performed on Raspberry Pi.",
+    "Latency includes the same artifact-backed prediction path used by the app."
+  ]
+}

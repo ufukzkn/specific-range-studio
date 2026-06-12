@@ -51,22 +51,31 @@ Tracked in Git:
 - original research/report PDFs in `Raporlar/`
 - selected docs under `docs/`
 
-Ignored and usually transferred separately:
+Included on the `codex/handoff-package` branch for handoff:
 
 - `data/processed/combined_specific_range.csv`
 - `artifacts/xgboost/`
 - `artifacts/ft_transformer/`
 - `artifacts/benchmarks/`
 - `artifacts/pso/`
-- large generated report outputs
+- `report_outputs/`
+- `raporlar__/`
+- generated comparison/final report documents under `docs/`
 
-Use:
+Still excluded:
+
+- `.venv/`
+- `external_apps/`
+- `handoff_payload/`
+- cache/build output folders
+
+If GitHub transfer becomes too heavy or if a generated artifact is missing, use the fallback package script:
 
 ```powershell
 .\scripts\package_handoff_artifacts.ps1
 ```
 
-to create a portable zip under `handoff_payload/`.
+It creates a portable zip under `handoff_payload/`.
 
 On another machine, clone this branch and run:
 
@@ -74,7 +83,7 @@ On another machine, clone this branch and run:
 .\scripts\restore_handoff_artifacts.ps1 -ZipPath .\handoff_payload\specific_range_handoff_artifacts.zip
 ```
 
-If the zip is too large for GitHub, send it through Drive/OneDrive/USB and run the restore script with that path.
+Normally the branch itself should now contain the key runtime and report context. The zip is only a fallback for machine-local regenerated artifacts.
 
 ## Recommended Startup
 
@@ -103,4 +112,3 @@ The project demonstrates that a single method is not best for every requirement:
 - **FT-Transformer** is the academic/architectural candidate for studying feature tokenization and attention-based interaction learning.
 
 The UI and reports should keep these roles distinct. Do not make interpolation "win" learned-model accuracy by comparing it against itself.
-

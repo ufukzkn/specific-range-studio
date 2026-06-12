@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "run_id": "20260517_181621",
+  "created_at": "2026-05-17T15:16:21.433530+00:00",
+  "system": {
+    "hostname": "mesi",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor": "",
+    "python": "3.12.13",
+    "cpu_count_logical": 16,
+    "cpu_count_physical": 8,
+    "total_ram_mb": 15844.07421875,
+    "psutil_available": true
+  },
+  "config": {
+    "models": [
+      "xgboost"
+    ],
+    "sample_size": 200,
+    "warmup": 50,
+    "repetitions": 500,
+    "device": "cpu",
+    "seed": 42,
+    "dataset_path": "/home/ufuk_/specific-range-studio-pulled/data/processed/combined_specific_range.csv"
+  },
+  "models": {
+    "xgboost": {
+      "model_key": "xgboost",
+      "available": true,
+      "started_at": "2026-05-17T15:16:21.437281+00:00",
+      "finished_at": "2026-05-17T15:16:53.821076+00:00",
+      "device": "cpu",
+      "sample_count": 200,
+      "warmup_count": 50,
+      "repetitions": 500,
+      "elapsed_sec": 26.840904949999995,
+      "throughput_per_sec": 18.628283991594706,
+      "latency_ms": {
+        "min": 35.302319999999554,
+        "mean": 53.64184273000026,
+        "median": 51.987430499998766,
+        "p50": 51.987430499998766,
+        "p90": 64.50557659999987,
+        "p95": 67.22294715000601,
+        "p99": 72.62352809999726,
+        "max": 85.16790099999128
+      },
+      "memory_mb": {
+        "rss_before": 304.56640625,
+        "rss_after": 306.54296875,
+        "rss_peak": 306.54296875
+      },
+      "cpu_percent": {
+        "process_avg": 1739.6954419750293,
+        "process_peak_sample": 1612.9,
+        "sample_count": 101
+      },
+      "model_size_mb": 1.9188594818115234,
+      "accuracy": {
+        "rmse": 0.003467587830872,
+        "mae": 0.001371793530324101,
+        "r2": 0.9984771534136355,
+        "mape": 1.5602427180279066
+      },
+      "raspberry_pi": {
+        "before": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        },
+        "after": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        }
+      }
+    }
+  },
+  "notes": [
+    "Inference-only benchmark. Training is intentionally not performed on Raspberry Pi.",
+    "Latency includes the same artifact-backed prediction path used by the app.",
+    "Interpolation is benchmarked for runtime cost only; accuracy comparison is for XGBoost and FT-Transformer."
+  ]
+}

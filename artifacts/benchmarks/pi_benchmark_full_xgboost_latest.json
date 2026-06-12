@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "run_id": "20260511_013015",
+  "created_at": "2026-05-10T22:30:15.414642+00:00",
+  "system": {
+    "hostname": "haya",
+    "platform": "Linux-6.12.75+rpt-rpi-v8-aarch64-with-glibc2.41",
+    "machine": "aarch64",
+    "processor": "",
+    "python": "3.13.5",
+    "cpu_count_logical": 4,
+    "cpu_count_physical": 4,
+    "total_ram_mb": 905.98046875,
+    "psutil_available": true
+  },
+  "config": {
+    "models": [
+      "xgboost"
+    ],
+    "sample_size": 200,
+    "warmup": 20,
+    "repetitions": 200,
+    "device": "cpu",
+    "seed": 42,
+    "dataset_path": "/tmp/pi-full/data/processed/combined_specific_range.csv"
+  },
+  "models": {
+    "xgboost": {
+      "model_key": "xgboost",
+      "available": true,
+      "started_at": "2026-05-10T22:30:15.421203+00:00",
+      "finished_at": "2026-05-10T22:30:30.223223+00:00",
+      "device": "cpu",
+      "sample_count": 200,
+      "warmup_count": 20,
+      "repetitions": 200,
+      "elapsed_sec": 9.212528120999878,
+      "throughput_per_sec": 21.70956738184622,
+      "latency_ms": {
+        "min": 44.954670999914015,
+        "mean": 45.79318320499965,
+        "median": 45.44224500000382,
+        "p50": 45.44224500000382,
+        "p90": 47.06346029993256,
+        "p95": 47.90557745006935,
+        "p99": 50.377928859977594,
+        "max": 53.59704499983309
+      },
+      "memory_mb": {
+        "rss_before": 174.25,
+        "rss_after": 176.3671875,
+        "rss_peak": 176.3671875
+      },
+      "cpu_percent": {
+        "process_avg": 148.81908440255586,
+        "process_peak_sample": 130.2,
+        "sample_count": 41
+      },
+      "model_size_mb": 1.9188594818115234,
+      "accuracy": {
+        "rmse": 0.003467587830872,
+        "mae": 0.001371793530324101,
+        "r2": 0.9984771534136355,
+        "mape": 1.5602427180279066
+      },
+      "raspberry_pi": {
+        "before": {
+          "temperature_c": 45.1,
+          "temperature_raw": "temp=45.1'C",
+          "throttled_raw": "throttled=0x50005",
+          "vcgencmd_available": true
+        },
+        "after": {
+          "temperature_c": 46.2,
+          "temperature_raw": "temp=46.2'C",
+          "throttled_raw": "throttled=0x50005",
+          "vcgencmd_available": true
+        }
+      }
+    }
+  },
+  "notes": [
+    "Inference-only benchmark. Training is intentionally not performed on Raspberry Pi.",
+    "Latency includes the same artifact-backed prediction path used by the app."
+  ]
+}

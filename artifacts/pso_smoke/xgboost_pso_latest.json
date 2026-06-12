@@ -1,0 +1,93 @@
+{
+  "run_id": "20260519_153255",
+  "model": "xgboost",
+  "dataset": "data\\processed\\combined_specific_range.csv",
+  "best_score": 1.2319136799023733,
+  "best_params": {
+    "n_estimators": 637,
+    "max_depth": 6,
+    "learning_rate": 0.17313360478316267,
+    "subsample": 0.8789472116237456,
+    "colsample_bytree": 0.6376709391550598,
+    "reg_alpha": 0.9756223516367559,
+    "reg_lambda": 3.8295845397527297
+  },
+  "best_position": [
+    637.2483549602936,
+    5.5110275180164185,
+    0.17313360478316267,
+    0.8789472116237456,
+    0.6376709391550598,
+    0.9756223516367559,
+    3.8295845397527297
+  ],
+  "objective": {
+    "formula": "w_rmse*RMSE/RMSE_ref + w_latency*T_inf/T_ref + w_size*S/S_ref",
+    "weights": {
+      "rmse": 0.7,
+      "latency": 0.2,
+      "size": 0.1
+    },
+    "references": {
+      "rmse_ref": 0.003,
+      "latency_ref_ms": 10.0,
+      "size_ref_mb": 1.0
+    }
+  },
+  "history_csv": "artifacts\\pso_smoke\\xgboost_pso_history_20260519_153255.csv",
+  "latest_history_csv": "artifacts\\pso_smoke\\xgboost_pso_history_latest.csv",
+  "history": [
+    {
+      "iteration": 0.0,
+      "particle": 0.0,
+      "score": 1.2319136799023733,
+      "rmse": 0.004914915639034712,
+      "mae": 0.002399916760623455,
+      "mape": 4.023503303527832,
+      "r2": 0.9971814751625061,
+      "latency_ms": 0.5845999665325508,
+      "model_size_mb": 0.7340803146362305,
+      "param_count": 10285.0,
+      "rmse_component": 1.6383052130115707,
+      "latency_component": 0.058459996653255075,
+      "size_component": 0.7340803146362305,
+      "weighted_rmse": 1.1468136491080994,
+      "weighted_latency": 0.011691999330651015,
+      "weighted_size": 0.07340803146362306,
+      "n_estimators": 637.0,
+      "max_depth": 6.0,
+      "learning_rate": 0.17313360478316267,
+      "subsample": 0.8789472116237456,
+      "colsample_bytree": 0.6376709391550598,
+      "reg_alpha": 0.9756223516367559,
+      "reg_lambda": 3.8295845397527297
+    }
+  ],
+  "pareto_front": [
+    {
+      "iteration": 0.0,
+      "particle": 0.0,
+      "score": 1.2319136799023733,
+      "rmse": 0.004914915639034712,
+      "mae": 0.002399916760623455,
+      "mape": 4.023503303527832,
+      "r2": 0.9971814751625061,
+      "latency_ms": 0.5845999665325508,
+      "model_size_mb": 0.7340803146362305,
+      "param_count": 10285.0,
+      "rmse_component": 1.6383052130115707,
+      "latency_component": 0.058459996653255075,
+      "size_component": 0.7340803146362305,
+      "weighted_rmse": 1.1468136491080994,
+      "weighted_latency": 0.011691999330651015,
+      "weighted_size": 0.07340803146362306,
+      "n_estimators": 637.0,
+      "max_depth": 6.0,
+      "learning_rate": 0.17313360478316267,
+      "subsample": 0.8789472116237456,
+      "colsample_bytree": 0.6376709391550598,
+      "reg_alpha": 0.9756223516367559,
+      "reg_lambda": 3.8295845397527297
+    }
+  ]
+}

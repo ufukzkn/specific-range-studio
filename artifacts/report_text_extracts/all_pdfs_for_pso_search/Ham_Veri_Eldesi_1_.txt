@@ -1,0 +1,83 @@
+
+
+--- PAGE 1 ---
+H A V A C I L I K T A  Y A P A Y  Z E K A
+A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+P R O J E  :         T U S A Ş  L i f t  U p
+G Ö R E V :        H a m  V e r i  E l d e s i   T A R İ H :        1 2 . 0 3 . 2 0 2 6
+M O N O G R A F L A R  N A S I L  O L U Ş T U R U L U R
+U ç a k  p e r f o r m a n s  d a t a s h e e t ' l e r i n d e  ( P O H  -  P i l o t ’ s  O p e r a t i n g  H a n d b o o k  v e y a  E F M  -  A i r p l a n e  F l i g h t  M a n u a l )
+g ö r d ü ğ ü m ü z  o  k a r m a ş ı k  g r a f i k l e r ,  b i r  u ç a ğ ı n  " d o ğ u m u n d a n "  s e r t i f i k a s y o n  s ü r e c i n e  k a d a r  g e ç e n  u z u n  b i r  v e r i
+t o p l a m a  v e  i ş l e m e  s ü r e c i n i n  ü r ü n ü d ü r .  B u  g r a f i k l e r  s a d e c e  t e o r i k  h e s a p l a m a l a r a  d e ğ i l ,  g e r ç e k  d ü n y a  t e s t l e r i n e
+d a y a n ı r .
+B u  s ü r e c i  ü ç  a n a  a ş a m a d a  i n c e l e y e b i l i r i z :
+1 .  T e o r i k  M o d e l  v e  T a s a r ı m  A ş a m a s ı  ( C F D  v e  R ü z g a r  T ü n e l i )
+U ç a k  h e n ü z  k a ğ ı t  ü z e r i n d e y k e n  m ü h e n d i s l e r ,  H e s a p l a m a l ı  A k ı ş k a n l a r  D i n a m i ğ i  ( C F D )  y a z ı l ı m l a r ı  k u l l a n a r a k  u ç a ğ ı n
+n a s ı l  d a v r a n a c a ğ ı n ı  t a h m i n  e d e r l e r .
+S ü r ü k l e m e  P o l a r ı  ( D r a g  P o l a r ) :  U ç a ğ ı n  f a r k l ı  t a ş ı m a  k a t s a y ı l a r ı n d a  n e  k a d a r  s ü r ü k l e m e  ü r e t e c e ğ i  h e s a p l a n ı r .  
+R ü z g a r  T ü n e l i :  Ö l ç e k l i  m o d e l l e r  r ü z g a r  t ü n e l l e r i n e  s o k u l a r a k  t e o r i k  v e r i l e r  d o ğ r u l a n ı r .  B u r a d a  e l d e  e d i l e n  v e r i l e r ,
+u ç a ğ ı n  " h a m "  p e r f o r m a n s  k a r a k t e r i s t i k l e r i n i  o l u ş t u r u r .
+2 .  U ç u ş  T e s t l e r i  ( G e r ç e k  V e r i  T o p l a m a )
+B i r  u ç a k  p r o t o t i p i  ü r e t i l d i ğ i n d e ,  ü z e r i n d e  y ü z l e r c e  s e n s ö r  b u l u n a n  F T I  ( F l i g h t  T e s t  I n s t r u m e n t a t i o n )  c i h a z l a r ı  i l e
+d o n a t ı l ı r .  P i l o t l a r ,  b e l i r l i  a ğ ı r l ı k  v e  i r t i f a  k o m b i n a s y o n l a r ı n d a  y ü z l e r c e  s a a t  u ç u ş  y a p a r .
+V e r i  N o k t a l a r ı :  F a r k l ı  h a v a  s ı c a k l ı k l a r ı ,  b a s ı n ç  i r t i f a l a r ı ,  a ğ ı r l ı k l a r  v e  m o t o r  g ü ç  a y a r l a r ı n d a ;  t ı r m a n m a  h ı z ı  ( R a t e  o f
+C l i m b ) ,  y a k ı t  a k ı ş ı  v e  k a l k ı ş  m e s a f e s i  g i b i  v e r i l e r  s a n i y e  s a n i y e  k a y d e d i l i r .
+K ö ş e  N o k t a l a r ı :  T e s t  p i l o t l a r ı  u ç a ğ ı  l i m i t l e r i n e  ( m a k s i m u m  a ğ ı r l ı k ,  e n  a r k a  C G ,  e n  s ı c a k  h a v a  v b . )  z o r l a y a r a k
+g ü v e n l i  o p e r a s y o n  s ı n ı r l a r ı n ı  b e l i r l e r .
+3 .  V e r i l e r i n  S t a n d a r d i z a s y o n u  v e  G r a f i k  O l u ş t u r m a
+T o p l a n a n  v e r i l e r  " h a m "  h a l d e d i r ;  y a n i  o  g ü n k ü  r ü z g a r ,  n e m  v e  p i l o t a j  h a t a l a r ı n ı  i ç e r i r .  M ü h e n d i s l e r  b u  v e r i l e r i  I S A
+( I n t e r n a t i o n a l  S t a n d a r d  A t m o s p h e r e )  ş a r t l a r ı n a  i n d i r g e r l e r .
+N o r m a l i z a s y o n :  V e r i l e r ;  d e n i z  s e v i y e s i  b a s ı n c ı  g i b i  r e f e r a n s  d e ğ e r l e r e  g ö r e  d ü z e l t i l i r .
+H a l ı  G r a f i k l e r i  ( C a r p e t  P l o t s ) :  B i r ç o k  p e r f o r m a n s  g r a f i ğ i  a s l ı n d a  " h a l ı  g r a f i k "  y ö n t e m i n i  k u l l a n ı r .  Ö r n e ğ i n ;  s ı c a k l ı k ,
+i r t i f a  v e  a ğ ı r l ı k  g i b i  ü ç  f a r k l ı  d e ğ i ş k e n i n  a y n ı  a n d a  k a l k ı ş  m e s a f e s i n i  n a s ı l  e t k i l e d i ğ i  b u  y ö n t e m l e  t e k  b i r  g r a f i ğ e
+d ö k ü l ü r .
+E m n i y e t  M a r j l a r ı :  Ü r e t i c i l e r ,  t e s t l e r d e  e l d e  e d i l e n  e n  i y i  d e ğ e r l e r i  d o ğ r u d a n  g r a f i ğ e  k o y m a z l a r .  O r t a l a m a  b i r
+p i l o t u n  p e r f o r m a n s ı n ı  v e  m o t o r u n  z a m a n l a  y a ş l a n m a s ı n ı  h e s a b a  k a t a r a k  b e l i r l i  b i r  " g ü v e n l i k  p a y ı "  e k l e r l e r .
+U ç a k  p e r f o r m a n s  m o n o g r a f l a r ı n d a n  ( n o m i n a l  g r a f i k l e r d e n )  " h a m  v e r i " y e  ( f l i g h t  t e s t  r a w  d a t a )  d ö n m e k ,  a s l ı n d a  b i r
+" D e - n o r m a l i z a s y o n "  ( D e - n o r m a l i z a t i o n )  i ş l e m i d i r .  G r a f i k l e r d e k i  v e r i l e r  p ü r ü z s ü z d ü r  ç ü n k ü  ü z e r l e r i n d e k i  a t m o s f e r i k
+d e ğ i ş k e n l e r ,  ö l ç ü m  h a t a l a r ı  v e  a ğ ı r l ı k  s a p m a l a r ı  m a t e m a t i k s e l  o l a r a k  " t e m i z l e n m i ş "  v e  s t a n d a r t  b i r  m o d e l e
+o t u r t u l m u ş t u r .
++ 0  2 1 2  1 2 3  2 4  2 5
+m e r h a b a @ h a r i k a s i t e . w e b . t r
+H A V A C I L I K T A  Y A P A Y  Z E K A  A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+
+
+
+--- PAGE 2 ---
+H A V A C I L I K T A  Y A P A Y  Z E K A
+A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+Y Ö N T E M
+A .  S ı c a k l ı k  v e  İ r t i f a  ( f _ a l t )
+J e t  m o t o r l a r ı n d a  Ö z g ü l  Y a k ı t  T ü k e t i m i  ( S F C ) ,  o r t a m  s ı c a k l ı ğ ı n ı n  ( θ  =  T  /  T ₀ )  k a r e k ö k ü y l e  d e ğ i ş i r .
+K a n ı t :  N A S A  v e  M I L - H D B K - 3 1 0  g i b i  k a y n a k l a r d a  m o t o r  y a k ı t  a k ı ş  k a t s a y ı s ı  δ √ θ  o l a r a k  s t a n d a r d i z e  e d i l i r .
+M a n t ı k :  S R  ∝  1 / S F C .  S ı c a k  b i r  g ü n d e  S F C  a r t a r ,  S R  d ü ş e r .  G r a f i k  v e r i s i  s o ğ u k  ( s t a n d a r t )  b i r  g ü n e  g ö r e
+d ü z e l t i l d i y s e ,  g e r ç e k  ( h a m )  v e r i y i  b u l m a k  i ç i n  s ı c a k l ı k  e t k i s i n i  ( √ θ )  b ö l e r e k  s i s t e m i  o r i j i n a l  ( d a h a  d ü ş ü k  v e r i m l i )
+h a l i n e  d ö n d ü r ü r ü z .
+B .  A ğ ı r l ı k  ( f _ w e i g h t )
+U ç a ğ ı n  a ğ ı r l ı ğ ı  ( W )  a r t t ı k ç a ,  h a v a d a  k a l m a s ı  i ç i n  g e r e k e n  k a l d ı r m a  k u v v e t i  ( L )  a r t a r ,  b u  d a  i n d ü k l e n m i ş  s ü r ü k l e m e y i
+( D _ i n d u c e d )  a r t ı r ı r .
+K a n ı t :  ( W  /  W _ r e f ) ^ 0 . 6  k a t s a y ı s ı  k u l l a n ı l ı r .  R e f e r a n s  a ğ ı r l ı k  ( W _ r e f )  F - 1 8  i ç i n  3 6 , 0 0 0  l b s  o l a r a k  s a b i t l e n m i ş t i r .
+M a n t ı k :  D e n i z  s e v i y e s i n d e  b i l e  o l s a n ı z ,  u ç a ğ ı n ı z  4 5 , 0 0 0  l b s  i s e  % 2 7  d a h a  f a z l a  s ü r ü k l e m e y e  m a r u z  k a l ı r .  H a m
+v e r i y e  d ö n m e k  i ç i n  b u  a ğ ı r l ı k  e k  y ü k ü n ü  b ö l e r e k  t e m i z l e r i z .
+C .  D r a g  I n d e x  v e  K o n f i g ü r a s y o n  ( f _ d r a g )
+U ç a ğ ı n  d ı ş ı n d a k i  m ü h i m m a t ,  y a k ı t  t a n k l a r ı  v e y a  d i ğ e r  e k i p m a n l a r  p a r a z i t  s ü r ü k l e m e y i  a r t ı r ı r .
+K a n ı t :  T i p i k  b i r  u ç a k  i ç i n  1 0 0  D r a g  I n d e x  p u a n ı  t o p l a m  s ü r ü k l e m e y i  y a k l a ş ı k  % 1 5  a r t ı r ı r .
+F o r m ü l :  f _ d r a g  =  1  +  0 . 1 5  ×  ( D I  /  1 0 0 )
+M a n t ı k :  G r a f i k  v e r i s i  " t e m i z "  ( 0  D I )  k o n f i g ü r a s y o n a  g ö r e  d ü z e l t i l m i ş s e ,  e l i m i z d e k i  1 0 0  D I ' l ı k  h a m  v e r i y e  u l a ş m a k
+i ç i n  b u  k a t s a y ı y a  b ö l m e  i ş l e m i  y a p ı l ı r .
+D .  M a c h  S a y ı s ı  v e  S ı k ı ş t ı r ı l a b i l i r l i k  ( f _ m a c h )
+Y ü k s e k  h ı z l a r d a  ( T r a n s o n i k  r e j i m ) ,  h a v a  s ı k ı ş t ı r ı l a b i l i r  h a l e  g e l i r  v e  d a l g a  s ü r ü k l e m e s i  ( D _ w a v e )  o l u ş u r .
+K a n ı t  ( F - 1 8  S p e s i f i k ) :  F - 1 8  g i b i  s e s  h ı z ı n ı  a ş a b i l e n  u ç a k l a r d a  s ü r ü k l e m e  k a t s a y ı s ı  ( C _ D )  M a c h  0 . 9 ' d a n  i t i b a r e n
+" W a v e  D r a g "  n e d e n i y l e  a n i  s ı ç r a m a  y a p a r .  K o d d a  b u  d u r u m  p a r ç a l ı  b i r  f o n k s i y o n l a  ( P i e c e w i s e )  m o d e l l e n m i ş t i r .
+M a n t ı k :  H ı z  a r t t ı k ç a  a e r o d i n a m i k  d i r e n ç  a r t a r  v e  S R  d ü ş e r .  G r a f i k t e k i  " i d e a l "  d e ğ e r d e n  g e r ç e k t e k i  " d i r e n ç l i "
+s ü p e r s o n i k  d e ğ e r e  g e ç m e k  i ç i n  d i r e n ç  a r t ı ş  f a k t ö r ü n e  b ö l m e k  g e r e k i r .
+Ö z e t
+M ü h e n d i s l i k t e  b i r  v e r i y i  " t e m i z l e m e k "  ( n o r m a l i z e  e t m e k )  i ç i n  k u l l a n ı l a n  k a t s a y ı l a r  ç a r p ı l a r a k  u y g u l a n ı r s a ,  " k i r l e t m e k "
+( g e r ç e k  h a m  h a l i n e  d ö n d ü r m e k )  i ç i n  t a m  t e r s i  i ş l e m  o l a n  b ö l m e  y a p ı l ı r .
+                                               S R _ H a m  =  S R _ G r a f i k  /  ( f _ a l t  ×  f _ m a c h  ×  f _ w e i g h t  ×  f _ d r a g )                                                          ( 1 )
+R e f e r a n s l a r   :
+1 )  N A T O P S  F l i g h t  M a n u a l  
+2 )  N A S A  T e c h n i c a l  R e p o r t s  S e r v e r  ( N T R S )
++ 0  2 1 2  1 2 3  2 4  2 5
+m e r h a b a @ h a r i k a s i t e . w e b . t r
+H A V A C I L I K T A  Y A P A Y  Z E K A  A R A Ş T I R M A L A R I  T O P L U L U Ğ U

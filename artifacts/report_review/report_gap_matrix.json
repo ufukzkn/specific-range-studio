@@ -1,0 +1,50 @@
+[
+  {
+    "section": "1. Giriş ve Motivasyon",
+    "ocr_word_count": 521,
+    "report_word_count": 402,
+    "coverage_ratio": 0.772,
+    "ocr_excerpt": "Uçuş performans parametrelerinin doğru ve hızlı biçimde kestirilmesi, modern havacılık sistemlerinde kritik bir mühendislik gereksinimidir. Havacılık performans kestirimi; hız rejimi (Mach), brüt ağırlık, konfigürasyon/sürükleme durumu (drag index) ve çevresel/operasyonel koşulların, motor yakıt tüketimi ile aerodinami",
+    "report_excerpt": "Uçak aviyoniklerinde specific range gibi performans büyüklükleri çoğu zaman tablo halinde saklanır. Ancak bu tablolar genellikle yalnızca belirli irtifa ve uçuş koşullarını içerir. Uçak ara bir değerde, örneğin 11,000 ft gibi tabloda doğrudan bulunmayan bir noktada uçtuğunda, sistemin bu değeri dolaylı yöntemlerle tahm"
+  },
+  {
+    "section": "2. Veri ve Problemin Tanımı",
+    "ocr_word_count": 476,
+    "report_word_count": 381,
+    "coverage_ratio": 0.8,
+    "ocr_excerpt": "NATOPS performans dokümantasyonunda specific range ve fuel flow değerleri, drag index ve gross weight ile birlikte çeşitli Mach ve irtifa seviyeleri için grafikler ve tablolar halinde sunulmaktadır. Kullanıcı senaryosunda ilgili grafiğe brüt ağırlık, drag index ve uçuş koşulları ile girilerek fuel flow ve specific rang",
+    "report_excerpt": "Bu çalışma, One Engine ve Two Engine veri kaynaklarından elde edilen specific range tablolarını çoklu irtifa rejimlerinde öğrenilebilir bir regresyon problemine dönüştürmektedir. Her satır, belirli bir uçuş koşulunu temsil eder; hedef değişken specific_range, girdiler ise altitude, gross_weight, drag_index, mach, fuel_"
+  },
+  {
+    "section": "3. Mimari Bileşenler",
+    "ocr_word_count": 159,
+    "report_word_count": 177,
+    "coverage_ratio": 1.113,
+    "ocr_excerpt": "Tabular Transformer yaklaşımı altında iki temel mimari çizgi öne çıkmaktadır: TabTransformer ve FT- Transformer. TabTransformer, Transformer bloklarını ağırlıklı olarak kategorik değişken gömmeleri üzerinde işleterek bağlamsal kategorik temsiller üretmekte; sayısal değişkenler ise çoğunlukla normalizasyon sonrasında da",
+    "report_excerpt": "Tabular Transformer ailesi içinde iki ana yaklaşım öne çıkar: TabTransformer ve FT-Transformer. TabTransformer, özellikle kategorik özellikleri bağlamsal embeddinglere dönüştürmeye odaklanır. FT-Transformer ise bir adım daha ileri giderek sayısal ve kategorik tüm özellikleri ortak tokenlar halinde temsil eder. Bu fark "
+  },
+  {
+    "section": "4. Katmanlar ve Veri Akışı",
+    "ocr_word_count": 353,
+    "report_word_count": 252,
+    "coverage_ratio": 0.714,
+    "ocr_excerpt": "Model akışı, ön işleme → tokenizasyon/gömme → Transformer encoder blokları → regresyon başlığı sırasıyla tanımlanmıştır. Ön işleme aşamasında veriler ortak sayısal biçime dönüştürülmekte, eksen ve isimlendirme farklılıkları giderilmekte ve model girdileri tutarlı bir yapıya getirilmektedir. Ardından her özellik, featur",
+    "report_excerpt": "Modelin veri akışı sezgisel olarak dört adımda düşünülebilir: önce veri temizlenir ve ortak biçime getirilir; sonra her kolon bir token veya embedding temsiline dönüştürülür; ardından bu tokenlar Transformer encoder bloklarından geçirilir; son olarak [CLS] tokeninden üretilen temsil regresyon başlığına verilerek specif"
+  },
+  {
+    "section": "5. Tokenizasyon Matematiği ve Sayısal/Kategorik Örnekler",
+    "ocr_word_count": 271,
+    "report_word_count": 256,
+    "coverage_ratio": 0.945,
+    "ocr_excerpt": "FT-Transformer’da feature tokenizer, her özelliği ortak boyutta bir token temsiline dönüştüren temel bileşendir. Genel biçimde, j özelliğe karşılık gelen token aşağıdaki şekilde tanımlanır: Burada ilgili özelliğin ham girdisini; ise bu girdiyi boyutlu temsil uzayına taşıyan dönüşümü ifade etmektedir. Bu yapı sayesinde ",
+    "report_excerpt": "FT-Transformer’da her kolon, modelin anlayabileceği sabit uzunlukta bir vektöre çevrilir. Bu işleme tokenizasyon denir. Sayısal özelliklerde bu dönüşüm, ham sayının öğrenilebilir bir projeksiyonla çarpılması şeklinde düşünülebilir. Kategorik özelliklerde ise ilgili kategori için uygun embedding satırı seçilir. Bu proje"
+  },
+  {
+    "section": "6. Transformer Encoder Bloğu: MHSA, FFN, LayerNorm ve Residual Akışı",
+    "ocr_word_count": 704,
+    "report_word_count": 1166,
+    "coverage_ratio": 1.656,
+    "ocr_excerpt": "Transformer encoder katmanının temelini, çok başlıklı öz-dikkat mekanizması (Multi-Head Self- Attention, MHSA) ile beslemeli ileri ağ (Feed-Forward Network, FFN) blokları oluşturmaktadır. Öz-dikkat mekanizmasının temel ifadesi aşağıdaki gibi tanımlanır: Bu yapıda sırasıyla sorgu, anahtar ve değer temsillerini ifade etm",
+    "report_excerpt": "Transformer encoder katmanının temelini, çok başlıklı öz-dikkat mekanizması (Multi-Head Self-Attention, MHSA) ile beslemeli ileri ağ (Feed-Forward Network, FFN) blokları oluşturmaktadır. Öz-dikkat mekanizmasının temel ifadesi aşağıdaki gibi tanımlanır. Denklem 6. Temel öz-dikkat ifadesi. Bu ifadede `Q`, `K` ve `V` sıra"
+  }
+]

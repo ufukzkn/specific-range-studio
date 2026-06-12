@@ -1,0 +1,2 @@
+run_id,created_at,hostname,model_key,available,sample_count,repetitions,latency_p50_ms,latency_p95_ms,rss_peak_mb,cpu_avg_percent,model_size_mb,rmse,mae,mape,r2,skipped_reason
+20260507_230314,2026-05-07T20:03:14.398013+00:00,mesi,xgboost,True,2,2,7.2942999977385625,8.483290001458954,,,1.9188594818115234,0.0002576707737244843,0.00025745730817318055,0.49521927004591665,0.9994804956484263,

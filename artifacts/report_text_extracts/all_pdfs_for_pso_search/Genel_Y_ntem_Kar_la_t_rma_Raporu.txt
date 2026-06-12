@@ -1,0 +1,116 @@
+
+
+--- PAGE 1 ---
+1 .  Ö z e t
+  B u  r a p o r ,  p r o j e  b o y u n c a  g e l i ş t i r i l e n  ü ç  y ö n t e m i  u ç t a n  u c a  k a r ş ı l a ş t ı r m a k  i ç i n  h a z ı r l a n m ı ş t ı r :
+I n t e r p o l a s y o n ,  X G B o o s t  v e  F T - T r a n s f o r m e r .  D e ğ e r l e n d i r m e  y a l n ı z  d o ğ r u l u k  m e t r i k l e r i y l e  s ı n ı r l ı  d e ğ i l d i r ;  h ı z ,
+R A M ,  C P U ,  m o d e l  b o y u t u ,  y o r u m l a n a b i l i r l i k ,  k u r u l u m  z o r l u ğ u ,  d e m o  u y g u n l u ğ u ,  a k a d e m i k  d e ğ e r  v e
+R a s p b e r r y  P i  3  s ı n ı f ı  e d g e  d e p l o y m e n t  b e k l e n t i l e r i  b i r l i k t e  e l e  a l ı n ı r .
+   
+   G e n e l  s o n u ç  ü ç l ü  r o l  d a ğ ı l ı m ı  ş e k l i n d e d i r .  I n t e r p o l a s y o n ,  v e r i  t a b l o s u n a  s a d ı k  d e t e r m i n i s t i k  r e f e r a n s
+a i l e s i d i r .  X G B o o s t ,  p r a t i k  u y g u l a m a  v e  d e m o  i ç i n  e n  d e n g e l i  M L  m o d e l i d i r .  F T - T r a n s f o r m e r  i s e  p r o j e n i n  a n a
+a k a d e m i k  m i m a r i  o d a ğ ı d ı r ;  m e v c u t  ö l ç ü m d e  X G B o o s t ' u  g e ç m e s e  d e  t a b u l a r  t r a n s f o r m e r  y a k l a ş ı m ı n ı n
+t e m s i l  e d i l m e s i  v e  i l e r i  ç a l ı ş m a  p o t a n s i y e l i  a ç ı s ı n d a n  k o r u n m a l ı d ı r .
+2 .  P r o b l e m  B a ğ l a m ı
+    S p e c i f i c  r a n g e  t a h m i n i ,  u ç u ş  p e r f o r m a n s  t a b l o l a r ı n d a k i  ç o k  d e ğ i ş k e n l i  i l i ş k i l e r i  ö ğ r e n m e  p r o b l e m i d i r .
+G i r d i l e r ;  a l t i t u d e ,  g r o s s  w e i g h t ,  d r a g  i n d e x ,  M a c h ,  f u e l  f l o w  v e  e n g i n e  t y p e  g i b i  d e ğ i ş k e n l e r d e n  o l u ş u r .
+H e d e f ,  b u  d e ğ i ş k e n l e r d e n  s p e c i f i c  r a n g e  d e ğ e r i n i  ü r e t m e k t i r .  P r o b l e m  d o ğ r u s a l  d e ğ i l d i r ;  f a r k l ı  i r t i f a ,  m o t o r
+k o n f i g ü r a s y o n u  v e  M a c h  r e j i m l e r i n d e  d a v r a n ı ş  d e ğ i ş e b i l i r .  
+ 
+    B u  n e d e n l e  t e k  b i r  y ö n t e m  b ü t ü n  i h t i y a ç l a r ı  a y n ı  a n d a  k a r ş ı l a m a y a b i l i r .  I n t e r p o l a s y o n  t a b l o  m a n t ı ğ ı n ı
+k o r u r ;  X G B o o s t  t a b u l a r  v e r i d e  g ü ç l ü  v e  h ı z l ı  b i r  M L  b a s e l i n e  s a ğ l a r ;  F T - T r a n s f o r m e r  i s e  f e a t u r e
+e t k i l e ş i m l e r i n i  s e l f - a t t e n t i o n  i l e  m o d e l l e m e y e  a d a y d ı r .  F i n a l  s i s t e m d e  b u  ü ç  y a k l a ş ı m ı n  b i r l i k t e  b u l u n m a s ı ,
+h e m  m ü h e n d i s l i k  h e m  a k a d e m i k  a n l a t ı  a ç ı s ı n d a n  d e ğ e r l i d i r .
+3 .  Y ö n t e m l e r i n  P r o j e d e k i  R o l ü
+4 .  Ö l ç ü l e b i l i r  K a r ş ı l a ş t ı r m a
+  I n t e r p o l a s y o n  i ç i n  d o ğ r u l u k  m e t r i k l e r i n i n  b o ş  o l m a s ı  b i l i n ç l i  b i r  t e r c i h t i r .  C u s t o m  i n p u t  t a r a f ı n d a
+r e f e r a n s / t a h m i n i  g e r ç e k  d e ğ e r  o l a r a k  i n t e r p o l a s y o n  k u l l a n ı l ı r ;  b u  y ö n t e m i  k e n d i  r e f e r a n s ı n a  k a r ş ı
+y a r ı ş t ı r m a k  a n l a m l ı  d e ğ i l d i r .  B u  y ü z d e n  d o ğ r u l u k  k ı y a s ı  X G B o o s t  v e  F T - T r a n s f o r m e r  a r a s ı n d a  y a p ı l ı r .
+H A V A C I L I K T A  Y A P A Y  Z E K A  A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+H A V A C I L I K T A  Y A P A Y  Z E K A
+A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+P R O J E  :         T U S A Ş  L i f t  U p
+G Ö R E V :       Y ö n t e m  K a r ş ı l a ş t ı r m a  T A R İ H :        1 0 . 0 5 . 2 0 2 6
+A N A L İ Z
+
+
+--- PAGE 2 ---
+5 .  D o ğ r u l u k  A n a l i z i
+   X G B o o s t  b u  ö l ç ü m d e  F T - T r a n s f o r m e r ' d a n  d a h a  d ü ş ü k  R M S E ,  M A E  v e  M A P E  ü r e t m i ş t i r .  R 2  d e ğ e r l e r i  i k i
+m o d e l d e  d e  o l d u k ç a  y ü k s e k t i r ;  b u ,  h e r  i k i  m o d e l i n  g e n e l  v a r y a n s ı  i y i  y a k a l a d ı ğ ı n ı  g ö s t e r i r .  A n c a k  M A E  v e
+M A P E  f a r k ı  p r a t i k  k u l l a n ı m  a ç ı s ı n d a n  ö n e m l i d i r :  k u l l a n ı c ı y a  t e k i l  t a h m i n  d ö n d ü r e n  b i r  a r a y ü z d e  o r t a l a m a
+m u t l a k  h a t a  v e  y ü z d e  h a t a ,  m o d e l  g ü v e n i l i r l i ğ i  h i s s i n i  d o ğ r u d a n  e t k i l e r .
+6 .  H ı z  v e  K a y n a k  A n a l i z i
+   H ı z  t a r a f ı n d a  X G B o o s t  e n  d ü ş ü k  p 9 5  g e c i k m e y e  s a h i p t i r .  F T - T r a n s f o r m e r  i k i n c i  s ı r a d a  g e l i r ;  i n t e r p o l a s y o n
+i s e  c a c h e  o p t i m i z a s y o n u n d a n  s o n r a  m a k u l  s e v i y e y e  i n s e  d e  X G B o o s t ' u n  g e r i s i n d e d i r .  R A M  t a r a f ı n d a
+i n t e r p o l a s y o n  e n  d ü ş ü k  P e a k  R S S  d e ğ e r i n i  v e r i r ;  F T - T r a n s f o r m e r  i s e  P y T o r c h  r u n t i m e  e t k i s i y l e  e n  y ü k s e k
+b e l l e k  a y a k  i z i n e  s a h i p t i r . M o d e l  b o y u t u  t e k  b a ş ı n a  k a r a r  v e r m e k  i ç i n  y e t e r l i  d e ğ i l d i r .  F T - T r a n s f o r m e r ' ı n
+m o d e l  d o s y a s ı  k ü ç ü k  g ö r ü n s e  b i l e  r u n t i m e  b a ğ ı m l ı l ı k l a r ı  v e  b e l l e k  k u l l a n ı m ı  d a h a  a ğ ı r  o l a b i l i r .  B u  n e d e n l e
+e d g e  d e p l o y m e n t  i ç i n  y a l n ı z  d o s y a  b o y u t u n a  d e ğ i l ,  g e r ç e k  i n f e r e n c e  p a t h ' i n i n  R A M  v e  C P U  d a v r a n ı ş ı n a
+b a k m a k  g e r e k i r .
+H A V A C I L I K T A  Y A P A Y  Z E K A  A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+H A V A C I L I K T A  Y A P A Y  Z E K A
+A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+A N A L İ Z
+
+
+--- PAGE 3 ---
+7 .  K a r a r  M a t r i s i
+    A ş a ğ ı d a k i  k a r a r  m a t r i s i ,  y a l n ı z  h a m  m e t r i k l e r i  d e ğ i l ,  m ü h e n d i s l i k  k u l l a n ı m  d e ğ e r i n i  d e  d i k k a t e  a l ı r .
+Ö r n e ğ i n  i n t e r p o l a s y o n  y o r u m l a n a b i l i r l i k t e  ç o k  g ü ç l ü d ü r ;  a n c a k  d o ğ r u l u k  y a r ı ş ı n d a  r e f e r a n s  a i l e s i  o l d u ğ u
+i ç i n  M L  m o d e l i  g i b i  p u a n l a n m a z .  F T - T r a n s f o r m e r  a k a d e m i k  d e ğ e r  v e  m o d e l l e m e  p o t a n s i y e l i  a ç ı s ı n d a n
+g ü ç l ü d ü r ;  X G B o o s t  i s e  p r a t i k  p e r f o r m a n s  d e n g e s i n d e  ö n e  ç ı k a r .
+H A V A C I L I K T A  Y A P A Y  Z E K A  A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+H A V A C I L I K T A  Y A P A Y  Z E K A
+A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+A N A L İ Z
+
+
+--- PAGE 4 ---
+8 .  A l a n  B a z l ı  K a z a n a n l a r
+9 .  Y ö n t e m  B a z l ı  D e r i n  Y o r u m
+  I n t e r p o l a s y o n ,  k a y n a k  v e r i n i n  ü r e t i m  m a n t ı ğ ı n a  e n  y a k ı n  y ö n t e m d i r .  U ç u ş  p e r f o r m a n s  t a b l o l a r ı  v e
+n o m o g r a m  t e m e l l i  v e r i  ü r e t i m i n d e ,  a r a d a k i  n o k t a l a r ı  t a h m i n  e t m e k  i ç i n  d o ğ a l  b i r  r e f e r a n s  o l u ş t u r u r .  B u
+y ü z d e n  c u s t o m  i n p u t  e k r a n ı n d a  ' t a h m i n i  g e r ç e k '  d e ğ e r  o l a r a k  k u l l a n ı l m a s ı  m a n t ı k l ı d ı r .  A n c a k  b u  a v a n t a j ,
+o n u  M L  d o ğ r u l u k  y a r ı ş ı n a  s o k m a y ı  a n l a m s ı z  h a l e  g e t i r i r .
+  X G B o o s t ,  t a b u l a r  v e r i  ü z e r i n d e  g ü ç l ü  a ğ a ç  t a b a n l ı  m o d e l l e m e  s a ğ l a r .  B u  p r o j e d e  h e m  d o ğ r u l u k  h e m  h ı z
+a ç ı s ı n d a n  e n  i y i  p r a t i k  s o n u c u  v e r m e k t e d i r .  Ö z e l l i k l e  c a n l ı  d e m o ,  R a s p b e r r y  P i  3  h e d e f i  v e  k u l l a n ı c ı y a  h ı z l ı
+c e v a p  ü r e t m e  i h t i y a c ı  d ü ş ü n ü l d ü ğ ü n d e  X G B o o s t  s i s t e m i n  g ü v e n l i  v a r s a y ı l a n  t a h m i n  m o d e l i  o l m a y a
+u y g u n d u r .
+  F T - T r a n s f o r m e r ,  p r o j e  r a p o r u n u n  m i m a r i  o d a ğ ı d ı r .  F e a t u r e  t o k e n i z e r ,  T r a n s f o r m e r  e n c o d e r  v e  s e l f -
+a t t e n t i o n  y a p ı s ı  s a y e s i n d e  s a y ı s a l  v e  k a t e g o r i k  k o l o n l a r ı  o r t a k  t o k e n  u z a y ı n d a  i ş l e y e b i l i r .  M e v c u t  ö l ç ü m d e
+X G B o o s t ' u  g e ç m e m e s i ,  m i m a r i n i n  y a n l ı ş  o l d u ğ u  a n l a m ı n a  g e l m e z ;  d a h a  k a p s a m l ı  e ğ i t i m ,  P S O  t a b a n l ı
+h i p e r p a r a m e t r e  a r a m a s ı ,  q u a n t i z a t i o n  v e y a  O N N X / T e n s o r R T  b e n z e r i  o p t i m i z a s y o n l a r l a  s o n u ç  d e ğ i ş e b i l i r .
+1 0 .  S i s t e m  Ö n e r i s i
+  F i n a l  a r a y ü z d e  ü ç l ü  y a p ı  k o r u n m a l ı d ı r .  I n t e r p o l a s y o n  r e f e r a n s / t a h m i n i  g e r ç e k  d e ğ e r  ü r e t i m i  i ç i n ;
+X G B o o s t  h ı z l ı ,  d o ğ r u  v e  g ü v e n l i  M L  t a h m i n  i ç i n ;  F T - T r a n s f o r m e r  i s e  a k a d e m i k  m i m a r i  v e  i l e r i  m o d e l l e m e
+a d a y ı  o l a r a k  k u l l a n ı l m a l ı d ı r .  B u  r o l  a y r ı m ı  k u l l a n ı c ı y a  d a  a ç ı k  g ö s t e r i l m e l i d i r :  i n t e r p o l a s y o n  r e f e r a n s  a i l e s i ,
+X G B o o s t  p r a t i k  m o d e l ,  F T - T r a n s f o r m e r  a r a ş t ı r m a  m o d e l i .
+  K a r ş ı l a ş t ı r m a  e k r a n ı n d a  d o ğ r u l u k  m e t r i k l e r i  X G B o o s t  v e  F T - T r a n s f o r m e r  i ç i n ;  r u n t i m e  v e  k a y n a k
+m e t r i k l e r i  i s e  ü ç  y ö n t e m  i ç i n  g ö s t e r i l m e l i d i r .  B ö y l e c e  i n t e r p o l a s y o n u n  h e r  z a m a n  s ı f ı r  h a t a  i l e  ' k a z a n a n '
+g ö r ü n m e s i  e n g e l l e n i r  v e  s i s t e m i n  g e r ç e k  k a r a r  m a n t ı ğ ı  d a h a  d o ğ r u  a n l a t ı l ı r .
+H A V A C I L I K T A  Y A P A Y  Z E K A  A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+H A V A C I L I K T A  Y A P A Y  Z E K A
+A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+A N A L İ Z
+
+
+--- PAGE 5 ---
+1 1 .  S o n r a k i  İ y i l e ş t i r m e l e r
+  
+ B e n c h m a r k  t a r a f ı n d a  c o l d  s t a r t ,  m o d e l  y ü k l e m e  s ü r e s i ,  b a t c h - s i z e  s e n a r y o l a r ı ,  h a t a  d a ğ ı l ı m
+h i s t o g r a m l a r ı  v e  i r t i f a / e n g i n e _ t y p e  k ı r ı l ı m l ı  m e t r i k l e r  e k l e n e b i l i r .  B u  m e t r i k l e r  ö z e l l i k l e  F T - T r a n s f o r m e r ' ı n
+h a n g i  r e j i m l e r d e  z o r l a n d ı ğ ı n ı  v e y a  a v a n t a j  s a ğ l a d ı ğ ı n ı  g ö r m e y i  k o l a y l a ş t ı r ı r .
+  M o d e l  t a r a f ı n d a  F T - T r a n s f o r m e r  i ç i n  d a h a  u z u n  e ğ i t i m ,  P S O  i l e  h i p e r p a r a m e t r e  a r a m a s ı ,  d a h a  k ü ç ü k
+m i m a r i  v a r y a n t l a r ,  q u a n t i z a t i o n  v e  O N N X  e x p o r t  d e n e n m e l i d i r .  X G B o o s t  t a r a f ı n d a  i s e  m o d e l  s ı k ı ş t ı r m a ,
+t r e e  d e p t h / e s t i m a t o r  s a y ı s ı  o p t i m i z a s y o n u  v e  C P U - t h r e a d  a y a r l a r ı  e d g e  d e p l o y m e n t  i ç i n  a y r ı c a
+d e ğ e r l e n d i r i l e b i l i r .
+1 2 .  N i h a i  D e ğ e r l e n d i r m e
+  B u  s o n u ç l a r a  g ö r e  p r o j e n i n  a n l a t ı s ı  d e n g e l i  k u r u l m a l ı d ı r :  X G B o o s t  p r a t i k t e  ç o k  g ü ç l ü d ü r  v e  m e v c u t
+ö l ç ü m l e r d e  e n  i y i  g e n e l  s o n u c u  v e r i r .  F T - T r a n s f o r m e r ,  p r o j e n i n  a k a d e m i k  k a t k ı s ı n ı  v e  m o d e r n  t a b u l a r  d e e p
+l e a r n i n g  y a k l a ş ı m ı n ı  t e m s i l  e d e r .  I n t e r p o l a s y o n  i s e  s i s t e m i n  r e f e r a n s  o m u r g a s ı d ı r .  Ü ç  y ö n t e m i  a y n ı
+a r a y ü z d e  t u t m a k ,  h e m  t e k n i k  d o ğ r u l a m a  h e m  s u n u m  a ç ı s ı n d a n  e n  g ü ç l ü  ç ö z ü m d ü r .
+H A V A C I L I K T A  Y A P A Y  Z E K A  A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+H A V A C I L I K T A  Y A P A Y  Z E K A
+A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+A N A L İ Z

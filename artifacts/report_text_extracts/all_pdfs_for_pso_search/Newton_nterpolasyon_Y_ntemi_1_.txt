@@ -1,0 +1,77 @@
+
+
+--- PAGE 1 ---
++ 0  2 1 2  1 2 3  2 4  2 5
+m e r h a b a @ h a r i k a s i t e . w e b . t r
+N e w t o n  B ö l ü n m ü ş  F a r k l a r  ( D i v i d e d - D i f f e r e n c e )  İ n t e r p o l a s y o n  P o l i n o m u  v e  İ ş l e m  A d ı m l a r ı
+S a y ı s a l  a n a l i z  l i t e r a t ü r ü n d e  N e w t o n  B ö l ü n m ü ş  F a r k l a r  İ n t e r p o l a s y o n u ;  a y r ı k  v e r i  n o k t a l a r ı n d a n  g e ç e n  t e k  b i r  g l o b a l  d e n k l e m
+ü r e t i r k e n ,  b u  d e n k l e m i  b a ş t a n  a ş a ğ ı  t e k  s e f e r d e  k u r m a k  y e r i n e  s ı r a l ı  ( a r d ı ş ı k )  t e r i m l e r  e k l e y e r e k  i n ş a  e d e n  o l d u k ç a  s t r a t e j i k  b i r
+m a t e m a t i k s e l  y a k l a ş ı m d ı r .  B u  y ö n t e m ,  s i s t e m e  h e r  y e n i  v e r i  n o k t a s ı  e k l e n d i ğ i n d e  h e s a p l a m a l a r ı  s ı f ı r d a n  y a p m a k  y e r i n e ,  m e v c u t
+d e n k l e m i n  ü z e r i n e  y e n i  b i r  " b ü k ü l m e  ( c u r v a t u r e ) "  t e r i m i  i l a v e  e d e r e k  b i l g i s a y a r  i ş l e m c i s i n i  ( C P U )  b ü y ü k  b i r  y ü k t e n  k u r t a r ı r .
+A l g o r i t m a n ı n  m a t e m a t i k s e l  i s k e l e t i  v e  d o n a n ı m s a l  i ş l e y i ş i  ş u  a d ı m l a r a  d a y a n ı r :
+1 .  S ı r a l ı  ( A r d ı ş ı k )  P o l i n o m  M i m a r i s i n i n  K u r u l m a s ı :
+N e w t o n  p o l i n o m u n u n  e n  b ü y ü k  a l g o r i t m i k  g ü c ü ,  y a p ı s ı n ı n  T a y l o r  S e r i l e r i n i n  e k l e m e l i  d o ğ a s ı n a  b e n z e m e s i d i r .  S i s t e m e  g i r i l e n  h e r
+y e n i  v e r i  n o k t a s ı ,  p o l i n o m u n  d e r e c e s i n i  b i r  a r t ı r a r a k  m o d e l e  y e n i  b i r  h a s s a s i y e t  k a t a r .  G e n e l  n .  d e r e c e d e n  N e w t o n  p o l i n o m u
+( f ( x ) )  ş u  f o r m ü l l e  i f a d e  e d i l i r :n
+( 1 )
+A n l a m ı :  B u  d e n k l e m ,  p a r ç a l a r ı n  s ü p e r p o z i s y o n u  i l e  ç a l ı ş ı r .  S a d e c e  i l k  i k i  t e r i m  d e ğ e r l e n d i r i l d i ğ i n d e  ( b  +  b ( x - x ) ) ,  e l d e  e d i l e n
+s o n u ç  s a d e c e  i k i  n o k t a y ı  b i r l e ş t i r e n  b i r i n c i  d e r e c e d e n  d o ğ r u s a l  b i r  ç i z g i d i r .  S i s t e m e  ü ç ü n c ü  t e r i m  ( b )  e k l e n d i ğ i n d e ,  o  d ü z
+ç i z g i y e  i k i n c i  d e r e c e d e n  b i r  b ü k ü l m e  ( p a r a b o l i k  e ğ r i l i k )  k a t ı l m ı ş  o l u r .  F o r m ü l e  e k l e n e n  h e r  y e n i  t e r i m ,  e ğ r i y i  v e r i  s e t i n i n  f i z i k s e l
+d o ğ a s ı n a  b i r  a d ı m  d a h a  y a k l a ş t ı r ı r .
+0 1 0
+2
+2 .  K a t s a y ı l a r ı n  Ö z y i n e l e m e l i  ( R e c u r s i v e )  B ö l ü n m ü ş  F a r k l a r l a  T ü r e t i l m e s i :
+D e n k l e m d e k i  b ,  b ,  b  ,  b  k a t s a y ı l a r ı  s ı r a d a n  s a b i t l e r  d e ğ i l ;  v e r i  s e t i n d e k i  d e ğ i ş i m  h ı z ı n ı n  ( t ü r e v i n )  s a y ı s a l  y a k l a ş ı m l a r ı  o l a n  S o n l u
+B ö l ü n m ü ş  F a r k l a r  ( F i n i t e  D i v i d e d  D i f f e r e n c e s )  d e ğ e r l e r i d i r .  A l g o r i t m a  b u  k a t s a y ı l a r ı  ş u  ö z y i n e l e m e l i  m a n t ı k l a  h e s a p l a r :
+0 1 2 n
+S ı f ı r ı n c ı  F a r k :  b _ 0  =  f ( x _ 0 )  ( E ğ r i n i n  b a ş l a n g ı ç  r e f e r a n s  n o k t a s ı )
+B i r i n c i  B ö l ü n m ü ş  F a r k  ( b ) :  İ k i  n o k t a  a r a s ı n d a k i  d o ğ r u s a l  e ğ i m i  ( b i r i n c i  t ü r e v i )  t e m s i l  e d e r :1
+( 2 )
+İ k i n c i  B ö l ü n m ü ş  F a r k  ( b ) :  İ k i  f a r k l ı  e ğ i m  a r a s ı n d a k i  d e ğ i ş i m i ,  y a n i  e ğ r i n i n  " i v m e l e n m e s i n i "  ( i k i n c i  t ü r e v i )  t e m s i l  e d e r :2
+( 3 )
+D o n a n ı m  b u  i ş l e m i  y ü r ü t ü r k e n ,  y ü k s e k  d e r e c e l i  f a r k l a r ı  b u l m a k  i ç i n  d a i m a  b i r  a l t  d e r e c e d e k i  f a r k l a r ı n  s o n u ç l a r ı n ı  k u l l a n ı r .  B u
+" r e k ü r s i f "  y a p ı  s a y e s i n d e  b i l g i s a y a r  b e l l e ğ i n d e  d e v a s a  b i r  p i r a m i t  ( b ö l ü n m ü ş  f a r k l a r  t a b l o s u )  m i n i m u m  b e l l e k  t a h s i s i  i l e  s o n
+d e r e c e  h ı z l ı  b i r  ş e k i l d e  i n ş a  e d i l i r .
+H A V A C I L I K T A  Y A P A Y  Z E K A
+A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+P R O J E  :         T U S A Ş  L i f t  U p
+G Ö R E V :        N e w t o n  İ n t e r p o l a s y o n T A R İ H :        2 5 . 0 3 . 2 0 2 6
+Y Ö N T E M
+H A V A C I L I K T A  Y A P A Y  Z E K A  A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+
+
+--- PAGE 2 ---
++ 0  2 1 2  1 2 3  2 4  2 5
+m e r h a b a @ h a r i k a s i t e . w e b . t r
+H A V A C I L I K T A  Y A P A Y  Z E K A
+A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+Y Ö N T E M
+H A V A C I L I K T A  Y A P A Y  Z E K A  A R A Ş T I R M A L A R I  T O P L U L U Ğ U
+3 .  D i n a m i k  H a t a  K e s t i r i m i  ( E r r o r  E s t i m a t i o n )  v e  D u r d u r m a  K r i t e r i :
+B u  y ö n t e m i n  e n  k r i t i k  a l g o r i t m i k  a v a n t a j l a r ı n d a n  b i r i ,  s i s t e m i n  k e n d i  y a p t ı ğ ı  h a t a y ı  " g e l e c e ğ e  b a k a r a k "  t a h m i n  e d e b i l m e s i d i r .
+İ n t e r p o l a s y o n u n  k e s m e  h a t a s ı  ( R ) ,  p o l i n o m u n  b i r  s o n r a k i  d e r e c e s i  i l e  m e v c u t  d e r e c e s i  a r a s ı n d a k i  f a r k a  e ş d e ğ e r  k a b u l  e d i l i r :n
+( 4 )
+A l g o r i t m i k  A v a n t a j :  B i l g i s a y a r  p r o g r a m ı ,  d e n k l e m e  y e n i  b i r  v e r i  n o k t a s ı  ( y e n i  b i r  t e r i m )  e k l e d i ğ i n d e  s o n u c u n  n e  k a d a r  d e ğ i ş t i ğ i n i
+a n l ı k  o l a r a k  d e n e t l e r .  E ğ e r  y e n i  e k l e n e n  v e r i  s o n u c u  a n l a m l ı  ö l ç ü d e  d e ğ i ş t i r m i y o r s a  ( y a n i  R  d e ğ e r i  b e l i r l e n e n  t o l e r a n s ı n  a l t ı n a
+d ü ş m ü ş s e ) ,  a l g o r i t m a  y e t e r l i  h a s s a s i y e t e  u l a ş ı l d ı ğ ı n a  k a r a r  v e r i r  v e  p o l i n o m u n  d e r e c e s i n i  g e r e k s i z  y e r e  a r t ı r m a y ı  k e s e r e k
+h e s a p l a m a y ı  d u r d u r u r .
+n
+4 .  V e r i  D ü ğ ü m l e r i n i n  ( B a s e  P o i n t s )  S e ç i m i  v e  K o n u m l a n d ı r m a  S t r a t e j i s i :
+N e w t o n  i n t e r p o l a s y o n u n u n  b a ş a r ı s ı ,  h e s a p l a m a y a  d a h i l  e d i l e n  b a z  n o k t a l a r ı n ı n  ( b a s e  p o i n t s )  k o n u m u n a  d o ğ r u d a n  b a ğ l ı d ı r .  H a t a
+f o r m ü l ü n d e k i  ( x  -  x ) ( x  -  x )  a r d ı ş ı k  ç a r p a n l a r ı  g e r e ğ i ;  a r a n a n  b i l i n m e y e n  x  d e ğ e r i n e  f i z i k s e l  o l a r a k  e n  y a k ı n  o l a n  v e  h e d e f i n
+s a ğ ı n a / s o l u n a  d e n g e l i  d a ğ ı t ı l m ı ş  v e r i  n o k t a l a r ı n ı  s ü r e c e  d a h i l  e t m e k ,  m a t e m a t i k s e l  h a t a y ı  ( R )  l o g a r i t m i k  o l a r a k  d ü ş ü r ü r .
+B i l i n m e y e n  d e ğ e r e  u z a k  o l a n  v e r i  n o k t a l a r ı n ı n  d e n k l e m e  z o r l a  k a t ı l m a s ı ,  e ğ r i n i n  u ç  k ı s ı m l a r ı n d a  ş i d d e t l i  v e  f i z i k s e l  g e r ç e k l i k t e n
+u z a k  d a l g a l a n m a l a r a  ( R u n g e  F e n o m e n i )  s e b e p  o l a b i l m e k t e d i r .
+0 1
+n
+S o n u ç  v e  A l g o r i t m i k  S ü r e c i n  Ö z e t i
+Ö z e t l e m e k  g e r e k i r s e ,  N e w t o n  B ö l ü n m ü ş  F a r k l a r  İ n t e r p o l a s y o n u ;  k a r m a ş ı k  g l o b a l  m a t r i s  ç ö z ü m l e r i  y e r i n e  s o n  d e r e c e  o p t i m i z e
+e d i l m i ş  " e k l e m e l i "  ( s e q u e n t i a l )  b i r  m i m a r i  i l e  ç a l ı ş ı r .  A l g o r i t m a  ö n c e l i k l e  v e r i l e r  a r a s ı n d a k i  t e m e l  e ğ i m l e r i  h e s a p l a y a r a k  d o ğ r u s a l  b i r
+i s k e l e t  o l u ş t u r u r .  D a h a  s o n r a  b u  e ğ i m l e r i n  k e n d i  a r a l a r ı n d a k i  d e ğ i ş i m  o r a n l a r ı n ı  ( b ö l ü n m ü ş  f a r k l a r ı )  p i r a m i t  ş e k l i n d e  ö z y i n e l e m e l i
+o l a r a k  h e s a p l a y ı p ,  s i s t e m e  a r d ı ş ı k  b ü k ü l m e  k a t s a y ı l a r ı  ( b )  o l a r a k  i l a v e  e d e r .  B u  e k l e m e l i  v e  a r d ı ş ı k  y a p ı ,  h e m  h e s a p l a m a  d ö n g ü s ü
+t a m a m l a n m a d a n  a n l ı k  h a t a  k o n t r o l ü  ( R )  y a p ı l m a s ı n a  o l a n a k  t a n ı r  h e m  d e  a l g o r i t m a n ı n  h a n g i  h a s s a s i y e t  n o k t a s ı n d a  d u r a c a ğ ı n a
+d i n a m i k  o l a r a k  k a r a r  v e r e b i l m e s i n i  s a ğ l a y a r a k  o l d u k ç a  g ü ç l ü  v e  e s n e k  b i r  s a y ı s a l  m o d e l  s u n a r .
+n
+n
+R e f e r a n s l a r  :  
+1 )   S .  C .  C h a p r a  a n d  R .  P .  C a n a l e ,  N u m e r i c a l  M e t h o d s  f o r  E n g i n e e r s ,  7 t h  e d .  N e w  Y o r k ,  N Y :  M c G r a w - H i l l  E d u c a t i o n ,  2 0 1 5 .

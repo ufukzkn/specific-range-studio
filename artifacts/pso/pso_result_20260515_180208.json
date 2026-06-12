@@ -1,0 +1,88 @@
+{
+  "run_id": "20260515_180208",
+  "dataset": "data\\processed\\combined_specific_range.csv",
+  "best_score": 9.580950620808942,
+  "best_params": {
+    "n_layers": 5,
+    "n_heads": 4,
+    "d_model": 224,
+    "d_ff": 376,
+    "dropout": 0.047088673943824766,
+    "learning_rate": 0.004880549523020104
+  },
+  "best_position": [
+    5.095824194223853,
+    4.072149078264366,
+    224.32593406014968,
+    376.42087701859504,
+    0.047088673943824766,
+    0.004880549523020104
+  ],
+  "objective": {
+    "formula": "w_rmse*RMSE/RMSE_ref + w_latency*T_inf/T_ref + w_size*S/S_ref",
+    "weights": {
+      "rmse": 0.7,
+      "latency": 0.2,
+      "size": 0.1
+    },
+    "references": {
+      "rmse_ref": 0.003,
+      "latency_ref_ms": 10.0,
+      "size_ref_mb": 1.0
+    }
+  },
+  "history_csv": "artifacts\\pso\\pso_history_20260515_180208.csv",
+  "latest_history_csv": "artifacts\\pso\\pso_history_latest.csv",
+  "history": [
+    {
+      "iteration": 0.0,
+      "particle": 0.0,
+      "score": 9.580950620808942,
+      "rmse": 0.03596434109144808,
+      "mae": 0.022700592875480652,
+      "mape": 50.88555908203125,
+      "r2": 0.8490843772888184,
+      "latency_ms": 22.996399998373818,
+      "model_size_mb": 7.293430328369141,
+      "param_count": 1911929.0,
+      "rmse_component": 11.98811369714936,
+      "latency_component": 2.2996399998373818,
+      "size_component": 7.293430328369141,
+      "weighted_rmse": 8.391679588004552,
+      "weighted_latency": 0.45992799996747635,
+      "weighted_size": 0.7293430328369142,
+      "n_layers": 5.0,
+      "n_heads": 4.0,
+      "d_model": 224.0,
+      "d_ff": 376.0,
+      "dropout": 0.047088673943824766,
+      "learning_rate": 0.004880549523020104
+    }
+  ],
+  "pareto_front": [
+    {
+      "iteration": 0.0,
+      "particle": 0.0,
+      "score": 9.580950620808942,
+      "rmse": 0.03596434109144808,
+      "mae": 0.022700592875480652,
+      "mape": 50.88555908203125,
+      "r2": 0.8490843772888184,
+      "latency_ms": 22.996399998373818,
+      "model_size_mb": 7.293430328369141,
+      "param_count": 1911929.0,
+      "rmse_component": 11.98811369714936,
+      "latency_component": 2.2996399998373818,
+      "size_component": 7.293430328369141,
+      "weighted_rmse": 8.391679588004552,
+      "weighted_latency": 0.45992799996747635,
+      "weighted_size": 0.7293430328369142,
+      "n_layers": 5.0,
+      "n_heads": 4.0,
+      "d_model": 224.0,
+      "d_ff": 376.0,
+      "dropout": 0.047088673943824766,
+      "learning_rate": 0.004880549523020104
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+HAVACILIKTA YAPAY ZEKA ARAŞTIRMALARI TOPLULUĞU
+HAVACILIKTA YAPAY ZEKA
+ARAŞTIRMALARI TOPLULUĞU
+PROJE : TUSAŞ Lift Up
+GÖREV: Raspberry Benchmark RaporuTARİH: 10.05.2026
+Y Ö N T E M
+1 .  Ö z e t
+Bu rapor Raspberry Pi 3 sınıfı edge deployment hedefi için hazırlanmıştır. Temel amaç, eğitim sürecini
+cihaz üzerinde yürütmek değil; masaüstü ortamda üretilmiş artefact'ların düşük güçlü bir cihaz profiline
+taşındığında çıkarım tarafında nasıl davranacağını değerlendirmektir. Değerlendirme; Interpolasyon,
+XGBoost ve FT-Transformer yöntemlerini hız, RAM, CPU, model boyutu ve maliyet fonksiyonu açısından aynı
+çatı altında ele alır.
+Ölçüm setinde XGBoost en dengeli profil olarak öne çıkmaktadır. p95 gecikme değeri düşük, doğruluk
+metrikleri güçlü ve model boyutu kabul edilebilir seviyededir. FT-Transformer araştırma değeri yüksek olan
+ana mimari adaydır; ancak mevcut artefact ve runtime yolu ile RAM kullanımı XGBoost'a göre daha
+yüksektir. Interpolasyon ise doğruluk yarışında bir model rakibi olarak değil, deterministik referans üretim
+ailesi olarak değerlendirilmelidir.
+2. Hedef Cihaz ve Deployment Senaryosu
+Hedef ortam Raspberry Pi 3 sınıfı bir edge cihaz olarak modellenmiştir: ARM Cortex-A53 sınıfı işlemci, 1
+GB RAM bütçesi, Raspberry Pi OS 64-bit, CPU-only inference ve tekil satır tahmin ağırlıklı kullanım. Bu
+hedef, uçuş performans tablolarından üretilmiş specific range tahminlerinin küçük bir cihaz üzerinde
+demo edilebilmesi ve kaynak maliyetinin görünür hale getirilmesi için seçilmiştir.
+
+Bu senaryoda cihazın görevi model eğitmek değildir. Eğitim ve ağır raporlama işlemleri masaüstü/iş
+istasyonu tarafında yapılır; Raspberry Pi 3 üzerinde yalnızca temizlenmiş veri, eğitilmiş model artefact'ları
+ve Flask tabanlı inference arayüzü çalıştırılır. Bu ayrım önemlidir; çünkü Pi 3 sınıfı bir cihaz, eğitim için değil,
+hafif çıkarım ve demo için daha uygundur.Raporun dili bu nedenle 'hedef ortam benchmark profili' olarak
+kurgulanmıştır. Ölçüm çıktıları uygulamanın gerçek prediction path'ini temsil eden benchmark JSON
+dosyasından alınır ve Pi 3 için seçilen 1 GB RAM, 10 ms p95 gecikme ve %80 CPU hedefleriyle yorumlanır.
+3. Kurulum ve Çalıştırma Akışı
+Raspberry Pi OS 64-bit ortamı hazırlanır; ağ erişimi ve SSH üzerinden yönetim etkinleştirilir.Python sanal
+ortamı oluşturulur ve numpy, pandas, scikit-learn, xgboost, torch, flask gibi inference bağımlılıkları
+kurulur.Temizlenmiş combined_specific_range.csv veri seti ile XGBoost ve FT-Transformer artefact'ları
+cihaza aktarılır.Flask arayüzü tekil tahmin, karşılaştırma ve maliyet sekmeleriyle inference modunda
+çalıştırılır.Benchmark runner; warmup, tekrar sayısı ve örnek sayısı sabitlenmiş şekilde üç yöntemi
+ölçer.Çıktı pi_benchmark_latest.json formatında kaydedilir ve maliyet simülatörü bu dosyadan
+beslenir.Kullanılan benchmark komutu şu mantığı izler: `python scripts/run_pi_benchmark.py --models
+interpolation,xgboost,ft_transformer --sample-size 200 --warmup 20 --repetitions 200 --device cpu`.
+Warmup ölçüme dahil edilmez; modelin ilk çağrı etkilerinden arınması için kullanılır.
+4. Benchmark Metodolojisi
+Benchmark, her yöntemin aynı örnek kümesi üzerinde tekrarlı şekilde çalıştırılmasına dayanır. `sample-
+size=200`, test edilecek satır sayısını; `warmup=20`, ölçüm öncesi ısındırma tahminlerini; `repetitions=200`
+ise kaydedilen çıkarım tekrarlarını ifade eder. Bu tasarım, tek bir şanslı veya şanssız tahmin süresine göre
+karar vermek yerine gecikme dağılımını özetlemeyi amaçlar.Latency tarafında p50 ve p95 değerleri
+özellikle önemlidir. p50 tipik kullanıcı deneyimini gösterirken p95, kötü ama olağan kabul edilen gecikme
+kuyruğunu temsil eder. Edge sistemlerde yalnız ortalama gecikmeye bakmak yanıltıcı olabilir; çünkü kısa
+süreli gecikme sıçramaları demo hissini ve gerçek zamanlı kullanım akışını bozabilir.Bellek tarafında Peak
+RSS kullanılır. Bu değer, process'in işletim sistemi tarafından görülen tepe resident memory ayak izini
+temsil eder. CPU tarafında process CPU yüzdesi raporlanır; çok çekirdekli sistemlerde bu değer %100'ün
+üzerine çıkabilir. Model boyutu ise artefact dosyalarının disk üzerindeki yaklaşık büyüklüğünü gösterir.
+5. Ölçüm Metrikleri
+
+6. Benchmark Sonuçları
+Tablo, üç yöntemin aynı inference benchmark protokolü altında elde edilen özetini verir. Interpolasyon
+bellek açısından en hafif görünürken, XGBoost gecikme ve genel maliyet dengesi açısından öne
+çıkmaktadır. FT-Transformer model dosyası küçük olsa da runtime tarafında daha yüksek bellek ayak izi
+üretmektedir.
+HAVACILIKTA YAPAY ZEKA ARAŞTIRMALARI TOPLULUĞU
+HAVACILIKTA YAPAY ZEKA
+ARAŞTIRMALARI TOPLULUĞU
+Y Ö N T E M
+7. Grafiklerle Sonuçların Okunması
+HAVACILIKTA YAPAY ZEKA ARAŞTIRMALARI TOPLULUĞU
+HAVACILIKTA YAPAY ZEKA
+ARAŞTIRMALARI TOPLULUĞU
+Y Ö N T E M
+8. Yöntem Bazlı Değerlendirme
+Interpolasyon, veri tablosundan deterministik referans üretmek için kullanılır. Bu nedenle doğruluk
+yarışına dahil edilmez; çünkü custom input senaryosunda karşılaştırılan 'tahmini gerçek' değer zaten
+interpolasyon ailesinden gelmektedir. Buna karşın runtime maliyeti önemlidir. Cache optimizasyonu
+sonrası gecikme kabul edilebilir seviyeye inmiş olsa da XGBoost kadar hızlı değildir. XGBoost, Raspberry Pi
+3 hedef senaryosunda pratik varsayılan model olarak en güçlü adaydır. Düşük p95 gecikmesi ve düşük
+hata metrikleri, onu canlı demo ve tekil tahmin ekranı için güvenli hale getirir. Ayrıca model boyutu ve
+kurulum karmaşıklığı da FT-Transformer'a kıyasla daha yönetilebilir görünmektedir.
+
+FT-Transformer, projenin araştırma tarafındaki ana mimari adaydır. Feature tokenizer ve self-attention
+yapısı sayesinde kolonlar arası etkileşimleri modelleyebilmesi teorik açıdan değerlidir. Ancak Pi 3 sınıfı
+runtime hedefinde PyTorch tabanlı çalıştırma yolu RAM ve bağımlılık maliyeti yaratır. Bu yüzden mevcut
+haliyle pratik deploy modeli değil, ileri optimizasyon adayı olarak konumlanmalıdır.
+9. Maliyet Formülü ve Hedefler
+Maliyet simülatöründe varsayılan ağırlıklar Accuracy %45, Latency %25, Memory %20 ve CPU %10'dur.
+Accuracy cost yalnız XGBoost ve FT-Transformer için hesaplanır. Interpolasyon referans ailesi olduğundan
+accuracy bileşeni dışarıda bırakılır ve runtime-only cost ile değerlendirilir.Latency cost, ölçülen p95
+gecikmenin 10 ms hedefine oranıdır. Memory cost, Peak RSS değerinin seçilen RAM bütçesine oranıdır.
+CPU cost, ortalama process CPU yüzdesinin %80 hedefine oranıdır. Fit Score ise `100 / (1 + 0.30 *
+CompositeCost)` formülünden türetilir. Bu skor kazananı otomatik 100 yapmaz; mutlak maliyet düştükçe
+yükselen bir uygunluk göstergesidir.
+HAVACILIKTA YAPAY ZEKA ARAŞTIRMALARI TOPLULUĞU
+HAVACILIKTA YAPAY ZEKA
+ARAŞTIRMALARI TOPLULUĞU
+Y Ö N T E M
+10. Operasyonel Öneri
+Final arayüzde Raspberry Pi 3 sınıfı demo için önerilen kullanım şöyledir: referans/tahmini gerçek değer
+üretiminde interpolasyon, ana ML tahmin ve kullanıcıya hızlı cevap üretiminde XGBoost, araştırma ve
+mimari gösterim tarafında FT-Transformer. Böylece uygulama hem mühendislik olarak çalışabilir kalır hem
+de raporun akademik odağı olan Tabular Transformer yaklaşımı korunur.
+
+İleri aşamada FT-Transformer için ONNX export, quantization, daha küçük hidden dimension ve batch=1
+optimize inference denenmelidir. Bu optimizasyonlar başarılı olursa FT-Transformer'ın edge maliyeti
+düşürülebilir; ancak mevcut ölçüm profilinde XGBoost pratik liderdir.
+11. Sınırlılıklar ve Sonraki Adımlar
+Bu rapor inference benchmark profiline odaklanır; eğitim süresi, model yeniden eğitme maliyeti ve
+gerçek uçuş yazılımı sertifikasyon süreçleri kapsam dışıdır. Ayrıca CPU yüzdesi ve bellek kullanımı Python
+runtime, işletim sistemi ve arka plan süreçlerinden etkilenebilir. Bu nedenle sonuçlar model seçimi için
+güçlü bir işaret olarak okunmalı; nihai deploy öncesi hedef cihazda tekrarlı ölçümle
+doğrulanmalıdır.Sonraki adım olarak benchmark runner'a cold start süresi, model yükleme süresi, batch
+senaryoları, hata dağılımı ve rejim bazlı doğruluk kırılımları eklenebilir. Böylece maliyet simülatörü yalnız
+özet metriklere değil, daha geniş bir operasyonel gözlem setine dayanır.
+HAVACILIKTA YAPAY ZEKA ARAŞTIRMALARI TOPLULUĞU
+HAVACILIKTA YAPAY ZEKA
+ARAŞTIRMALARI TOPLULUĞU
+Y Ö N T E M
