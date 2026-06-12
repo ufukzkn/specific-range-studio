@@ -6,6 +6,7 @@ data/processed/
 external_apps/
 report_outputs/
 raporlar__/
+handoff_payload/
 scripts/build_report_docx.py
 tools/dataset_builder/dataset_production/
 tools/dataset_builder/segmentation_results/
