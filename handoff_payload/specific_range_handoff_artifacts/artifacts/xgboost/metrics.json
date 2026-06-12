@@ -1,0 +1,33 @@
+{
+  "model_name": "xgboost",
+  "metrics": {
+    "validation": {
+      "rmse": 0.002659588221157514,
+      "mae": 0.0011897692456841469,
+      "r2": 0.9991747140884399,
+      "mape": 2.0324106216430664
+    },
+    "test": {
+      "rmse": 0.0026772635325740574,
+      "mae": 0.0012040645815432072,
+      "r2": 0.9992321133613586,
+      "mape": 1.588226318359375
+    }
+  },
+  "extra": {
+    "config": {
+      "n_estimators": 300,
+      "max_depth": 6,
+      "learning_rate": 0.05,
+      "subsample": 0.9,
+      "colsample_bytree": 0.9,
+      "reg_alpha": 0.0,
+      "reg_lambda": 1.0,
+      "random_state": 42,
+      "objective": "reg:squarederror",
+      "eval_metric": "rmse",
+      "tree_method": "hist",
+      "device": "cuda"
+    }
+  }
+}

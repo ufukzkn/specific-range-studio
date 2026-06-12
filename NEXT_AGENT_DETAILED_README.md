@@ -63,6 +63,12 @@ Important report folders:
 - `docs/final_reports/`
 - `report_outputs/`
 
+Priority note:
+
+- `Raporlar/`, `raporlar__/`, `docs/comparison_reports/`, `docs/benchmark_reference/`, and `docs/final_reports/` are the important sources for understanding and improving the final report.
+- `report_outputs/` is included for completeness. It contains generated drafts, rendered page images, and earlier Word outputs from the report-generation experiments. These are useful as historical/context artifacts, but they are **not** the authoritative final report source.
+- In particular, `report_outputs/docx/` contains several older generated Word drafts. Treat them as optional reference material, not as the main document to polish.
+
 Especially read:
 
 - `raporlar__/Ham Veri Eldesi (1).pdf`
@@ -363,14 +369,38 @@ Included:
 - `Raporlar/`,
 - `raporlar__/`,
 - final report DOCX,
-- comparison reports and figures.
+- comparison reports and figures,
+- `handoff_payload/` fallback artifact package.
 
 Still intentionally excluded:
 
 - `.venv/` because it is machine-specific and huge,
-- `external_apps/` because it is a large reference dump; production code uses `tools/dataset_builder/` and `src/interpolation/` instead,
-- `handoff_payload/` because it is a generated zip copy of files now mostly committed,
-- Python cache folders.
+- `external_apps/` because it is a large reference dump; production code uses `tools/dataset_builder/` and `src/interpolation/` instead.
+
+This handoff branch intentionally keeps almost everything else, including generated CSV/Excel/report/model/benchmark artifacts. Some cache files are present because the branch is meant as a pragmatic transfer snapshot, not a pristine release branch.
+
+### 9.1 Fallback ZIP
+
+The folder `handoff_payload/` is included as a fallback bundle. It contains:
+
+- `handoff_payload/specific_range_handoff_artifacts.zip`
+- `handoff_payload/specific_range_handoff_artifacts/`
+- `ARTIFACT_MANIFEST.txt`
+- selected `artifacts/` outputs,
+- selected `data/processed/` outputs.
+
+If a clone on another machine appears to be missing generated benchmark/model/data artifacts, unpack:
+
+```powershell
+Expand-Archive handoff_payload\specific_range_handoff_artifacts.zip -DestinationPath handoff_payload\restored -Force
+```
+
+Then copy the restored folders back into the repository root according to their paths inside the archive. For example:
+
+- archive `artifacts/...` -> repository `artifacts/...`
+- archive `data/processed/...` -> repository `data/processed/...`
+
+Most of these files are already committed directly on this branch; the ZIP is only an emergency fallback.
 
 If a file is missing on another machine, first run:
 
@@ -487,4 +517,3 @@ Suggested final report structure:
 16. References
 
 Keep it compact, but not thin. The report should feel like a polished synthesis of the whole project, not a dump of every sub-report.
-

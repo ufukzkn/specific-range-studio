@@ -1,14 +1,2 @@
 .venv/
-__pycache__/
-*.pyc
 external_apps/
-handoff_payload/
-artifacts/*.log
-*
-scripts/build_report_docx.py
-tools/dataset_builder/dataset_production/
-tools/dataset_builder/segmentation_results/
-tools/dataset_builder/demo_segmentation_results/
-tools/dataset_builder/checkpoints/
-tools/dataset_builder/training_history.png
-tools/dataset_builder/curve_data.xlsx

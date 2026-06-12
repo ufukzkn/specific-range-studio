@@ -1,0 +1,8 @@
+Specific Range Studio handoff artifact bundle
+Created: 2026-06-12T19:28:10.8169514+03:00
+
+Restore with:
+.\scripts\restore_handoff_artifacts.ps1 -ZipPath <this zip>
+
+This bundle intentionally contains only runtime-critical generated files.
+It excludes heavy report outputs, external_apps, .venv and temporary folders.

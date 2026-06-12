@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "run_id": "20260512_200834",
+  "created_at": "2026-05-12T17:08:34.030014+00:00",
+  "system": {
+    "hostname": "mesi",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor": "",
+    "python": "3.12.13",
+    "cpu_count_logical": 16,
+    "cpu_count_physical": 8,
+    "total_ram_mb": 15844.0703125,
+    "psutil_available": true
+  },
+  "config": {
+    "models": [
+      "interpolation",
+      "xgboost",
+      "ft_transformer"
+    ],
+    "sample_size": 200,
+    "warmup": 20,
+    "repetitions": 200,
+    "device": "cpu",
+    "seed": 42,
+    "dataset_path": "/home/ufuk_/specific-range-studio-pulled/data/processed/combined_specific_range.csv"
+  },
+  "models": {
+    "interpolation": {
+      "model_key": "interpolation",
+      "available": true,
+      "started_at": "2026-05-12T17:08:34.033220+00:00",
+      "finished_at": "2026-05-12T17:08:57.547562+00:00",
+      "device": "cpu",
+      "sample_count": 200,
+      "warmup_count": 20,
+      "repetitions": 200,
+      "elapsed_sec": 17.972373064000003,
+      "throughput_per_sec": 11.128190990015383,
+      "latency_ms": {
+        "min": 50.86696000000046,
+        "mean": 89.82537583499987,
+        "median": 102.34547650000181,
+        "p50": 102.34547650000181,
+        "p90": 109.84939869999977,
+        "p95": 112.05858950000156,
+        "p99": 120.82499008999993,
+        "max": 150.19014399999975
+      },
+      "memory_mb": {
+        "rss_before": 158.40625,
+        "rss_after": 174.51171875,
+        "rss_peak": 174.51171875
+      },
+      "cpu_percent": {
+        "process_avg": 125.74855818717383,
+        "process_peak_sample": 102.9,
+        "sample_count": 41
+      },
+      "model_size_mb": 2.641805648803711,
+      "accuracy": {
+        "note": "Not scored as model accuracy. Interpolation is treated as the deterministic table/reference family; benchmark records runtime, memory, CPU and artifact size."
+      },
+      "raspberry_pi": {
+        "before": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        },
+        "after": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        }
+      }
+    },
+    "xgboost": {
+      "model_key": "xgboost",
+      "available": true,
+      "started_at": "2026-05-12T17:08:57.549852+00:00",
+      "finished_at": "2026-05-12T17:08:59.110812+00:00",
+      "device": "cpu",
+      "sample_count": 200,
+      "warmup_count": 20,
+      "repetitions": 200,
+      "elapsed_sec": 0.3915762580000006,
+      "throughput_per_sec": 510.7561960510887,
+      "latency_ms": {
+        "min": 1.54449200000073,
+        "mean": 1.934986449999485,
+        "median": 1.8730764999972394,
+        "p50": 1.8730764999972394,
+        "p90": 2.2955385999956945,
+        "p95": 2.490814199997615,
+        "p99": 2.674131999996161,
+        "max": 2.9680519999999433
+      },
+      "memory_mb": {
+        "rss_before": 326.65234375,
+        "rss_after": 327.09375,
+        "rss_peak": 327.09375
+      },
+      "cpu_percent": {
+        "process_avg": 120.02770607200605,
+        "process_peak_sample": 198.9,
+        "sample_count": 41
+      },
+      "model_size_mb": 1.9188594818115234,
+      "accuracy": {
+        "rmse": 0.003467587830872,
+        "mae": 0.001371793530324101,
+        "r2": 0.9984771534136355,
+        "mape": 1.5602427180279066
+      },
+      "raspberry_pi": {
+        "before": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        },
+        "after": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        }
+      }
+    },
+    "ft_transformer": {
+      "model_key": "ft_transformer",
+      "available": true,
+      "started_at": "2026-05-12T17:08:59.112251+00:00",
+      "finished_at": "2026-05-12T17:09:02.789295+00:00",
+      "device": "cpu",
+      "sample_count": 200,
+      "warmup_count": 20,
+      "repetitions": 200,
+      "elapsed_sec": 0.5082445719999953,
+      "throughput_per_sec": 393.5113349326667,
+      "latency_ms": {
+        "min": 1.9961480000034726,
+        "mean": 2.5138752550002863,
+        "median": 2.4525720000028173,
+        "p50": 2.4525720000028173,
+        "p90": 2.9728036000015834,
+        "p95": 3.1572429000011226,
+        "p99": 3.860096730002524,
+        "max": 4.933213000001047
+      },
+      "memory_mb": {
+        "rss_before": 494.515625,
+        "rss_after": 503.7734375,
+        "rss_peak": 503.7734375
+      },
+      "cpu_percent": {
+        "process_avg": 120.02095715446323,
+        "process_peak_sample": 173.7,
+        "sample_count": 41
+      },
+      "model_size_mb": 0.4170999526977539,
+      "accuracy": {
+        "rmse": 0.00367126960034109,
+        "mae": 0.0020441893267571926,
+        "r2": 0.9982929990213002,
+        "mape": 2.887864226583545
+      },
+      "raspberry_pi": {
+        "before": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        },
+        "after": {
+          "temperature_c": null,
+          "temperature_raw": null,
+          "throttled_raw": null,
+          "vcgencmd_available": false
+        }
+      }
+    }
+  },
+  "notes": [
+    "Inference-only benchmark. Training is intentionally not performed on Raspberry Pi.",
+    "Latency includes the same artifact-backed prediction path used by the app.",
+    "Interpolation is benchmarked for runtime cost only; accuracy comparison is for XGBoost and FT-Transformer."
+  ]
+}
