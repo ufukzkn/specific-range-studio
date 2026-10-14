@@ -64,6 +64,11 @@ app = Flask(
 # Lazy-loaded singletons
 # ---------------------------------------------------------------------------
 _data_config = DataConfig()
+RESEARCH_BUNDLE = Path(os.environ["SPECIFIC_RANGE_BUNDLE"]).resolve() if os.environ.get("SPECIFIC_RANGE_BUNDLE") else None
+if RESEARCH_BUNDLE:
+    from src.evaluation.research_bundle import verify_bundle
+    verify_bundle(RESEARCH_BUNDLE)
+    _data_config.artifacts_dir = RESEARCH_BUNDLE
 _reference_df: pd.DataFrame | None = None
 _xgb_predictor: XGBoostPredictor | None = None
 _ft_predictor: FTTransformerPredictor | None = None
@@ -72,7 +77,7 @@ _interpolation_service: SpecificRangeInterpolationService | None = None
 DATASET_APP_DIR = PROJECT_ROOT / "tools" / "dataset_builder"
 BENCHMARK_DIR = _data_config.artifacts_dir / "benchmarks"
 PI_BENCHMARK_LATEST = BENCHMARK_DIR / "pi_benchmark_latest.json"
-REFERENCE_BENCHMARK_LATEST = PROJECT_ROOT / "docs" / "benchmark_reference" / "pi_benchmark_latest_reference.json"
+EDGE_BENCHMARK_LATEST = Path(os.environ.get("SPECIFIC_RANGE_EDGE_RESULTS", str(PROJECT_ROOT / "artifacts/benchmarks/edge_benchmark_latest.json")))
 PSO_DIR = _data_config.artifacts_dir / "pso"
 PSO_LATEST = PSO_DIR / "pso_latest.json"
 FT_PSO_LATEST = PSO_DIR / "ft_transformer_pso_latest.json"
@@ -84,7 +89,8 @@ _dataset_gui_lock = threading.Lock()
 def _get_reference_df() -> pd.DataFrame:
     global _reference_df
     if _reference_df is None:
-        _reference_df = add_reference_row_id(load_reference_dataset())
+        frame = pd.read_csv(RESEARCH_BUNDLE / "test.csv") if RESEARCH_BUNDLE else load_reference_dataset()
+        _reference_df = frame.copy() if RESEARCH_BUNDLE else add_reference_row_id(frame)
     return _reference_df
 
 
@@ -93,7 +99,9 @@ def _get_xgb() -> tuple[XGBoostPredictor | None, str]:
     if _xgb_predictor is not None:
         return _xgb_predictor, ""
     try:
-        _xgb_predictor = XGBoostPredictor.from_artifacts()
+        _xgb_predictor = XGBoostPredictor.from_artifacts(_data_config.xgboost_artifact_dir)
+        if RESEARCH_BUNDLE:
+            _xgb_predictor.model.model.set_params(device="cpu", n_jobs=1)
         return _xgb_predictor, ""
     except Exception as exc:
         logging.exception("XGBoost model loading failed")
@@ -105,7 +113,7 @@ def _get_ft(device: str = "cpu") -> tuple[FTTransformerPredictor | None, str]:
     if _ft_predictor is not None:
         return _ft_predictor, ""
     try:
-        _ft_predictor = FTTransformerPredictor.from_artifacts(device=device)
+        _ft_predictor = FTTransformerPredictor.from_artifacts(_data_config.ft_transformer_artifact_dir, device=device)
         return _ft_predictor, ""
     except Exception as exc:
         logging.exception("FT-Transformer model loading failed")
@@ -117,7 +125,8 @@ def _get_interpolation() -> tuple[SpecificRangeInterpolationService | None, str]
     if _interpolation_service is not None:
         return _interpolation_service, ""
     try:
-        _interpolation_service = SpecificRangeInterpolationService(_data_config)
+        _interpolation_service = (SpecificRangeInterpolationService.from_frame(pd.read_csv(RESEARCH_BUNDLE / "train.csv"))
+                                  if RESEARCH_BUNDLE else SpecificRangeInterpolationService(_data_config))
         return _interpolation_service, ""
     except Exception as exc:
         logging.exception("Interpolation service loading failed")
@@ -162,13 +171,10 @@ def _load_model_summary(model_key: str) -> dict:
             "display_name": "Interpolasyon (Spline)",
             "metrics": {
                 "rows": rows,
-                "mae": 1e-6,
-                "rmse": 1e-6,
-                "mape": 0.01,
-                "r2": 0.999999,
             },
             "config": {"method": DEFAULT_INTERPOLATION_METHOD},
-            "model_size_mb": 0.25,
+            "model_size_mb": (sum(p.stat().st_size for p in [_data_config.one_engine_path, _data_config.two_engine_path] if p.exists()) / (1024 * 1024)
+                              if not RESEARCH_BUNDLE else (RESEARCH_BUNDLE / "train.csv").stat().st_size / (1024 * 1024)),
             "artifact_path": _data_config.project_root / "src" / "interpolation",
         }
 
@@ -186,9 +192,11 @@ def _load_model_summary(model_key: str) -> dict:
     if model_paths["metrics"].exists():
         with model_paths["metrics"].open("r", encoding="utf-8") as handle:
             metrics_blob = json.load(handle)
-        config = metrics_blob.get("extra", {}).get("config", {})
+        config = metrics_blob.get("config") or metrics_blob.get("extra", {}).get("config", {})
         if not metrics and metrics_blob.get("metrics", {}).get("test"):
             metrics = metrics_blob["metrics"]["test"]
+        if not metrics and RESEARCH_BUNDLE:
+            metrics = metrics_blob.get("test", {})
 
     model_size_mb = (
         estimate_model_size_mb(model_paths["model"])
@@ -215,7 +223,9 @@ def _load_pi_benchmark_latest() -> dict | None:
 
 
 def _active_pi_benchmark_path() -> Path:
-    return PI_BENCHMARK_LATEST if PI_BENCHMARK_LATEST.exists() else REFERENCE_BENCHMARK_LATEST
+    # A bundled reference measurement belongs to a different machine/run.
+    # The local cost panel must show missing data until this device is measured.
+    return PI_BENCHMARK_LATEST
 
 
 def _metric_float(source: dict | None, key: str) -> float | None:
@@ -982,7 +992,7 @@ def _subprocess_env() -> dict[str, str]:
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", research_mode=bool(RESEARCH_BUNDLE))
 
 
 @app.route("/api/info")
@@ -1092,11 +1102,14 @@ def api_predict():
         gross_weight=float(body["gross_weight"]),
         drag_index=float(body["drag_index"]),
         mach=float(body["mach"]),
-        fuel_flow=float(body["fuel_flow"]),
+        fuel_flow=float(body.get("fuel_flow", 0.0)) if RESEARCH_BUNDLE else float(body["fuel_flow"]),
         engine_type=str(body["engine_type"]),
     )
 
     result: dict = {}
+    if RESEARCH_BUNDLE:
+        result["research_profile"] = {"inputs": ["altitude", "gross_weight", "drag_index", "mach", "engine_type"],
+                                      "fuel_flow_role": "context only", "interpolation_reference": "train partition"}
     ref = _get_reference_df()
 
     if include_interpolation:
@@ -1135,7 +1148,7 @@ def api_predict():
             result["ft_transformer_error"] = ft_err
 
     # Exact match — use wider tolerance for float precision through JSON
-    exact = find_exact_match(ref, frame, atol=1e-4)
+    exact = find_exact_match(ref, frame, atol=1e-4, use_fuel_flow=not bool(RESEARCH_BUNDLE))
 
     if not exact.empty:
         result["exact_match"] = {
@@ -1146,7 +1159,7 @@ def api_predict():
         result["exact_match"] = None
 
         # Nearest rows — only when no exact match
-        nearest = find_nearest_reference_rows(ref, frame, top_k=5)
+        nearest = find_nearest_reference_rows(ref, frame, top_k=5, use_fuel_flow=not bool(RESEARCH_BUNDLE))
         cols = [c for c in ["row_id", "engine_type", "altitude", "gross_weight",
                             "drag_index", "mach", "fuel_flow", "specific_range",
                             "distance"] if c in nearest.columns]
@@ -1164,6 +1177,13 @@ def api_predict():
             result["weighted_avg_sr"] = None
 
     return jsonify(result)
+
+
+@app.route("/api/benchmark/edge/latest")
+def api_edge_benchmark_latest():
+    if not EDGE_BENCHMARK_LATEST.is_file():
+        return jsonify({"error": "Henüz bu ortamda edge benchmark ölçümü yok. scripts/run_edge_benchmark.py çalıştırın."}), 404
+    return jsonify(json.loads(EDGE_BENCHMARK_LATEST.read_text(encoding="utf-8")))
 
 
 # ---------------------------------------------------------------------------
@@ -1261,6 +1281,8 @@ def api_pi_benchmark_latest():
 
 @app.route("/api/benchmark/pi/run", methods=["POST"])
 def api_pi_benchmark_run():
+    if RESEARCH_BUNDLE:
+        return jsonify({"error": "Ortak girdi paketi için scripts/run_edge_benchmark.py kullanın. Pi ölçümü bu paketin modellerini kullanmaz."}), 409
     body = request.get_json(silent=True) or {}
     models = str(body.get("models", "interpolation,xgboost,ft_transformer"))
     allowed_models = {"interpolation", "xgboost", "ft_transformer"}
@@ -1887,6 +1909,8 @@ def api_setup_commands():
 
 @app.route("/api/setup/run", methods=["POST"])
 def api_setup_run():
+    if RESEARCH_BUNDLE:
+        return jsonify({"error": "Araştırma paketini scripts/prepare_research_bundle.py ile yeni bir klasöre oluşturun."}), 409
     """Run a setup command and stream output via SSE."""
     body = request.get_json(force=True)
     command = body.get("command", "")
@@ -2229,7 +2253,8 @@ def main():
     port = 5000
     url = f"http://localhost:{port}"
     print(f"\n  Specific Range Studio -> {url}\n")
-    threading.Timer(1.5, lambda: webbrowser.open(url)).start()
+    if os.environ.get("SPECIFIC_RANGE_NO_BROWSER") != "1":
+        threading.Timer(1.5, lambda: webbrowser.open(url)).start()
     app.run(host="0.0.0.0", port=port, debug=False)
 
 

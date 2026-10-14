@@ -1,0 +1,11 @@
+.git
+.venv
+artifacts
+data
+Raporlar
+tools
+*.xlsx
+__pycache__
+**/__pycache__
+*.pyc
+work

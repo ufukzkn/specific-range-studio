@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Specific Range Studio</title>
   <meta name="description" content="FT-Transformer ve XGBoost ile uçak performans tahmini ve analiz paneli">
+  <link rel="icon" href="/static/img/logo.ico">
   <link rel="stylesheet" href="/static/css/style.css">
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
 </head>
@@ -27,6 +28,9 @@
       <div class="status-badge status-badge--warn"><span class="status-badge__dot"></span>Yükleniyor…</div>
     </div>
   </header>
+  {% if research_mode %}
+  <div class="form-help" style="padding:12px">Ortak girdi karşılaştırması: irtifa, ağırlık, drag index, Mach ve motor tipi. Yakıt debisi tahminde kullanılmaz. İnterpolasyon eğitim tablosunu kullanır; gösterilen referans satırları ayrılmış test kümesindendir. Jetson ölçümleri ayrı benchmark raporunda tutulur.</div>
+  {% endif %}
 
   <!-- ===== TAB NAVIGATION ===== -->
   <nav class="tab-nav" role="tablist">
@@ -203,6 +207,18 @@
   <!-- TAB 3: GERÇEK PI MALİYET ÖLÇÜMÜ                                    -->
   <!-- ================================================================== -->
   <div class="tab-content" id="tab-cost">
+    {% if research_mode %}
+    <div class="section-header">
+      <div class="section-header__title">Ortak Test Kümesi Benchmarkı</div>
+      <div class="section-header__desc">Kübik interpolasyon, XGBoost ve FT-Transformer; gecikme, bellek ve tahmin hatası</div>
+    </div>
+    <div class="card mb-lg">
+      <button class="btn btn--secondary btn--sm" onclick="loadEdgeBenchmark()">Ölçümü yenile</button>
+      <div id="edge-benchmark-status" class="form-help" style="margin:12px 0"></div>
+      <div id="edge-benchmark-table" style="overflow-x:auto"></div>
+      <div class="form-help">RSS 10 ms aralıkla örneklenir; kesin bellek tepe değeri değildir. Her yöntem ve tekrar ayrı süreçtedir. MAPE yüzdedir; RMSE kaynak hedefinin sayısal birimindedir. CPU karşılaştırmasında FT-Transformer da CPU'da ölçülür.</div>
+    </div>
+    {% else %}
     <div class="section-header">
       <div class="section-header__title">Gerçek Pi Maliyet Ölçümü</div>
       <div class="section-header__desc">XGBoost ve FT-Transformer için Pi benchmark çıktısından doğruluk, hız, bellek ve CPU maliyetini incele</div>
@@ -300,6 +316,7 @@
         <div class="metric-card"><div class="loading-overlay"><div class="spinner"></div></div></div>
       </div>
     </div>
+    {% endif %}
   </div>
 
   <!-- ================================================================== -->
@@ -344,7 +361,7 @@
             <option value="linear">Piecewise Linear</option>
             <option value="newton">Newton Divided Difference</option>
           </select>
-          <div class="form-help">Klasik interpolasyon fuel_flow girdisini kullanmaz; tablo eksenleri altitude, gross_weight, drag_index ve mach üzerinden hesaplanır.</div>
+          <div class="form-help">{% if research_mode %}Üç yöntem de aynı dört sayısal girdiyi ve motor tipini kullanır. Yakıt debisi bağlam bilgisidir.{% else %}Klasik interpolasyon fuel_flow girdisini kullanmaz; tablo eksenleri altitude, gross_weight, drag_index ve mach üzerinden hesaplanır.{% endif %}</div>
         </div>
 
         <hr style="border:none;border-top:1px solid var(--glass-border);margin:var(--space-md) 0">

@@ -1,5 +1,53 @@
 # Aircraft Specific Range Modeling
 
+## Common-input research comparison and Jetson benchmark (12 October 2026)
+
+For a comparison of cubic interpolation, XGBoost and the local FT-Transformer-style
+regressor, use the new research bundle workflow. The older five-input training and
+Pi workflows below are retained for existing artifacts; they are not the common-input experiment.
+
+- [Audit, changes and verification](docs/REPO_REVIEW_20261012.md)
+- [Workstation preparation, Jetson installation and Docker option](docs/JETSON_BENCHMARK.md)
+- [Step-by-step Turkish guide to take to the Jetson](docs/JETSON_SAHA_KILAVUZU.md)
+
+```bash
+python -m pip install -r requirements-edge.txt
+# Install a suitable PyTorch build separately on the workstation.
+python scripts/run_data_pipeline.py
+python scripts/prepare_research_bundle.py --ft-device cpu --epochs 50
+python scripts/run_edge_benchmark.py --ft-device cpu --sample-size 200 --warmup 50 --repetitions 500 --trials 3
+```
+
+On Jetson, copy the **same** bundle and run inference only. First use CPU for all
+methods; then repeat with `--ft-device cuda` for a separate GPU scenario.
+`--require-jetson` prevents another machine's measurements being labelled as Jetson measurements.
+CUDA requests fail if CUDA is unavailable. PyTorch must match the target JetPack;
+the generic full requirements file must not replace the NVIDIA PyTorch installation.
+
+The research models use `altitude`, `gross_weight`, `drag_index`, `mach`, and
+`engine_type`. `fuel_flow` remains context only: in the current input tables,
+`fuel_flow * specific_range / mach` is constant within each altitude.
+Conflicting labels are quarantined, repeated conditions deduplicated, and identical
+conditions never cross train/validation/test partitions. Cubic interpolation uses
+training nodes only and is evaluated on the same held-out test sample as both models.
+The protocol holds out interior Mach nodes on known curves; it does not establish
+generalization to unseen flights, aircraft, or entirely unseen curves.
+
+To run the Flask UI with the common-input models:
+
+```bash
+# Linux / Jetson
+export SPECIFIC_RANGE_BUNDLE="$PWD/artifacts/research_bundle_portable"
+export SPECIFIC_RANGE_NO_BROWSER=1
+python scripts/web_app/server.py
+```
+
+The research-mode `Maliyet` panel reads the new local edge benchmark. It displays
+the actual device and experiment label, including whether a Jetson was verified.
+There are no invented interpolation accuracy values or automatic substitutions
+of another machine's reference measurements. Training/setup remains a CLI operation
+for this frozen research profile.
+
 This repository contains a modular research codebase for predicting `specific_range` from aircraft performance tables. The current focus is tabular modeling with:
 
 - `FT-Transformer` as the main model,

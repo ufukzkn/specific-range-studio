@@ -247,6 +247,27 @@ class SpecificRangeInterpolationModel:
             raise ValueError(f"No interpolation data could be loaded from {self.excel_path}")
         self._mach_interpolators: dict[InterpolationMethod, dict[tuple[int, int, int], object]] = {}
 
+    @classmethod
+    def from_frame(cls, frame: pd.DataFrame) -> "SpecificRangeInterpolationModel":
+        """Build from an explicit reference partition, without reading test labels."""
+        model = cls.__new__(cls)
+        model.excel_path = None
+        model.data = {}
+        for (alt, weight, drag), group in frame.groupby(["altitude", "gross_weight", "drag_index"]):
+            points = group.groupby("mach", as_index=False)["specific_range"].mean().sort_values("mach")
+            if len(points) >= 2:
+                model.data.setdefault(float(alt), {}).setdefault(float(weight), {})[float(drag)] = {
+                    "mach": points.mach.to_numpy(dtype=float),
+                    "sr": points.specific_range.to_numpy(dtype=float),
+                }
+        if not model.data:
+            raise ValueError("Reference partition has no curves with at least two Mach nodes.")
+        model.altitudes = sorted(model.data)
+        model.weights = sorted({w for a in model.data.values() for w in a})
+        model.drags = sorted({d for a in model.data.values() for w in a.values() for d in w})
+        model._mach_interpolators = {}
+        return model
+
     def _get_mach_interpolator(self, method: InterpolationMethod, altitude: int, weight: int, drag: int):
         method_cache = self._mach_interpolators.setdefault(method, {})
         key = (altitude, weight, drag)
@@ -314,10 +335,21 @@ class SpecificRangeInterpolationService:
     def __init__(self, data_config: DataConfig | None = None) -> None:
         self.data_config = data_config or DataConfig()
         self._models: dict[str, SpecificRangeInterpolationModel] = {}
+        self._partition_backed = False
+
+    @classmethod
+    def from_frame(cls, frame: pd.DataFrame) -> "SpecificRangeInterpolationService":
+        service = cls()
+        service._partition_backed = True
+        for engine, group in frame.groupby("engine_type"):
+            service._models[_canonical_engine_type(engine)] = SpecificRangeInterpolationModel.from_frame(group)
+        return service
 
     def _get_model(self, engine_type: str) -> SpecificRangeInterpolationModel:
         engine_type = _canonical_engine_type(engine_type)
         if engine_type not in self._models:
+            if self._partition_backed:
+                raise ValueError(f"Engine type absent from reference partition: {engine_type}")
             path = self.data_config.one_engine_path if engine_type == "one_engine" else self.data_config.two_engine_path
             if not path.exists():
                 raise FileNotFoundError(f"Interpolation workbook not found: {path}")

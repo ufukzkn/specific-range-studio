@@ -1,6 +1,8 @@
 .venv/
 __pycache__/
 *.pyc
+.playwright-cli/
+output/playwright/
 artifacts/
 data/processed/
 external_apps/

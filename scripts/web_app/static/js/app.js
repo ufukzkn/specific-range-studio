@@ -221,9 +221,38 @@ async function loadComparison() {
 
 async function loadCostTab() {
   window._costLoaded = true;
+  if (document.getElementById('edge-benchmark-status')) {
+    await loadEdgeBenchmark();
+    return;
+  }
   updateCostControlLabels();
   await loadCostSimulation();
   await loadLatestPsoSummary();
+}
+
+async function loadEdgeBenchmark() {
+  const status = document.getElementById('edge-benchmark-status');
+  const container = document.getElementById('edge-benchmark-table');
+  container.replaceChildren();
+  try {
+    const data = await api('/api/benchmark/edge/latest');
+    status.textContent = `${data.verified_jetson ? 'Jetson üzerinde ölçüldü' : 'Yerel kontrol; Jetson sonucu değildir'} | ${data.experiment_label} | ${data.complete ? 'Tüm ölçümler tamamlandı' : 'Eksik/başarısız ölçüm var'} | ${data.created_at}`;
+    const table = document.createElement('table');
+    table.className = 'data-table';
+    const header = table.insertRow();
+    ['Yöntem / tekrar', 'Cihaz', 'p50 (ms)', 'p95 (ms)', 'p99 (ms)', 'RSS (MiB)', 'CPU (%)', 'RMSE', 'MAPE (%)'].forEach(label => {
+      const cell = document.createElement('th'); cell.textContent = label; header.appendChild(cell);
+    });
+    for (const item of data.trials || []) {
+      const row = table.insertRow();
+      const values = item.available ? [item.model_key + ' / ' + item.trial, item.device,
+        item.latency_ms.p50.toFixed(3), item.latency_ms.p95.toFixed(3), item.latency_ms.p99.toFixed(3),
+        (item.memory_bytes.rss_peak_sampled / 1048576).toFixed(1), item.cpu_percent.process_avg.toFixed(1),
+        item.accuracy.rmse.toFixed(6), item.accuracy.mape.toFixed(2)] : [item.model_key + ' / ' + item.trial, item.error];
+      values.forEach(value => { row.insertCell().textContent = String(value); });
+    }
+    container.appendChild(table);
+  } catch (error) { status.textContent = error.message; }
 }
 
 function getCostInputs() {

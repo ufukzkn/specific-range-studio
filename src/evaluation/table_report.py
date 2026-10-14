@@ -74,7 +74,7 @@ def build_row_level_comparison(
         actual = float(row["specific_range"])
         rows.append(
             {
-                "row_id": int(idx),
+                "row_id": int(row["row_id"]) if "row_id" in row else int(idx),
                 "engine_type": str(row["engine_type"]),
                 "altitude": float(row["altitude"]),
                 "gross_weight": float(row["gross_weight"]),

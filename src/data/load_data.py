@@ -122,7 +122,8 @@ def read_workbook(spec: WorkbookSpec) -> pd.DataFrame:
         raise FileNotFoundError(f"Workbook not found: {spec.path}")
 
     try:
-        workbook = pd.ExcelFile(spec.path, engine="openpyxl")
+        with pd.ExcelFile(spec.path, engine="openpyxl") as workbook:
+            sheet_names = list(workbook.sheet_names)
     except ImportError as exc:
         raise ImportError(
             "openpyxl is required to read the Excel workbooks. "
@@ -130,7 +131,7 @@ def read_workbook(spec: WorkbookSpec) -> pd.DataFrame:
         ) from exc
 
     frames: list[pd.DataFrame] = []
-    for sheet_name in workbook.sheet_names:
+    for sheet_name in sheet_names:
         try:
             raw = pd.read_excel(spec.path, sheet_name=sheet_name, engine="openpyxl")
         except Exception as exc:
@@ -152,7 +153,11 @@ def read_workbook(spec: WorkbookSpec) -> pd.DataFrame:
         if "altitude" not in normalized.columns:
             normalized["altitude"] = altitude_from_sheet
         else:
-            normalized["altitude"] = normalized["altitude"].fillna(altitude_from_sheet)
+            # Textual Sea Level values are not NaN, so filling before parsing loses
+            # the entire sea-level sheet during final numeric cleaning.
+            altitude_text = normalized["altitude"].astype(str).str.strip().str.lower()
+            altitude_values = normalized["altitude"].mask(altitude_text.isin(["sea level", "sea_level"]), 0.0)
+            normalized["altitude"] = _safe_to_numeric(altitude_values).fillna(altitude_from_sheet)
 
         normalized["engine_type"] = spec.engine_type
         frames.append(normalized)

@@ -137,12 +137,15 @@ def find_exact_match(
     query_frame: pd.DataFrame,
     *,
     atol: float = 1e-9,
+    use_fuel_flow: bool = True,
 ) -> pd.DataFrame:
     """Return rows that exactly match the query values within tolerance."""
 
     query = query_frame.iloc[0]
     subset = reference_df[reference_df["engine_type"] == query["engine_type"]].copy()
     numeric_columns = ["altitude", "gross_weight", "drag_index", "mach", "fuel_flow"]
+    if not use_fuel_flow:
+        numeric_columns.remove("fuel_flow")
     mask = np.ones(len(subset), dtype=bool)
     for column in numeric_columns:
         mask &= np.isclose(subset[column].to_numpy(dtype=float), float(query[column]), atol=atol, rtol=0.0)
@@ -154,12 +157,15 @@ def find_nearest_reference_rows(
     query_frame: pd.DataFrame,
     *,
     top_k: int = 5,
+    use_fuel_flow: bool = True,
 ) -> pd.DataFrame:
     """Find nearest real rows for the current query using normalized numeric distance."""
 
     query = query_frame.iloc[0]
     subset = reference_df[reference_df["engine_type"] == query["engine_type"]].copy()
     numeric_columns = ["altitude", "gross_weight", "drag_index", "mach", "fuel_flow"]
+    if not use_fuel_flow:
+        numeric_columns.remove("fuel_flow")
     if subset.empty:
         return subset
 
