@@ -1,0 +1,698 @@
+{
+  "schema_version": 2,
+  "run_id": "edge_20261117T121955Z_065ba760",
+  "created_at": "2026-11-17T12:19:55.045550+00:00",
+  "system": {
+    "hostname": "tayfun-desktop",
+    "platform": "Linux-5.15.148-tegra-aarch64-with-glibc2.35",
+    "machine": "aarch64",
+    "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "cpu_count": 6,
+    "ram_bytes": 7989907456,
+    "jetson_model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super",
+    "l4t_release": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia",
+    "container": false,
+    "power_settings": {
+      "nvpmodel -q": {
+        "exit_code": 0,
+        "stdout": "NV Power Mode: MAXN_SUPER\n2\n",
+        "stderr": ""
+      },
+      "jetson_clocks --show": {
+        "exit_code": 1,
+        "stdout": "SOC family:tegra234  Machine:NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super\nError: Run this script(/usr/bin/jetson_clocks) as a root user\n",
+        "stderr": ""
+      },
+      "dpkg-query -W nvidia-jetpack": {
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "dpkg-query: no packages found matching nvidia-jetpack\n"
+      }
+    },
+    "thermal_zones": {
+      "cv0-thermal": null,
+      "cpu-thermal": "51187",
+      "soc2-thermal": "50406",
+      "soc0-thermal": "51093",
+      "cv1-thermal": null,
+      "gpu-thermal": "51312",
+      "tj-thermal": "51656",
+      "soc1-thermal": "51656",
+      "cv2-thermal": null
+    }
+  },
+  "verified_jetson": true,
+  "bundle_manifest_sha256": "76f90ec33b3225991a0d413d7be26064f825e7d62fc3190f17cb3964c3d6239b",
+  "experiment_label": "functional_check",
+  "data_audit": {
+    "input_rows": 62740,
+    "invalid_rows": 0,
+    "conflicting_rows": 803,
+    "duplicate_rows_removed": 49,
+    "unique_conditions": 61888,
+    "boundary_nodes_pinned_to_train": 2905,
+    "partition_rows": {
+      "train": 44193,
+      "valid": 8847,
+      "test": 8848
+    },
+    "split_protocol": "known-curve interior Mach holdout; endpoints in train; seed-fixed; no condition overlap",
+    "numerical_features": [
+      "altitude",
+      "gross_weight",
+      "drag_index",
+      "mach"
+    ],
+    "categorical_features": [
+      "engine_type"
+    ],
+    "excluded_predictor": "fuel_flow (retained only as context; target-linked in current tables)",
+    "specific_range_unit": "source numeric unit; workbook header NM is insufficient to verify NM/lb",
+    "source_provenance": "user-provided digitized tables; independent ground truth not established"
+  },
+  "source_code": {
+    "commit": null,
+    "status": null,
+    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python_file_sha256": {
+      "src/__init__.py": "fcc9b2ba3a052c2f8e3a32ab67dec52598b88d41e64784544cee137c9a7af3e5",
+      "src/data/__init__.py": "33cf9ce1a81253ebdca6f009dfc89f3e7432727eed48c18ab616091a663b7131",
+      "src/data/load_data.py": "bd5de79248a7a01ab760660a748d89d5aa1a0502bdb71cadbdbd8d5f7445f231",
+      "src/data/preprocess.py": "8735794b750e1cfa823d2ba9745294ece95023f7b3f60daefeee4c77e1c7e6b8",
+      "src/data/split.py": "71234d085297be9bfce0cf433c5faa60692724d319b4bfdc05692b6291e49289",
+      "src/evaluation/__init__.py": "1d007514cd2ba7fff75cf4062e2869359f4de20678378bf3eeea2eae880e8459",
+      "src/evaluation/benchmark.py": "f7e930bcd4e6b04b8662705952f60734121864207d651945c77f3ec010bc2519",
+      "src/evaluation/edge_benchmark.py": "8bdd9bba6c977ff3f6f7c094ac3f5c46c0b7c00f56af9fec044636416eb46691",
+      "src/evaluation/heldout_reports.py": "cd4207862dac53508e91126e0490cbfc42c6429f3e384029bbcb7fe544e64d55",
+      "src/evaluation/metrics.py": "f233d9c57f0380598acd168be63cb875f7604bfed5331d680aeff8ab1895ad58",
+      "src/evaluation/nomogram_report.py": "6d3685cf53caa7fefb619a3f6c486bbab20e57fa45e94327965531e957b3b397",
+      "src/evaluation/pi_benchmark.py": "2765930891fc9d916f7ae3bfd686e5140c019813b0cc4ba720d447e458d51565",
+      "src/evaluation/report_figures.py": "ad78fd615d8240eab6cfe6e6a9ed176a7075205482ce9483cb7e47a8bd835873",
+      "src/evaluation/research_bundle.py": "00c23526d2bccee8957d58b29dee5cd44d43049345f753ed17f91714435a9f5b",
+      "src/evaluation/table_report.py": "f8f198f31ba9b01d905572e608935b6a02067aaf3291f3b82dcfbe0c1c643bb0",
+      "src/inference/__init__.py": "53a31af36dbc211e7c7e4ddab1a5c014f3c384d3fba51bc01763248bbf05617f",
+      "src/inference/predictors.py": "b5e8ccfa448232f23f71fcffe2d8d8e1099de62027e6abaca9898256106245d7",
+      "src/interpolation/__init__.py": "92f9ae1a1931b408312f7322bfa2c0bc384e2ced49c2cd72d0eb3fdb14a16c87",
+      "src/interpolation/specific_range.py": "48c4aca2039bdb8a0e69ef5afb2304bb3872acb59873df81452d261d600cc0c8",
+      "src/models/__init__.py": "7682952ba87c55e4e5a8eeeb30bf2ef6eaf99430b6136bda0c100c96652e5dd2",
+      "src/models/ft_transformer.py": "6e4821f92b1a77e7349c7ef8a26bf4778e8c649612f111c1016bd2283a94f334",
+      "src/models/xgboost_baseline.py": "ede16a92112a7e63342c992f1f9fecd650de45355160adb2e4a37bfdb4a624cf",
+      "src/optimization/__init__.py": "eccb48ed972fbdf6e1bde6eecccb720ad9725818b57fb7561298990cf55e8252",
+      "src/optimization/objective.py": "4803856d779918559d9a6aa42b1f2ecfc4dfa9197947b010710540f9a02a3227",
+      "src/optimization/pso_search.py": "948095ce7dc115107cde9f6178d4a9374bc17b8126f7ece48bbcb8029cdc3e7a",
+      "src/utils/__init__.py": "202c0558a431d479126d73379c54615f34028f69f7c7a3445ea14d9c1213f7eb",
+      "src/utils/config.py": "5f616dae891cf4824adf63dfa0228a8104c2942cc8750f74dca121c4b398851f",
+      "src/utils/device.py": "3d5f4ce93b7936132c728a2bbddd0714c1b4ed1e60c9946df9c260dcfd6dd388",
+      "src/utils/seed.py": "b2b0055c7bc1c17413c708c911de321e3d1690cd9b5f678d583fa0e74aa38301",
+      "scripts/compare_models.py": "ff30a223b3f3d9f23ebe6b2e5399d613be0fd7c9339ad0260834696b6feb3717",
+      "scripts/desktop_app_legacy.py": "6a04c655fab84c722212c86a3579a996219d3fda645976d3c782f31319af8a6c",
+      "scripts/desktop_app_qt.py": "5d2141fb2ae36031933ec3420c253faffe7e8185c67e1a0ebfa6a5b1a6fbde25",
+      "scripts/export_jetson_package.py": "b4aab692eca50e1cad3c5c9964bc5b9a0251153a44eb3a3523674ce4081d07fb",
+      "scripts/inspect_edge_environment.py": "bed112d7748d963a46f8b53837b366c5b5f53421b19b0b4e8b799e646cfc8dfc",
+      "scripts/jetson_auto.py": "6830778db7fec8ad08761971cd7576f4c8261b873e2f022b18577c8de81e6d60",
+      "scripts/jetson_github_login.py": "007dc1e3e83f38942cdad235363a3394ea0773b1c801919f301259199397f412",
+      "scripts/jetson_usb_check.py": "61654aed9816f662e02749de11ddee4716136e6d62d59973f796685c6a2a08ac",
+      "scripts/launch_ui.py": "45cc56e04f1ea3a19cccf1eb18cb0a392fc8024505e61c76bc286943b5e67b50",
+      "scripts/prepare_research_bundle.py": "5f6a23f94abe82e1b6a8bbedcc5ca624f6f46663ba6b065af69ed79e87fde081",
+      "scripts/publish_jetson_results.py": "6ac235470160b65fff91c89f6425401bebc2163cea21a32f217dde8a4674ee34",
+      "scripts/refresh_research_reports.py": "08c2f76a7ad61ea0bd6b801635d0a62c3f149c0d3e7358dc6d6980ea8cf4f10e",
+      "scripts/run_data_pipeline.py": "27dd693dba21a4f8515f1c81bb2cad86176e23db431e6bf4fe8a19793bf4308e",
+      "scripts/run_edge_benchmark.py": "f037504f536d09355e633211c56e8a2905bd9e3527bfec1ac4f3ad273b234a71",
+      "scripts/run_nomogram_report.py": "027c0a3914b3ba79ef74258aaeb854d2bb563b0e9771521c5f7d83772923bb0a",
+      "scripts/run_pi_benchmark.py": "eff55adf34b59a42b730e41c806a5b7b5e06e4cf49abe51fd8c8cd8e62d1b455",
+      "scripts/run_pso.py": "dc3576aae2cb540bb3a47057c41fea1f2272ce75f4a0be8146d9576542bee3df",
+      "scripts/run_table_report.py": "e643cb8e91b21f9f41b96e93402c0ef59d1fcc86b5ff892d9e5d503f0deaee28",
+      "scripts/setup_jetson_torch.py": "b8966d5130e36df29962a1d5768c7d0f7da446e07b210e9cec603e140051fb23",
+      "scripts/train_ft_transformer.py": "f87bfdb7112ebc635efbeae7d19a6778299782780cad5294531e61d685899db7",
+      "scripts/train_xgboost.py": "897ff7fb95ea479c9617a00db4b74a76d6ffdc193172776e356042bac1d43bf3",
+      "scripts/web_app/server.py": "cf196cc2dab86990ea5f1692723fe093e366099b374ff81fcbba6d488e0917fd"
+    }
+  },
+  "config": {
+    "bundle": "/home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/project/artifacts/research_bundle_portable",
+    "output": "/home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/output/cpu_benchmark",
+    "ft_device": "cpu",
+    "sample_size": 200,
+    "warmup": 50,
+    "repetitions": 1000,
+    "trials": 3,
+    "threads": 1,
+    "seed": 42,
+    "require_jetson": true,
+    "worker_config": null
+  },
+  "trials": [
+    {
+      "model_key": "ft_transformer",
+      "available": true,
+      "trial": 1,
+      "requested_device": "cpu",
+      "device": "cpu",
+      "pid": 9827,
+      "load_seconds": 2.245559136000338,
+      "measured_start": "2026-11-17T12:19:59.223164+00:00",
+      "measured_end": "2026-11-17T12:20:10.596096+00:00",
+      "sample_count": 200,
+      "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+      "warmup_count": 50,
+      "repetitions": 1000,
+      "elapsed_sec": 11.372549536000406,
+      "throughput_per_sec": 87.93103049008027,
+      "latency_ms": {
+        "min": 11.005888,
+        "mean": 11.368251552,
+        "p50": 11.359232,
+        "p95": 11.6508608,
+        "p99": 12.002876160000001,
+        "max": 12.718016
+      },
+      "accuracy": {
+        "rmse": 0.02573572707180256,
+        "mae": 0.01119430836338818,
+        "r2": 0.8979322081571072,
+        "mape": 16.538767742249178
+      },
+      "cpu_percent": {
+        "process_avg": 100.768960941632,
+        "normalization": "one logical CPU = 100%"
+      },
+      "memory_bytes": {
+        "rss_before_load": 137101312,
+        "rss_after_warmup": 319729664,
+        "rss_peak_sampled": 320049152,
+        "sample_interval_ms": 10
+      },
+      "gpu_memory": null,
+      "artifact_bytes": 439427,
+      "artifact_sha256": {
+        "ft_transformer/model.pt": "0b4b824a70f4e0a4dd132eb7edf61cccf1ab27562c279e803da88b705c855183",
+        "ft_transformer/preprocessor.joblib": "b61a67e2cb3d02850794dccaf8f86f98708a423fcb05194ad55ac4ffe15c6f22"
+      },
+      "packages": {
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2",
+        "joblib": "1.4.2",
+        "psutil": "7.2.2",
+        "xgboost": "2.1.4",
+        "torch": "2.5.1"
+      }
+    },
+    {
+      "model_key": "xgboost",
+      "available": true,
+      "trial": 1,
+      "requested_device": "cpu",
+      "device": "cpu",
+      "pid": 9842,
+      "load_seconds": 0.12775254400003178,
+      "measured_start": "2026-11-17T12:20:13.590662+00:00",
+      "measured_end": "2026-11-17T12:20:19.335322+00:00",
+      "sample_count": 200,
+      "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+      "warmup_count": 50,
+      "repetitions": 1000,
+      "elapsed_sec": 5.744318400000338,
+      "throughput_per_sec": 174.08505768063642,
+      "latency_ms": {
+        "min": 5.510016,
+        "mean": 5.741297408,
+        "p50": 5.7291039999999995,
+        "p95": 5.915468799999999,
+        "p99": 6.08480576,
+        "max": 6.211776
+      },
+      "accuracy": {
+        "rmse": 0.0225799657178132,
+        "mae": 0.006995640613094568,
+        "r2": 0.9214289799779846,
+        "mape": 7.727436425484339
+      },
+      "cpu_percent": {
+        "process_avg": 101.3175035701304,
+        "normalization": "one logical CPU = 100%"
+      },
+      "memory_bytes": {
+        "rss_before_load": 137101312,
+        "rss_after_warmup": 160743424,
+        "rss_peak_sampled": 161947648,
+        "sample_interval_ms": 10
+      },
+      "gpu_memory": null,
+      "artifact_bytes": 2149532,
+      "artifact_sha256": {
+        "xgboost/model.json": "94baa9f2c59d9b660ed41f8221e64933f88147a42dd4472ecbb5bf95f930ef28",
+        "xgboost/config.json": "0c7021199264ac0a8875d1c5ad07c254060426cd88dd02c28c035ddddb04eb0f",
+        "xgboost/preprocessor.joblib": "b61a67e2cb3d02850794dccaf8f86f98708a423fcb05194ad55ac4ffe15c6f22"
+      },
+      "packages": {
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2",
+        "joblib": "1.4.2",
+        "psutil": "7.2.2",
+        "xgboost": "2.1.4"
+      }
+    },
+    {
+      "model_key": "interpolation",
+      "available": true,
+      "trial": 1,
+      "requested_device": "cpu",
+      "device": "cpu",
+      "pid": 9844,
+      "load_seconds": 2.3405778879996433,
+      "measured_start": "2026-11-17T12:20:24.279210+00:00",
+      "measured_end": "2026-11-17T12:20:46.985093+00:00",
+      "sample_count": 200,
+      "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+      "warmup_count": 50,
+      "repetitions": 1000,
+      "elapsed_sec": 22.70553001600001,
+      "throughput_per_sec": 44.0421341979388,
+      "latency_ms": {
+        "min": 13.026528,
+        "mean": 22.702966496000002,
+        "p50": 24.876176,
+        "p95": 28.2111296,
+        "p99": 28.8063008,
+        "max": 290.391808
+      },
+      "accuracy": {
+        "rmse": 0.15375658023074157,
+        "mae": 0.02157955751784711,
+        "r2": -2.6432020446947093,
+        "mape": 9.323794514829796
+      },
+      "cpu_percent": {
+        "process_avg": 106.40579622222013,
+        "normalization": "one logical CPU = 100%"
+      },
+      "memory_bytes": {
+        "rss_before_load": 137093120,
+        "rss_after_warmup": 150564864,
+        "rss_peak_sampled": 151891968,
+        "sample_interval_ms": 10
+      },
+      "gpu_memory": null,
+      "artifact_bytes": 3321179,
+      "artifact_sha256": {
+        "train.csv": "a0d6887918d6f2e90fda3c140f15e81c531b1d24a1e60d6da1738580e24819d8"
+      },
+      "packages": {
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2",
+        "joblib": "1.4.2",
+        "psutil": "7.2.2",
+        "xgboost": "2.1.4"
+      }
+    },
+    {
+      "model_key": "xgboost",
+      "available": true,
+      "trial": 2,
+      "requested_device": "cpu",
+      "device": "cpu",
+      "pid": 9846,
+      "load_seconds": 0.1287001919999966,
+      "measured_start": "2026-11-17T12:20:52.791707+00:00",
+      "measured_end": "2026-11-17T12:20:58.500349+00:00",
+      "sample_count": 200,
+      "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+      "warmup_count": 50,
+      "repetitions": 1000,
+      "elapsed_sec": 5.70828911999979,
+      "throughput_per_sec": 175.18383862099066,
+      "latency_ms": {
+        "min": 5.531904,
+        "mean": 5.705269472,
+        "p50": 5.69384,
+        "p95": 5.8689536,
+        "p99": 6.0310729599999995,
+        "max": 6.218432
+      },
+      "accuracy": {
+        "rmse": 0.0225799657178132,
+        "mae": 0.006995640613094568,
+        "r2": 0.9214289799779846,
+        "mape": 7.727436425484339
+      },
+      "cpu_percent": {
+        "process_avg": 101.0810748843116,
+        "normalization": "one logical CPU = 100%"
+      },
+      "memory_bytes": {
+        "rss_before_load": 137109504,
+        "rss_after_warmup": 160751616,
+        "rss_peak_sampled": 161955840,
+        "sample_interval_ms": 10
+      },
+      "gpu_memory": null,
+      "artifact_bytes": 2149532,
+      "artifact_sha256": {
+        "xgboost/model.json": "94baa9f2c59d9b660ed41f8221e64933f88147a42dd4472ecbb5bf95f930ef28",
+        "xgboost/config.json": "0c7021199264ac0a8875d1c5ad07c254060426cd88dd02c28c035ddddb04eb0f",
+        "xgboost/preprocessor.joblib": "b61a67e2cb3d02850794dccaf8f86f98708a423fcb05194ad55ac4ffe15c6f22"
+      },
+      "packages": {
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2",
+        "joblib": "1.4.2",
+        "psutil": "7.2.2",
+        "xgboost": "2.1.4"
+      }
+    },
+    {
+      "model_key": "ft_transformer",
+      "available": true,
+      "trial": 2,
+      "requested_device": "cpu",
+      "device": "cpu",
+      "pid": 9848,
+      "load_seconds": 2.229072255999199,
+      "measured_start": "2026-11-17T12:21:03.029751+00:00",
+      "measured_end": "2026-11-17T12:21:14.216943+00:00",
+      "sample_count": 200,
+      "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+      "warmup_count": 50,
+      "repetitions": 1000,
+      "elapsed_sec": 11.186815168000066,
+      "throughput_per_sec": 89.39094684075091,
+      "latency_ms": {
+        "min": 10.764864,
+        "mean": 11.182529184,
+        "p50": 11.187184,
+        "p95": 11.325057600000001,
+        "p99": 11.523226560000001,
+        "max": 11.800768
+      },
+      "accuracy": {
+        "rmse": 0.02573572707180256,
+        "mae": 0.01119430836338818,
+        "r2": 0.8979322081571072,
+        "mape": 16.538767742249178
+      },
+      "cpu_percent": {
+        "process_avg": 100.65420614268554,
+        "normalization": "one logical CPU = 100%"
+      },
+      "memory_bytes": {
+        "rss_before_load": 136916992,
+        "rss_after_warmup": 319729664,
+        "rss_peak_sampled": 320049152,
+        "sample_interval_ms": 10
+      },
+      "gpu_memory": null,
+      "artifact_bytes": 439427,
+      "artifact_sha256": {
+        "ft_transformer/model.pt": "0b4b824a70f4e0a4dd132eb7edf61cccf1ab27562c279e803da88b705c855183",
+        "ft_transformer/preprocessor.joblib": "b61a67e2cb3d02850794dccaf8f86f98708a423fcb05194ad55ac4ffe15c6f22"
+      },
+      "packages": {
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2",
+        "joblib": "1.4.2",
+        "psutil": "7.2.2",
+        "xgboost": "2.1.4",
+        "torch": "2.5.1"
+      }
+    },
+    {
+      "model_key": "interpolation",
+      "available": true,
+      "trial": 2,
+      "requested_device": "cpu",
+      "device": "cpu",
+      "pid": 9859,
+      "load_seconds": 2.2750865600000907,
+      "measured_start": "2026-11-17T12:21:19.846563+00:00",
+      "measured_end": "2026-11-17T12:21:42.468009+00:00",
+      "sample_count": 200,
+      "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+      "warmup_count": 50,
+      "repetitions": 1000,
+      "elapsed_sec": 22.621073439999236,
+      "throughput_per_sec": 44.20656706024265,
+      "latency_ms": {
+        "min": 12.728352,
+        "mean": 22.618499647999997,
+        "p50": 24.758367999999997,
+        "p95": 28.300432,
+        "p99": 28.82897632,
+        "max": 287.294432
+      },
+      "accuracy": {
+        "rmse": 0.15375658023074157,
+        "mae": 0.02157955751784711,
+        "r2": -2.6432020446947093,
+        "mape": 9.323794514829796
+      },
+      "cpu_percent": {
+        "process_avg": 106.1399675116426,
+        "normalization": "one logical CPU = 100%"
+      },
+      "memory_bytes": {
+        "rss_before_load": 137109504,
+        "rss_after_warmup": 150581248,
+        "rss_peak_sampled": 151904256,
+        "sample_interval_ms": 10
+      },
+      "gpu_memory": null,
+      "artifact_bytes": 3321179,
+      "artifact_sha256": {
+        "train.csv": "a0d6887918d6f2e90fda3c140f15e81c531b1d24a1e60d6da1738580e24819d8"
+      },
+      "packages": {
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2",
+        "joblib": "1.4.2",
+        "psutil": "7.2.2",
+        "xgboost": "2.1.4"
+      }
+    },
+    {
+      "model_key": "xgboost",
+      "available": true,
+      "trial": 3,
+      "requested_device": "cpu",
+      "device": "cpu",
+      "pid": 9861,
+      "load_seconds": 0.13006313599998975,
+      "measured_start": "2026-11-17T12:21:48.284308+00:00",
+      "measured_end": "2026-11-17T12:21:54.006472+00:00",
+      "sample_count": 200,
+      "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+      "warmup_count": 50,
+      "repetitions": 1000,
+      "elapsed_sec": 5.72178015999998,
+      "throughput_per_sec": 174.7707832242201,
+      "latency_ms": {
+        "min": 5.500416,
+        "mean": 5.718762976,
+        "p50": 5.673296000000001,
+        "p95": 6.0737392,
+        "p99": 6.433805759999999,
+        "max": 8.691584
+      },
+      "accuracy": {
+        "rmse": 0.0225799657178132,
+        "mae": 0.006995640613094568,
+        "r2": 0.9214289799779846,
+        "mape": 7.727436425484339
+      },
+      "cpu_percent": {
+        "process_avg": 100.66797113715076,
+        "normalization": "one logical CPU = 100%"
+      },
+      "memory_bytes": {
+        "rss_before_load": 137105408,
+        "rss_after_warmup": 160743424,
+        "rss_peak_sampled": 161943552,
+        "sample_interval_ms": 10
+      },
+      "gpu_memory": null,
+      "artifact_bytes": 2149532,
+      "artifact_sha256": {
+        "xgboost/model.json": "94baa9f2c59d9b660ed41f8221e64933f88147a42dd4472ecbb5bf95f930ef28",
+        "xgboost/config.json": "0c7021199264ac0a8875d1c5ad07c254060426cd88dd02c28c035ddddb04eb0f",
+        "xgboost/preprocessor.joblib": "b61a67e2cb3d02850794dccaf8f86f98708a423fcb05194ad55ac4ffe15c6f22"
+      },
+      "packages": {
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2",
+        "joblib": "1.4.2",
+        "psutil": "7.2.2",
+        "xgboost": "2.1.4"
+      }
+    },
+    {
+      "model_key": "interpolation",
+      "available": true,
+      "trial": 3,
+      "requested_device": "cpu",
+      "device": "cpu",
+      "pid": 9863,
+      "load_seconds": 2.2932742719995076,
+      "measured_start": "2026-11-17T12:21:58.851904+00:00",
+      "measured_end": "2026-11-17T12:22:20.942537+00:00",
+      "sample_count": 200,
+      "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+      "warmup_count": 50,
+      "repetitions": 1000,
+      "elapsed_sec": 22.09028230400054,
+      "throughput_per_sec": 45.26877412602828,
+      "latency_ms": {
+        "min": 13.025472,
+        "mean": 22.087596832,
+        "p50": 24.330064,
+        "p95": 26.549177599999997,
+        "p99": 29.15592448,
+        "max": 292.878272
+      },
+      "accuracy": {
+        "rmse": 0.15375658023074157,
+        "mae": 0.02157955751784711,
+        "r2": -2.6432020446947093,
+        "mape": 9.323794514829796
+      },
+      "cpu_percent": {
+        "process_avg": 104.8424808758815,
+        "normalization": "one logical CPU = 100%"
+      },
+      "memory_bytes": {
+        "rss_before_load": 136986624,
+        "rss_after_warmup": 150581248,
+        "rss_peak_sampled": 151916544,
+        "sample_interval_ms": 10
+      },
+      "gpu_memory": null,
+      "artifact_bytes": 3321179,
+      "artifact_sha256": {
+        "train.csv": "a0d6887918d6f2e90fda3c140f15e81c531b1d24a1e60d6da1738580e24819d8"
+      },
+      "packages": {
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2",
+        "joblib": "1.4.2",
+        "psutil": "7.2.2",
+        "xgboost": "2.1.4"
+      }
+    },
+    {
+      "model_key": "ft_transformer",
+      "available": true,
+      "trial": 3,
+      "requested_device": "cpu",
+      "device": "cpu",
+      "pid": 9865,
+      "load_seconds": 2.2415031999998973,
+      "measured_start": "2026-11-17T12:22:29.103248+00:00",
+      "measured_end": "2026-11-17T12:22:40.315805+00:00",
+      "sample_count": 200,
+      "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+      "warmup_count": 50,
+      "repetitions": 1000,
+      "elapsed_sec": 11.2121959039996,
+      "throughput_per_sec": 89.18859504080564,
+      "latency_ms": {
+        "min": 10.923744,
+        "mean": 11.208109824,
+        "p50": 11.171248,
+        "p95": 11.487616,
+        "p99": 11.96798336,
+        "max": 12.330304
+      },
+      "accuracy": {
+        "rmse": 0.02573572707180256,
+        "mae": 0.01119430836338818,
+        "r2": 0.8979322081571072,
+        "mape": 16.538767742249178
+      },
+      "cpu_percent": {
+        "process_avg": 100.69392380106956,
+        "normalization": "one logical CPU = 100%"
+      },
+      "memory_bytes": {
+        "rss_before_load": 137105408,
+        "rss_after_warmup": 319741952,
+        "rss_peak_sampled": 320061440,
+        "sample_interval_ms": 10
+      },
+      "gpu_memory": null,
+      "artifact_bytes": 439427,
+      "artifact_sha256": {
+        "ft_transformer/model.pt": "0b4b824a70f4e0a4dd132eb7edf61cccf1ab27562c279e803da88b705c855183",
+        "ft_transformer/preprocessor.joblib": "b61a67e2cb3d02850794dccaf8f86f98708a423fcb05194ad55ac4ffe15c6f22"
+      },
+      "packages": {
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2",
+        "joblib": "1.4.2",
+        "psutil": "7.2.2",
+        "xgboost": "2.1.4",
+        "torch": "2.5.1"
+      }
+    }
+  ],
+  "notes": [
+    "Common held-out test sample; cubic reference uses training nodes only.",
+    "Known-curve interior Mach holdout; not new-flight or new-curve generalization.",
+    "Single-row synchronous inference; includes preprocessing and CPU/GPU transfer, excludes HTTP/UI/load.",
+    "One fresh process per model and trial; CPU times exclude warmup and accuracy evaluation.",
+    "RSS is sampled, not an exact allocation peak; CUDA allocator peaks are separate from shared system RAM.",
+    "Runtime includes a 10-ms RSS sampler; raw tegrastats may require host privileges."
+  ],
+  "tegrastats": {
+    "available": true,
+    "file": "tegrastats.log",
+    "exit_code": -15
+  },
+  "system_after": {
+    "hostname": "tayfun-desktop",
+    "platform": "Linux-5.15.148-tegra-aarch64-with-glibc2.35",
+    "machine": "aarch64",
+    "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "cpu_count": 6,
+    "ram_bytes": 7989907456,
+    "jetson_model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super",
+    "l4t_release": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia",
+    "container": false,
+    "power_settings": {
+      "nvpmodel -q": {
+        "exit_code": 0,
+        "stdout": "NV Power Mode: MAXN_SUPER\n2\n",
+        "stderr": ""
+      },
+      "jetson_clocks --show": {
+        "exit_code": 1,
+        "stdout": "SOC family:tegra234  Machine:NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super\nError: Run this script(/usr/bin/jetson_clocks) as a root user\n",
+        "stderr": ""
+      },
+      "dpkg-query -W nvidia-jetpack": {
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "dpkg-query: no packages found matching nvidia-jetpack\n"
+      }
+    },
+    "thermal_zones": {
+      "cv0-thermal": null,
+      "cpu-thermal": "51593",
+      "soc2-thermal": "50906",
+      "soc0-thermal": "51500",
+      "cv1-thermal": null,
+      "gpu-thermal": "51781",
+      "tj-thermal": "52281",
+      "soc1-thermal": "52281",
+      "cv2-thermal": null
+    }
+  },
+  "complete": true,
+  "finished_at": "2026-11-17T12:22:41.573358+00:00"
+}

@@ -1,0 +1,75 @@
+{
+  "signature": "293b6000a74a5eda1d4a08103d04750260141a4e6e45d3c9460aa3263efa541c",
+  "first_scan_utc": "20261117T113402_983666Z",
+  "identity": {
+    "model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super",
+    "l4t": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia",
+    "machine": "aarch64",
+    "kernel": "5.15.148-tegra",
+    "python_paths": [
+      "/usr/bin/python3",
+      "/usr/bin/python3.10"
+    ]
+  },
+  "interpreters": [
+    {
+      "path": "/usr/bin/python3",
+      "version": [
+        3,
+        10,
+        12
+      ]
+    },
+    {
+      "path": "/usr/bin/python3.10",
+      "version": [
+        3,
+        10,
+        12
+      ]
+    }
+  ],
+  "jetpack_package": {
+    "code": 1,
+    "stdout": "",
+    "stderr": "dpkg-query: no packages found matching nvidia-jetpack\n"
+  },
+  "cache_reused": true,
+  "checked_utc": "20261117T122617_198019Z",
+  "current": {
+    "ram": "MemTotal:        7802644 kB\nMemFree:          667548 kB\nMemAvailable:    5116320 kB\nBuffers:          119564 kB\nCached:          4292308 kB\nSwapCached:          116 kB\nActive:          2197516 kB\nInactive:        3864556 kB\nActive(anon):      57116 kB\nInactive(anon):  1698600 kB\nActive(file):    2140400 kB\nInactive(file):  2165956 kB\nUnevictable:       35404 kB\nMlocked:               0 kB\nSwapTotal:       3901296 kB\nSwapFree:        3860848 kB\nDirty:               144 kB\nWriteback:             0 kB\nAnonPages:       1595156 kB\nMapped:           514216 kB\nShmem:             70284 kB\nKReclaimable:     345484 kB\nSlab:             482588 kB\nSReclaimable:     345484 kB\nSUnreclaim:       137104 kB\nKernelStack:       12512 kB\nPageTables:        36044 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:     7802616 kB\nCommitted_AS:   10301048 kB\nVmallocTotal:   133143592960 kB\nVmallocUsed:       71604 kB\nVmallocChunk:          0 kB\nPercpu:             5352 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:    516096 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nCmaTotal:         262144 kB\nCmaFree:            7816 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB",
+    "disk_free_bytes": 73828974592,
+    "cpu_count": 6,
+    "nvpmodel": {
+      "code": 0,
+      "stdout": "NV Power Mode: MAXN_SUPER\n2\n",
+      "stderr": ""
+    },
+    "clocks": {
+      "code": 1,
+      "stdout": "SOC family:tegra234  Machine:NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super\nError: Run this script(/usr/bin/jetson_clocks) as a root user\n",
+      "stderr": ""
+    },
+    "cpu": {
+      "code": 0,
+      "stdout": "Architecture:                       aarch64\nCPU op-mode(s):                     32-bit, 64-bit\nByte Order:                         Little Endian\nCPU(s):                             6\nOn-line CPU(s) list:                0-5\nVendor ID:                          ARM\nModel name:                         Cortex-A78AE\nModel:                              1\nThread(s) per core:                 1\nCore(s) per cluster:                3\nSocket(s):                          -\nCluster(s):                         2\nStepping:                           r0p1\nCPU max MHz:                        1728,0000\nCPU min MHz:                        115,2000\nBogoMIPS:                           62.50\nFlags:                              fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp uscat ilrcpc flagm paca pacg\nL1d cache:                          384 KiB (6 instances)\nL1i cache:                          384 KiB (6 instances)\nL2 cache:                           1,5 MiB (6 instances)\nL3 cache:                           4 MiB (2 instances)\nNUMA node(s):                       1\nNUMA node0 CPU(s):                  0-5\nVulnerability Gather data sampling: Not affected\nVulnerability L1tf:                 Not affected\nVulnerability Mds:                  Not affected\nVulnerability Meltdown:             Not affected\nVulnerability Mmio stale data:      Not affected\nVulnerability Retbleed:             Not affected\nVulnerability Spec rstack overflow: Not affected\nVulnerability Spec store bypass:    Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:           Mitigation; __user pointer sanitization\nVulnerability Spectre v2:           Mitigation; CSV2, but not BHB\nVulnerability Srbds:                Not affected\nVulnerability Tsx async abort:      Not affected\nVulnerability itlb multihit:        Not affected\n",
+      "stderr": ""
+    },
+    "thermal": {
+      "cv0-thermal": null,
+      "cpu-thermal": "51281",
+      "soc2-thermal": "50843",
+      "soc0-thermal": "51562",
+      "cv1-thermal": null,
+      "gpu-thermal": "51687",
+      "tj-thermal": "52187",
+      "soc1-thermal": "52187",
+      "cv2-thermal": null
+    },
+    "cuda_toolkit": {
+      "code": 0,
+      "stdout": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2024 NVIDIA Corporation\nBuilt on Wed_Aug_14_10:14:07_PDT_2024\nCuda compilation tools, release 12.6, V12.6.68\nBuild cuda_12.6.r12.6/compiler.34714021_0\n",
+      "stderr": ""
+    }
+  }
+}

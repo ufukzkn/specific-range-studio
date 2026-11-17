@@ -1,0 +1,198 @@
+
+=== Cihaz profili: önbellek kontrolü ve güncel durum ===
+{"model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super", "l4t": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia", "machine": "aarch64", "kernel": "5.15.148-tegra", "python_paths": ["/usr/bin/python3", "/usr/bin/python3.10"]}
+Cihaz profili önbellekten: True
+
+=== Repodan kaynak kopyası ve hazır model bütünlük kontrolü ===
+Hazır model etiketi: functional_check / FT kısa eğitim: 5 epoch
+KOPYA TAMAM. Çalışma Jetson diskindeki doğrulanmış kopyadan devam ediyor.
+USB gerekmiyor; sonuçlar Jetson diskine kaydedilecek.
+
+=== Gerekli sistem kütüphanesi ve izole CPU ortamı ===
+$ /usr/bin/python3 -m venv /home/tayfun/specific-range-jetson-auto/venv_cpu_310_20261117T121828_092179Z
+
+=== CPU bağımlılıkları; internet veya pip önbelleği kullanılır ===
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_310_20261117T121828_092179Z/bin/python -m pip --disable-pip-version-check --no-input install --only-binary=:all: --retries 2 --timeout 25 --cache-dir /home/tayfun/specific-range-jetson-auto/pip-cache --index-url https://pypi.org/simple -r requirements-edge.txt
+Collecting numpy==1.26.4
+  Using cached numpy-1.26.4-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (14.2 MB)
+Collecting pandas==2.2.3
+  Using cached pandas-2.2.3-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (66.5 MB)
+Collecting openpyxl==3.1.5
+  Using cached openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+Collecting scipy==1.13.1
+  Using cached scipy-1.13.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (33.7 MB)
+Collecting scikit-learn==1.5.2
+  Using cached scikit_learn-1.5.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (12.5 MB)
+Collecting xgboost==2.1.4
+  Using cached xgboost-2.1.4-py3-none-manylinux_2_28_aarch64.whl (4.2 MB)
+Collecting joblib==1.4.2
+  Using cached joblib-1.4.2-py3-none-any.whl (301 kB)
+Collecting threadpoolctl==3.6.0
+  Using cached threadpoolctl-3.6.0-py3-none-any.whl (18 kB)
+Collecting psutil==7.2.2
+  Using cached psutil-7.2.2-cp36-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (156 kB)
+Collecting flask<4,>=3.0
+  Using cached flask-3.1.3-py3-none-any.whl (103 kB)
+Collecting matplotlib<4,>=3.8
+  Using cached matplotlib-3.10.9-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (9.6 MB)
+Collecting pillow<13,>=10
+  Using cached pillow-12.3.0-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (6.3 MB)
+Collecting python-dateutil>=2.8.2
+  Using cached python_dateutil-3.0.0-py2.py3-none-any.whl (94 kB)
+Collecting pytz>=2020.1
+  Using cached pytz-2026.6-py2.py3-none-any.whl (506 kB)
+Collecting tzdata>=2022.7
+  Using cached tzdata-2026.6-py2.py3-none-any.whl (348 kB)
+Collecting et-xmlfile
+  Using cached et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Collecting werkzeug>=3.1.0
+  Using cached werkzeug-3.1.9-py3-none-any.whl (228 kB)
+Collecting jinja2>=3.1.2
+  Using cached jinja2-3.1.6-py3-none-any.whl (134 kB)
+Collecting click>=8.1.3
+  Using cached click-8.5.1-py3-none-any.whl (126 kB)
+Collecting itsdangerous>=2.2.0
+  Using cached itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Collecting blinker>=1.9.0
+  Using cached blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Collecting markupsafe>=2.1.1
+  Using cached markupsafe-3.0.4-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (22 kB)
+Collecting cycler>=0.10
+  Using cached cycler-0.12.1-py3-none-any.whl (8.3 kB)
+Collecting contourpy>=1.0.1
+  Using cached contourpy-1.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (312 kB)
+Collecting packaging>=20.0
+  Using cached packaging-26.3-py3-none-any.whl (129 kB)
+Collecting fonttools>=4.22.0
+  Using cached fonttools-4.65.0-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (5.3 MB)
+Collecting kiwisolver>=1.3.1
+  Using cached kiwisolver-1.5.1-cp310-cp310-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl (1.2 MB)
+Collecting pyparsing>=3
+  Using cached pyparsing-3.3.3-py3-none-any.whl (126 kB)
+Collecting six>=1.6
+  Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Installing collected packages: pytz, tzdata, threadpoolctl, six, pyparsing, psutil, pillow, packaging, numpy, markupsafe, kiwisolver, joblib, itsdangerous, fonttools, et-xmlfile, cycler, click, blinker, werkzeug, scipy, python-dateutil, openpyxl, jinja2, contourpy, xgboost, scikit-learn, pandas, matplotlib, flask
+Successfully installed blinker-1.9.0 click-8.5.1 contourpy-1.3.2 cycler-0.12.1 et-xmlfile-2.0.0 flask-3.1.3 fonttools-4.65.0 itsdangerous-2.2.0 jinja2-3.1.6 joblib-1.4.2 kiwisolver-1.5.1 markupsafe-3.0.4 matplotlib-3.10.9 numpy-1.26.4 openpyxl-3.1.5 packaging-26.3 pandas-2.2.3 pillow-12.3.0 psutil-7.2.2 pyparsing-3.3.3 python-dateutil-3.0.0 pytz-2026.6 scikit-learn-1.5.2 scipy-1.13.1 six-1.17.0 threadpoolctl-3.6.0 tzdata-2026.6 werkzeug-3.1.9 xgboost-2.1.4
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_310_20261117T121828_092179Z/bin/python -m pip --disable-pip-version-check --no-input install --only-binary=:all: --retries 2 --timeout 25 --cache-dir /home/tayfun/specific-range-jetson-auto/pip-cache --index-url https://pypi.org/simple torch==2.5.1
+Collecting torch==2.5.1
+  Using cached torch-2.5.1-cp310-cp310-manylinux2014_aarch64.whl (91.9 MB)
+Requirement already satisfied: jinja2 in /home/tayfun/specific-range-jetson-auto/venv_cpu_310_20261117T121828_092179Z/lib/python3.10/site-packages (from torch==2.5.1) (3.1.6)
+Collecting typing-extensions>=4.8.0
+  Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Collecting filelock
+  Using cached filelock-4.1.0-py3-none-any.whl (133 kB)
+Collecting networkx
+  Using cached networkx-3.4.2-py3-none-any.whl (1.7 MB)
+Collecting sympy==1.13.1
+  Using cached sympy-1.13.1-py3-none-any.whl (6.2 MB)
+Collecting fsspec
+  Using cached fsspec-2026.9.0-py3-none-any.whl (221 kB)
+Collecting mpmath<1.4,>=1.1.0
+  Using cached mpmath-1.3.0-py3-none-any.whl (536 kB)
+Requirement already satisfied: MarkupSafe>=2.0 in /home/tayfun/specific-range-jetson-auto/venv_cpu_310_20261117T121828_092179Z/lib/python3.10/site-packages (from jinja2->torch==2.5.1) (3.0.4)
+Installing collected packages: mpmath, typing-extensions, sympy, networkx, fsspec, filelock, torch
+Successfully installed filelock-4.1.0 fsspec-2026.9.0 mpmath-1.3.0 networkx-3.4.2 sympy-1.13.1 torch-2.5.1 typing-extensions-4.16.0
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_310_20261117T121828_092179Z/bin/python -m pip check
+No broken requirements found.
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_310_20261117T121828_092179Z/bin/python -c 'from pathlib import Path; from src.evaluation.research_bundle import verify_bundle; m=verify_bundle(Path('"'"'artifacts/research_bundle_portable'"'"')); print('"'"'Model etiketi:'"'"',m['"'"'experiment_label'"'"'])'
+Model etiketi: functional_check
+
+=== Kısa CPU denemesi ===
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_310_20261117T121828_092179Z/bin/python scripts/run_edge_benchmark.py --bundle /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/project/artifacts/research_bundle_portable --ft-device cpu --sample-size 24 --warmup 5 --repetitions 20 --trials 1 --threads 1 --seed 42 --require-jetson --output /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/output/cpu_smoke
+ft_transformer trial 1: p95=11.364 ms
+xgboost trial 1: p95=5.992 ms
+interpolation trial 1: p95=41.022 ms
+Results: /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/output/cpu_smoke/edge_20261117T121941Z_0f3c73b1 (complete=True, Jetson=True)
+
+=== Üç yöntem CPU benchmarkı: 3 tekrar, 1000 çağrı ===
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_310_20261117T121828_092179Z/bin/python scripts/run_edge_benchmark.py --bundle /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/project/artifacts/research_bundle_portable --ft-device cpu --sample-size 200 --warmup 50 --repetitions 1000 --trials 3 --threads 1 --seed 42 --require-jetson --output /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/output/cpu_benchmark
+ft_transformer trial 1: p95=11.651 ms
+xgboost trial 1: p95=5.915 ms
+interpolation trial 1: p95=28.211 ms
+xgboost trial 2: p95=5.869 ms
+ft_transformer trial 2: p95=11.325 ms
+interpolation trial 2: p95=28.300 ms
+xgboost trial 3: p95=6.074 ms
+interpolation trial 3: p95=26.549 ms
+ft_transformer trial 3: p95=11.488 ms
+Results: /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/output/cpu_benchmark/edge_20261117T121955Z_065ba760 (complete=True, Jetson=True)
+
+=== Mevcut NVIDIA CUDA ortamı kontrolü ===
+$ /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/gpu_python -m pip --disable-pip-version-check --no-input install --only-binary=:all: --retries 2 --timeout 25 --cache-dir /home/tayfun/specific-range-jetson-auto/pip-cache --index-url https://pypi.org/simple -r requirements-edge.txt
+Requirement already satisfied: numpy==1.26.4 in /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/lib/python3.10/site-packages (from -r requirements-edge.txt (line 2)) (1.26.4)
+Collecting pandas==2.2.3
+  Using cached pandas-2.2.3-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (66.5 MB)
+Collecting openpyxl==3.1.5
+  Using cached openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+Collecting scipy==1.13.1
+  Using cached scipy-1.13.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (33.7 MB)
+Collecting scikit-learn==1.5.2
+  Using cached scikit_learn-1.5.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (12.5 MB)
+Collecting xgboost==2.1.4
+  Using cached xgboost-2.1.4-py3-none-manylinux_2_28_aarch64.whl (4.2 MB)
+Collecting joblib==1.4.2
+  Using cached joblib-1.4.2-py3-none-any.whl (301 kB)
+Collecting threadpoolctl==3.6.0
+  Using cached threadpoolctl-3.6.0-py3-none-any.whl (18 kB)
+Collecting psutil==7.2.2
+  Using cached psutil-7.2.2-cp36-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (156 kB)
+Collecting flask<4,>=3.0
+  Using cached flask-3.1.3-py3-none-any.whl (103 kB)
+Collecting matplotlib<4,>=3.8
+  Using cached matplotlib-3.10.9-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (9.6 MB)
+Collecting pillow<13,>=10
+  Using cached pillow-12.3.0-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (6.3 MB)
+Collecting tzdata>=2022.7
+  Using cached tzdata-2026.6-py2.py3-none-any.whl (348 kB)
+Collecting pytz>=2020.1
+  Using cached pytz-2026.6-py2.py3-none-any.whl (506 kB)
+Collecting python-dateutil>=2.8.2
+  Using cached python_dateutil-3.0.0-py2.py3-none-any.whl (94 kB)
+Collecting et-xmlfile
+  Using cached et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Collecting blinker>=1.9.0
+  Using cached blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Collecting itsdangerous>=2.2.0
+  Using cached itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Collecting werkzeug>=3.1.0
+  Using cached werkzeug-3.1.9-py3-none-any.whl (228 kB)
+Requirement already satisfied: markupsafe>=2.1.1 in /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/lib/python3.10/site-packages (from flask<4,>=3.0->-r requirements-edge.txt (line 11)) (3.0.4)
+Collecting click>=8.1.3
+  Using cached click-8.5.1-py3-none-any.whl (126 kB)
+Requirement already satisfied: jinja2>=3.1.2 in /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/lib/python3.10/site-packages (from flask<4,>=3.0->-r requirements-edge.txt (line 11)) (3.1.6)
+Collecting contourpy>=1.0.1
+  Using cached contourpy-1.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (312 kB)
+Collecting pyparsing>=3
+  Using cached pyparsing-3.3.3-py3-none-any.whl (126 kB)
+Collecting cycler>=0.10
+  Using cached cycler-0.12.1-py3-none-any.whl (8.3 kB)
+Collecting packaging>=20.0
+  Using cached packaging-26.3-py3-none-any.whl (129 kB)
+Collecting fonttools>=4.22.0
+  Using cached fonttools-4.65.0-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (5.3 MB)
+Collecting kiwisolver>=1.3.1
+  Using cached kiwisolver-1.5.1-cp310-cp310-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl (1.2 MB)
+Collecting six>=1.6
+  Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Installing collected packages: pytz, werkzeug, tzdata, threadpoolctl, six, scipy, pyparsing, psutil, pillow, packaging, kiwisolver, joblib, itsdangerous, fonttools, et-xmlfile, cycler, contourpy, click, blinker, xgboost, scikit-learn, python-dateutil, openpyxl, flask, pandas, matplotlib
+Successfully installed blinker-1.9.0 click-8.5.1 contourpy-1.3.2 cycler-0.12.1 et-xmlfile-2.0.0 flask-3.1.3 fonttools-4.65.0 itsdangerous-2.2.0 joblib-1.4.2 kiwisolver-1.5.1 matplotlib-3.10.9 openpyxl-3.1.5 packaging-26.3 pandas-2.2.3 pillow-12.3.0 psutil-7.2.2 pyparsing-3.3.3 python-dateutil-3.0.0 pytz-2026.6 scikit-learn-1.5.2 scipy-1.13.1 six-1.17.0 threadpoolctl-3.6.0 tzdata-2026.6 werkzeug-3.1.9 xgboost-2.1.4
+$ /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/gpu_python -m pip check
+No broken requirements found.
+$ /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/gpu_python scripts/run_edge_benchmark.py --bundle /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/project/artifacts/research_bundle_portable --ft-device cuda --sample-size 24 --warmup 5 --repetitions 20 --trials 1 --threads 1 --seed 42 --require-jetson --output /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/output/gpu_smoke
+ft_transformer trial 1: p95=10.397 ms
+xgboost trial 1: p95=5.937 ms
+interpolation trial 1: p95=41.396 ms
+Results: /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/output/gpu_smoke/edge_20261117T122321Z_85a32f46 (complete=True, Jetson=True)
+$ /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/gpu_python scripts/run_edge_benchmark.py --bundle /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/project/artifacts/research_bundle_portable --ft-device cuda --sample-size 200 --warmup 50 --repetitions 1000 --trials 3 --threads 1 --seed 42 --require-jetson --output /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/output/gpu_benchmark
+ft_transformer trial 1: p95=9.686 ms
+xgboost trial 1: p95=5.856 ms
+interpolation trial 1: p95=28.024 ms
+xgboost trial 2: p95=5.830 ms
+ft_transformer trial 2: p95=9.478 ms
+interpolation trial 2: p95=28.477 ms
+xgboost trial 3: p95=5.826 ms
+interpolation trial 3: p95=26.837 ms
+ft_transformer trial 3: p95=9.770 ms
+Results: /home/tayfun/specific-range-jetson-auto/run_20261117T121827_782356Z/output/gpu_benchmark/edge_20261117T122336Z_7f8c81a6 (complete=True, Jetson=True)
+
+=== Son cihaz durumu ve arayüz başlatıcısı ===

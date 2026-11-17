@@ -1,0 +1,6 @@
+{
+  "version": "2.5.0a0+872d972e41.nv24.08",
+  "cuda": true,
+  "build": "12.6",
+  "gpu": "Orin"
+}

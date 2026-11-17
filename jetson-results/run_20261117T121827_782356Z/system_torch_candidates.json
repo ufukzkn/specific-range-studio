@@ -1,0 +1,18 @@
+[
+  {
+    "interpreter": {
+      "path": "/home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/gpu_python",
+      "version": [
+        3,
+        10
+      ],
+      "registered_runtime": true
+    },
+    "probe": {
+      "version": "2.5.0a0+872d972e41.nv24.08",
+      "cuda": true,
+      "build": "12.6",
+      "gpu": "Orin"
+    }
+  }
+]

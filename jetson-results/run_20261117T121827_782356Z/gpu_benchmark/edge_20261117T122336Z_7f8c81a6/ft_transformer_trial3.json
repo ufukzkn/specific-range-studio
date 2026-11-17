@@ -1,0 +1,61 @@
+{
+  "model_key": "ft_transformer",
+  "available": true,
+  "trial": 3,
+  "requested_device": "cuda",
+  "device": "cuda",
+  "pid": 9978,
+  "load_seconds": 2.259219072000633,
+  "measured_start": "2026-11-17T12:26:06.624108+00:00",
+  "measured_end": "2026-11-17T12:26:15.730519+00:00",
+  "sample_count": 200,
+  "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+  "warmup_count": 50,
+  "repetitions": 1000,
+  "elapsed_sec": 9.1060428159999,
+  "throughput_per_sec": 109.81718625822141,
+  "latency_ms": {
+    "min": 8.744832,
+    "mean": 9.075344256000001,
+    "p50": 8.959136,
+    "p95": 9.769689600000001,
+    "p99": 11.077179199999996,
+    "max": 15.164192
+  },
+  "accuracy": {
+    "rmse": 0.02573610551786961,
+    "mae": 0.011194710629547834,
+    "r2": 0.897929206303824,
+    "mape": 16.53822637134705
+  },
+  "cpu_percent": {
+    "process_avg": 99.9336394949815,
+    "normalization": "one logical CPU = 100%"
+  },
+  "memory_bytes": {
+    "rss_before_load": 136814592,
+    "rss_after_warmup": 837390336,
+    "rss_peak_sampled": 838086656,
+    "sample_interval_ms": 10
+  },
+  "gpu_memory": {
+    "name": "Orin",
+    "torch_cuda": "12.6",
+    "allocated_peak_bytes": 10013184,
+    "reserved_peak_bytes": 23068672
+  },
+  "artifact_bytes": 439427,
+  "artifact_sha256": {
+    "ft_transformer/model.pt": "0b4b824a70f4e0a4dd132eb7edf61cccf1ab27562c279e803da88b705c855183",
+    "ft_transformer/preprocessor.joblib": "b61a67e2cb3d02850794dccaf8f86f98708a423fcb05194ad55ac4ffe15c6f22"
+  },
+  "packages": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.5.2",
+    "joblib": "1.4.2",
+    "psutil": "7.2.2",
+    "xgboost": "2.1.4",
+    "torch": "2.5.0a0+872d972e41.nv24.08"
+  }
+}

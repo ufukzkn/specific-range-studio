@@ -1,0 +1,54 @@
+{
+  "model_key": "interpolation",
+  "available": true,
+  "trial": 2,
+  "requested_device": "cpu",
+  "device": "cpu",
+  "pid": 9972,
+  "load_seconds": 2.294841279999673,
+  "measured_start": "2026-11-17T12:24:56.895951+00:00",
+  "measured_end": "2026-11-17T12:25:19.940887+00:00",
+  "sample_count": 200,
+  "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+  "warmup_count": 50,
+  "repetitions": 1000,
+  "elapsed_sec": 23.044588672000828,
+  "throughput_per_sec": 43.3941353535635,
+  "latency_ms": {
+    "min": 12.965952,
+    "mean": 23.04208208,
+    "p50": 25.015552,
+    "p95": 28.476528,
+    "p99": 29.156255999999996,
+    "max": 285.312032
+  },
+  "accuracy": {
+    "rmse": 0.15375658023074157,
+    "mae": 0.02157955751784711,
+    "r2": -2.6432020446947093,
+    "mape": 9.323794514829796
+  },
+  "cpu_percent": {
+    "process_avg": 107.40048500006968,
+    "normalization": "one logical CPU = 100%"
+  },
+  "memory_bytes": {
+    "rss_before_load": 136835072,
+    "rss_after_warmup": 150298624,
+    "rss_peak_sampled": 151617536,
+    "sample_interval_ms": 10
+  },
+  "gpu_memory": null,
+  "artifact_bytes": 3321179,
+  "artifact_sha256": {
+    "train.csv": "a0d6887918d6f2e90fda3c140f15e81c531b1d24a1e60d6da1738580e24819d8"
+  },
+  "packages": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.5.2",
+    "joblib": "1.4.2",
+    "psutil": "7.2.2",
+    "xgboost": "2.1.4"
+  }
+}

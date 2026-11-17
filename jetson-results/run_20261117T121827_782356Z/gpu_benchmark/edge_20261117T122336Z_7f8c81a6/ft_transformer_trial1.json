@@ -1,0 +1,61 @@
+{
+  "model_key": "ft_transformer",
+  "available": true,
+  "trial": 1,
+  "requested_device": "cuda",
+  "device": "cuda",
+  "pid": 9949,
+  "load_seconds": 2.257455519999894,
+  "measured_start": "2026-11-17T12:23:40.553890+00:00",
+  "measured_end": "2026-11-17T12:23:49.608881+00:00",
+  "sample_count": 200,
+  "sample_sha256": "9e0f693728fa21b0e3fb559582724c5a9385fbf164c9810ecf98c99bb0c5fa38",
+  "warmup_count": 50,
+  "repetitions": 1000,
+  "elapsed_sec": 9.054665503999786,
+  "throughput_per_sec": 110.44030279840403,
+  "latency_ms": {
+    "min": 8.652704,
+    "mean": 9.025458208,
+    "p50": 8.900736,
+    "p95": 9.685700800000001,
+    "p99": 10.85519584,
+    "max": 14.798144
+  },
+  "accuracy": {
+    "rmse": 0.02573610551786961,
+    "mae": 0.011194710629547834,
+    "r2": 0.897929206303824,
+    "mape": 16.53822637134705
+  },
+  "cpu_percent": {
+    "process_avg": 99.72759342695885,
+    "normalization": "one logical CPU = 100%"
+  },
+  "memory_bytes": {
+    "rss_before_load": 136835072,
+    "rss_after_warmup": 835244032,
+    "rss_peak_sampled": 835887104,
+    "sample_interval_ms": 10
+  },
+  "gpu_memory": {
+    "name": "Orin",
+    "torch_cuda": "12.6",
+    "allocated_peak_bytes": 10013184,
+    "reserved_peak_bytes": 23068672
+  },
+  "artifact_bytes": 439427,
+  "artifact_sha256": {
+    "ft_transformer/model.pt": "0b4b824a70f4e0a4dd132eb7edf61cccf1ab27562c279e803da88b705c855183",
+    "ft_transformer/preprocessor.joblib": "b61a67e2cb3d02850794dccaf8f86f98708a423fcb05194ad55ac4ffe15c6f22"
+  },
+  "packages": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.5.2",
+    "joblib": "1.4.2",
+    "psutil": "7.2.2",
+    "xgboost": "2.1.4",
+    "torch": "2.5.0a0+872d972e41.nv24.08"
+  }
+}
