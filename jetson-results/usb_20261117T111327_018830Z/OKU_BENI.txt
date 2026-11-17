@@ -1,0 +1,4 @@
+USB durumu: mount_failed
+Biçimlendirme veya dosya sistemi onarımı yapılmadı.
+Yeni bağlama denemeleri salt okunurdur.
+Tüm disk küçük mü, yalnız bir bölüm mü küçük: usb_report.json içindeki usb_disks/lsblk_before.
