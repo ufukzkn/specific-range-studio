@@ -1,5 +1,23 @@
 # Aircraft Specific Range Modeling
 
+## Jetson: clone and start
+
+The `jetson-benchmark` branch includes the launcher and the frozen functional-check
+model ZIP. No USB or separate model download is needed:
+
+```bash
+git clone --branch jetson-benchmark --single-branch https://github.com/ufukzkn/specific-range-studio.git specific-range-jetson
+cd specific-range-jetson
+bash BASLAT.sh
+```
+
+The launcher collects device information, installs an isolated CPU environment,
+runs the benchmark, and tries GPU inference if a working system CUDA/PyTorch is
+already available. Logs and results are archived locally, with an optional USB
+copy. Python 3.10–3.12 is required; unsupported devices stop with diagnostic output.
+The included FT model is a five-epoch `functional_check`, not a final scientific model.
+See the [Turkish quick-start guide](docs/JETSON_TEK_KOMUT.md), including clock repair.
+
 ## Common-input research comparison and Jetson benchmark (12 October 2026)
 
 For a comparison of cubic interpolation, XGBoost and the local FT-Transformer-style

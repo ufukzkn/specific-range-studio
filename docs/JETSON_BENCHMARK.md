@@ -1,5 +1,9 @@
 # Jetson benchmark hazırlığı — güncelleme 14 Ekim 2026
 
+17 Kasım 2026: Dal artık hazır model ZIP'i ve `BASLAT.sh` içeriyor. Klonlayıp
+otomatik kurulum/ölçüm için [JETSON_TEK_KOMUT.md](JETSON_TEK_KOMUT.md) kullanılabilir.
+Bu belgede aşağıdaki adımlar elle kurulum ve yeni model hazırlama protokolüdür.
+
 Jetson'a gittiğinde sırayla uygulayacağın kısa kılavuz:
 [JETSON_SAHA_KILAVUZU.md](JETSON_SAHA_KILAVUZU.md). Bu belge ayrıntılı deney protokolüdür.
 
@@ -47,9 +51,10 @@ betik güç modunu, saatleri veya fanı değiştirmez.
 ## İş istasyonunda ortak modeli oluştur
 
 Kaynak `jetson-benchmark` dalındadır. Uzak depodan bu dalı seçerek klonlayın;
-yalnız `main` dalını klonlamak bu çalışma dalının betiklerini getirmez. Eğitilmiş
-modeller Git'te tutulmaz; hazırlık/model ZIP'inden veya iş istasyonundan ayrıca
-aktarılır. Kod ve model paketinin sürüm kaydı korunmalıdır.
+yalnız `main` dalını klonlamak bu çalışma dalının betiklerini getirmez. İşlev kontrolü
+modellerinin ZIP'i artık `deploy/jetson/` altında Git'te bulunur; `BASLAT.sh` bunu
+doğrulayıp otomatik açar. Yeni eğitilen nihai modeller ayrıca paketlenip aktarılır.
+Kod ve model paketinin sürüm kaydı korunmalıdır.
 
 Dağıtım ZIP'i çekirdek kaynakları, iki özgün Excel girdisini ve doğrulanmış model
 paketini içerir. Büyük arşiv raporları, Dataset Builder demo varlıkları ve `.venv`

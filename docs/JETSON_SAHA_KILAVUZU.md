@@ -1,5 +1,9 @@
 # Jetson'da kurulum ve benchmark — saha kılavuzu
 
+**17 Kasım 2026 güncellemesi:** `jetson-benchmark` dalı artık `BASLAT.sh` ve hazır
+model ZIP'ini içeriyor. Klonlayıp başlatma için [kısa kılavuzu](JETSON_TEK_KOMUT.md)
+kullan; aşağıdaki ayrı model ZIP'ini açma adımı yalnız elle kurulum yoludur.
+
 14 Ekim 2026. Bu kılavuz, cihazın başında terminalden sırayla uygulanmak içindir.
 İlk yol **Docker kullanmadan**, repodan sanal ortamda çalıştırmadır. Cihaz üzerinde
 eğitim yapılmaz; aynı hazır modellerle çıkarım ölçülür. Ayrıntılı deney açıklaması:
@@ -11,7 +15,8 @@ eğitim yapılmaz; aynı hazır modellerle çıkarım ölçülür. Ayrıntılı 
 - `Specific_Range_Jetson_Hazirlik_20261014.zip`: kaynak kodu ve kısa eğitim modelleri;
   USB'ye kopyala. GitHub'a erişemesen de kaynak/model dosyaların yanında olur.
 - `Research_Bundle_Functional_Check.zip`: yalnız model/veri paketi; Git'ten klonlarsan
-  bu ZIP'i ayrıca açacaksın. **Modeller Git clone ile gelmez.**
+  bu ZIP'i elle kurulumda ayrıca açabilirsin. Yeni `BASLAT.sh` yolu repoya eklenen
+  hazır model ZIP'ini otomatik açar; ayrı indirme gerekmez.
 - Paketlerin yanındaki `KONTROL_KAYDI.json`: ZIP SHA-256 değerleri ve kontrol kaydı.
 - İnternet erişimi: Python paketleri ve gerekiyorsa NVIDIA PyTorch kurulumu için.
 
