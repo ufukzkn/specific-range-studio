@@ -28,7 +28,10 @@ def now():
 
 def read_text(path):
     try:
-        return Path(path).read_text().strip().replace("\x00", "")
+        data = Path(path).read_bytes()
+        if data is None:
+            return None
+        return data.decode("utf-8").strip().replace("\x00", "")
     except (OSError, UnicodeError):
         return None
 

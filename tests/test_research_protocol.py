@@ -9,6 +9,7 @@ from scipy.interpolate import CubicSpline
 
 from src.data.load_data import WorkbookSpec, read_workbook
 from src.evaluation.research_bundle import FEATURES, KEYS, CURVE_KEYS, git_info, prepare_partitions, sha256, verify_bundle
+from src.evaluation.edge_benchmark import probe_system, read_text as read_device_text
 from src.interpolation.specific_range import CubicSplineInterpolator, SpecificRangeInterpolationService
 
 
@@ -23,6 +24,28 @@ def table():
 
 
 class ResearchProtocolTests(unittest.TestCase):
+    def test_benchmark_device_reader_tolerates_no_data_from_sysfs(self):
+        with patch('src.evaluation.edge_benchmark.Path.read_bytes', return_value=None), \
+             patch('src.evaluation.edge_benchmark.Path.read_text', side_effect=TypeError("can't concat NoneType to bytes")):
+            self.assertIsNone(read_device_text('/sys/class/thermal/thermal_zone0/temp'))
+        with patch('src.evaluation.edge_benchmark.Path.read_bytes', return_value=b'Jetson\x00\n'):
+            self.assertEqual(read_device_text('/proc/device-tree/model'), 'Jetson')
+
+    def test_benchmark_system_probe_records_unavailable_sensor_without_stopping(self):
+        with tempfile.TemporaryDirectory() as temp:
+            sensor = Path(temp)/'thermal_zone0'
+            sensor.mkdir()
+            (sensor/'type').write_bytes(b'cpu-thermal\n')
+            original = Path.read_bytes
+            def read_sensor(path):
+                return None if path == sensor/'temp' else original(path)
+            with patch('src.evaluation.edge_benchmark.Path.read_bytes', autospec=True, side_effect=read_sensor), \
+                 patch('src.evaluation.edge_benchmark.Path.glob', return_value=[sensor]), \
+                 patch('src.evaluation.edge_benchmark.shutil.which', return_value=None):
+                info = probe_system()
+            self.assertIsNone(info['thermal_zones']['cpu-thermal'])
+            self.assertGreater(info['ram_bytes'], 0)
+
     def test_usb_source_record_works_without_git_installed(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
