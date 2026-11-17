@@ -1,0 +1,7 @@
+{
+  "cpu": "not_run",
+  "gpu": "not_run",
+  "stage": "Cihaz profili: önbellek kontrolü ve güncel durum",
+  "error": "can't concat NoneType to bytes",
+  "finished_utc": "20261117T112630_279480Z"
+}
