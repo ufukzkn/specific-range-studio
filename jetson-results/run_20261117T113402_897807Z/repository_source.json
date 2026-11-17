@@ -1,0 +1,16 @@
+{
+  "kind": "git_checkout",
+  "path": "/home/tayfun/specific-range-jetson",
+  "commit": {
+    "code": 0,
+    "stdout": "2d7a256b5443206162fba5eb9d305af366307538\n",
+    "stderr": ""
+  },
+  "status": {
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "model_zip_sha256": "77e3c53def565ee50515de6910eb4a30b603119afcd823667ff3ef24eb0558f5",
+  "experiment_label": "functional_check"
+}

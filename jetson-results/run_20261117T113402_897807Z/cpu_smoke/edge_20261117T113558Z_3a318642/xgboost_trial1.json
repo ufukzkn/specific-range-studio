@@ -1,0 +1,56 @@
+{
+  "model_key": "xgboost",
+  "available": true,
+  "trial": 1,
+  "requested_device": "cpu",
+  "device": "cpu",
+  "pid": 8521,
+  "load_seconds": 0.13090719999991052,
+  "measured_start": "2026-11-17T11:36:04.929086+00:00",
+  "measured_end": "2026-11-17T11:36:05.046531+00:00",
+  "sample_count": 24,
+  "sample_sha256": "7a4d7fae8beac1a8480e7a4c54e4b058302898eab75144389eab6513e3c7a947",
+  "warmup_count": 5,
+  "repetitions": 20,
+  "elapsed_sec": 0.11709734399983063,
+  "throughput_per_sec": 170.79806694871687,
+  "latency_ms": {
+    "min": 5.73232,
+    "mean": 5.851672,
+    "p50": 5.8303840000000005,
+    "p95": 6.0028112,
+    "p99": 6.0080886399999995,
+    "max": 6.009408
+  },
+  "accuracy": {
+    "rmse": 0.020659508389584004,
+    "mae": 0.008943860406026247,
+    "r2": 0.9841332366905585,
+    "mape": 7.629310554124682
+  },
+  "cpu_percent": {
+    "process_avg": 111.0187435166658,
+    "normalization": "one logical CPU = 100%"
+  },
+  "memory_bytes": {
+    "rss_before_load": 136712192,
+    "rss_after_warmup": 159543296,
+    "rss_peak_sampled": 159768576,
+    "sample_interval_ms": 10
+  },
+  "gpu_memory": null,
+  "artifact_bytes": 2149532,
+  "artifact_sha256": {
+    "xgboost/model.json": "94baa9f2c59d9b660ed41f8221e64933f88147a42dd4472ecbb5bf95f930ef28",
+    "xgboost/config.json": "0c7021199264ac0a8875d1c5ad07c254060426cd88dd02c28c035ddddb04eb0f",
+    "xgboost/preprocessor.joblib": "b61a67e2cb3d02850794dccaf8f86f98708a423fcb05194ad55ac4ffe15c6f22"
+  },
+  "packages": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.5.2",
+    "joblib": "1.4.2",
+    "psutil": "7.2.2",
+    "xgboost": "2.1.4"
+  }
+}

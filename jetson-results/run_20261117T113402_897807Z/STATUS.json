@@ -1,0 +1,7 @@
+{
+  "cpu": "passed",
+  "gpu": "skipped_cuda_not_ready",
+  "stage": "tamamlandı",
+  "ui_launcher": "/home/tayfun/specific-range-jetson-auto/run_20261117T113402_897807Z/ARAYUZU_AC.sh",
+  "finished_utc": "20261117T113859_344167Z"
+}

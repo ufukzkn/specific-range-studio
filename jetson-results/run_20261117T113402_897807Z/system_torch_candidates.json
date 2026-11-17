@@ -1,0 +1,38 @@
+[
+  {
+    "interpreter": {
+      "path": "/usr/bin/python3",
+      "version": [
+        3,
+        10,
+        12
+      ]
+    },
+    "probe": {
+      "cuda": false,
+      "error": {
+        "code": 1,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'torch'\n"
+      }
+    }
+  },
+  {
+    "interpreter": {
+      "path": "/usr/bin/python3.10",
+      "version": [
+        3,
+        10,
+        12
+      ]
+    },
+    "probe": {
+      "cuda": false,
+      "error": {
+        "code": 1,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'torch'\n"
+      }
+    }
+  }
+]

@@ -1,0 +1,232 @@
+
+=== Cihaz profili: önbellek kontrolü ve güncel durum ===
+{"model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super", "l4t": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia", "machine": "aarch64", "kernel": "5.15.148-tegra", "python_paths": ["/usr/bin/python3", "/usr/bin/python3.10"]}
+Cihaz profili önbellekten: False
+
+=== Repodan kaynak kopyası ve hazır model bütünlük kontrolü ===
+Hazır model etiketi: functional_check / FT kısa eğitim: 5 epoch
+KOPYA TAMAM. Çalışma Jetson diskindeki doğrulanmış kopyadan devam ediyor.
+USB gerekmiyor; sonuçlar Jetson diskine kaydedilecek.
+
+=== Gerekli sistem kütüphanesi ve izole CPU ortamı ===
+$ /usr/bin/python3 -m venv /home/tayfun/specific-range-jetson-auto/venv_cpu_310
+The virtual environment was not created successfully because ensurepip is not
+available.  On Debian/Ubuntu systems, you need to install the python3-venv
+package using the following command.
+
+    apt install python3.10-venv
+
+You may need to use sudo with that command.  After installing the python3-venv
+package, recreate your virtual environment.
+
+Failing command: /home/tayfun/specific-range-jetson-auto/venv_cpu_310/bin/python3
+
+$ sudo -n apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=25 update
+Get:1 file:/var/cudnn-local-tegra-repo-ubuntu2204-9.3.0  InRelease [1.572 B]
+Get:2 file:/var/l4t-cuda-tegra-repo-ubuntu2204-12-6-local  InRelease [1.572 B]
+Get:1 file:/var/cudnn-local-tegra-repo-ubuntu2204-9.3.0  InRelease [1.572 B]
+Get:3 file:/var/nv-tensorrt-local-tegra-repo-ubuntu2204-10.3.0-cuda-12.5  InRelease [1.572 B]
+Get:2 file:/var/l4t-cuda-tegra-repo-ubuntu2204-12-6-local  InRelease [1.572 B]
+Get:3 file:/var/nv-tensorrt-local-tegra-repo-ubuntu2204-10.3.0-cuda-12.5  InRelease [1.572 B]
+Hit:4 https://download.docker.com/linux/ubuntu jammy InRelease
+Hit:5 https://repo.download.nvidia.com/jetson/common r36.4 InRelease
+Hit:6 http://ports.ubuntu.com/ubuntu-ports jammy InRelease
+Hit:7 https://repo.download.nvidia.com/jetson/t234 r36.4 InRelease
+Hit:8 http://ports.ubuntu.com/ubuntu-ports jammy-updates InRelease
+Hit:9 https://repo.download.nvidia.com/jetson/ffmpeg r36.4 InRelease
+Hit:10 http://ports.ubuntu.com/ubuntu-ports jammy-backports InRelease
+Hit:11 http://packages.osrfoundation.org/gazebo/ubuntu-stable jammy InRelease
+Hit:12 http://ports.ubuntu.com/ubuntu-ports jammy-security InRelease
+Hit:13 http://packages.ros.org/ros2/ubuntu jammy InRelease
+Reading package lists...
+$ sudo -n apt-get -y install python3.10-venv
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  python3-pip-whl python3-setuptools-whl
+The following NEW packages will be installed:
+  python3-pip-whl python3-setuptools-whl python3.10-venv
+0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.
+Need to get 2.478 kB of archives.
+After this operation, 2.891 kB of additional disk space will be used.
+Get:1 http://ports.ubuntu.com/ubuntu-ports jammy-updates/universe arm64 python3-pip-whl all 22.0.2+dfsg-1ubuntu0.7 [1.683 kB]
+Get:2 http://ports.ubuntu.com/ubuntu-ports jammy-updates/universe arm64 python3-setuptools-whl all 59.6.0-1.2ubuntu0.22.04.3 [789 kB]
+Get:3 http://ports.ubuntu.com/ubuntu-ports jammy-updates/universe arm64 python3.10-venv arm64 3.10.12-1~22.04.18 [5.726 B]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 2.478 kB in 2s (1.245 kB/s)
+Selecting previously unselected package python3-pip-whl.
+(Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 228389 files and directories currently installed.)
+Preparing to unpack .../python3-pip-whl_22.0.2+dfsg-1ubuntu0.7_all.deb ...
+Unpacking python3-pip-whl (22.0.2+dfsg-1ubuntu0.7) ...
+Selecting previously unselected package python3-setuptools-whl.
+Preparing to unpack .../python3-setuptools-whl_59.6.0-1.2ubuntu0.22.04.3_all.deb ...
+Unpacking python3-setuptools-whl (59.6.0-1.2ubuntu0.22.04.3) ...
+Selecting previously unselected package python3.10-venv.
+Preparing to unpack .../python3.10-venv_3.10.12-1~22.04.18_arm64.deb ...
+Unpacking python3.10-venv (3.10.12-1~22.04.18) ...
+Setting up python3-setuptools-whl (59.6.0-1.2ubuntu0.22.04.3) ...
+Setting up python3-pip-whl (22.0.2+dfsg-1ubuntu0.7) ...
+Setting up python3.10-venv (3.10.12-1~22.04.18) ...
+$ /usr/bin/python3 -m venv /home/tayfun/specific-range-jetson-auto/venv_cpu_20261117T113417_893459Z
+
+=== CPU bağımlılıkları; internet veya pip önbelleği kullanılır ===
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_20261117T113417_893459Z/bin/python -m pip --disable-pip-version-check --no-input install --only-binary=:all: --retries 2 --timeout 25 --cache-dir /home/tayfun/specific-range-jetson-auto/pip-cache --index-url https://pypi.org/simple -r requirements-edge.txt
+Collecting numpy==1.26.4
+  Downloading numpy-1.26.4-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (14.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.2/14.2 MB 10.8 MB/s eta 0:00:00
+Collecting pandas==2.2.3
+  Downloading pandas-2.2.3-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (66.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 66.5/66.5 MB 8.8 MB/s eta 0:00:00
+Collecting openpyxl==3.1.5
+  Downloading openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 250.9/250.9 KB 10.4 MB/s eta 0:00:00
+Collecting scipy==1.13.1
+  Downloading scipy-1.13.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (33.7 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 33.7/33.7 MB 4.9 MB/s eta 0:00:00
+Collecting scikit-learn==1.5.2
+  Downloading scikit_learn-1.5.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (12.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.5/12.5 MB 7.4 MB/s eta 0:00:00
+Collecting xgboost==2.1.4
+  Downloading xgboost-2.1.4-py3-none-manylinux_2_28_aarch64.whl (4.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 10.4 MB/s eta 0:00:00
+Collecting joblib==1.4.2
+  Downloading joblib-1.4.2-py3-none-any.whl (301 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 301.8/301.8 KB 8.5 MB/s eta 0:00:00
+Collecting threadpoolctl==3.6.0
+  Downloading threadpoolctl-3.6.0-py3-none-any.whl (18 kB)
+Collecting psutil==7.2.2
+  Downloading psutil-7.2.2-cp36-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (156 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 157.0/157.0 KB 9.4 MB/s eta 0:00:00
+Collecting flask<4,>=3.0
+  Downloading flask-3.1.3-py3-none-any.whl (103 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 103.4/103.4 KB 10.5 MB/s eta 0:00:00
+Collecting matplotlib<4,>=3.8
+  Downloading matplotlib-3.10.9-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (9.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.6/9.6 MB 11.1 MB/s eta 0:00:00
+Collecting pillow<13,>=10
+  Downloading pillow-12.3.0-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (6.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 11.1 MB/s eta 0:00:00
+Collecting python-dateutil>=2.8.2
+  Downloading python_dateutil-3.0.0-py2.py3-none-any.whl (94 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 94.7/94.7 KB 8.9 MB/s eta 0:00:00
+Collecting tzdata>=2022.7
+  Downloading tzdata-2026.6-py2.py3-none-any.whl (348 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 348.2/348.2 KB 10.5 MB/s eta 0:00:00
+Collecting pytz>=2020.1
+  Downloading pytz-2026.6-py2.py3-none-any.whl (506 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 506.3/506.3 KB 10.2 MB/s eta 0:00:00
+Collecting et-xmlfile
+  Downloading et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Collecting jinja2>=3.1.2
+  Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 KB 9.3 MB/s eta 0:00:00
+Collecting werkzeug>=3.1.0
+  Downloading werkzeug-3.1.9-py3-none-any.whl (228 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 228.7/228.7 KB 9.2 MB/s eta 0:00:00
+Collecting itsdangerous>=2.2.0
+  Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Collecting click>=8.1.3
+  Downloading click-8.5.1-py3-none-any.whl (126 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 126.2/126.2 KB 11.4 MB/s eta 0:00:00
+Collecting blinker>=1.9.0
+  Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Collecting markupsafe>=2.1.1
+  Downloading markupsafe-3.0.4-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (22 kB)
+Collecting fonttools>=4.22.0
+  Downloading fonttools-4.65.0-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (5.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.3/5.3 MB 11.0 MB/s eta 0:00:00
+Collecting pyparsing>=3
+  Downloading pyparsing-3.3.3-py3-none-any.whl (126 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 126.4/126.4 KB 10.2 MB/s eta 0:00:00
+Collecting contourpy>=1.0.1
+  Downloading contourpy-1.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (312 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 312.1/312.1 KB 10.0 MB/s eta 0:00:00
+Collecting packaging>=20.0
+  Downloading packaging-26.3-py3-none-any.whl (129 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 130.0/130.0 KB 8.8 MB/s eta 0:00:00
+Collecting cycler>=0.10
+  Downloading cycler-0.12.1-py3-none-any.whl (8.3 kB)
+Collecting kiwisolver>=1.3.1
+  Downloading kiwisolver-1.5.1-cp310-cp310-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl (1.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 10.6 MB/s eta 0:00:00
+Collecting six>=1.6
+  Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+Installing collected packages: pytz, tzdata, threadpoolctl, six, pyparsing, psutil, pillow, packaging, numpy, markupsafe, kiwisolver, joblib, itsdangerous, fonttools, et-xmlfile, cycler, click, blinker, werkzeug, scipy, python-dateutil, openpyxl, jinja2, contourpy, xgboost, scikit-learn, pandas, matplotlib, flask
+Successfully installed blinker-1.9.0 click-8.5.1 contourpy-1.3.2 cycler-0.12.1 et-xmlfile-2.0.0 flask-3.1.3 fonttools-4.65.0 itsdangerous-2.2.0 jinja2-3.1.6 joblib-1.4.2 kiwisolver-1.5.1 markupsafe-3.0.4 matplotlib-3.10.9 numpy-1.26.4 openpyxl-3.1.5 packaging-26.3 pandas-2.2.3 pillow-12.3.0 psutil-7.2.2 pyparsing-3.3.3 python-dateutil-3.0.0 pytz-2026.6 scikit-learn-1.5.2 scipy-1.13.1 six-1.17.0 threadpoolctl-3.6.0 tzdata-2026.6 werkzeug-3.1.9 xgboost-2.1.4
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_20261117T113417_893459Z/bin/python -m pip --disable-pip-version-check --no-input install --only-binary=:all: --retries 2 --timeout 25 --cache-dir /home/tayfun/specific-range-jetson-auto/pip-cache --index-url https://pypi.org/simple torch==2.5.1
+Collecting torch==2.5.1
+  Downloading torch-2.5.1-cp310-cp310-manylinux2014_aarch64.whl (91.9 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 91.9/91.9 MB 8.2 MB/s eta 0:00:00
+Collecting filelock
+  Downloading filelock-4.1.0-py3-none-any.whl (133 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 133.0/133.0 KB 10.4 MB/s eta 0:00:00
+Collecting sympy==1.13.1
+  Downloading sympy-1.13.1-py3-none-any.whl (6.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.2/6.2 MB 10.9 MB/s eta 0:00:00
+Collecting typing-extensions>=4.8.0
+  Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.6/45.6 KB 8.3 MB/s eta 0:00:00
+Collecting fsspec
+  Downloading fsspec-2026.9.0-py3-none-any.whl (221 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 221.7/221.7 KB 9.8 MB/s eta 0:00:00
+Collecting networkx
+  Downloading networkx-3.4.2-py3-none-any.whl (1.7 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 10.7 MB/s eta 0:00:00
+Requirement already satisfied: jinja2 in /home/tayfun/specific-range-jetson-auto/venv_cpu_20261117T113417_893459Z/lib/python3.10/site-packages (from torch==2.5.1) (3.1.6)
+Collecting mpmath<1.4,>=1.1.0
+  Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 KB 10.4 MB/s eta 0:00:00
+Requirement already satisfied: MarkupSafe>=2.0 in /home/tayfun/specific-range-jetson-auto/venv_cpu_20261117T113417_893459Z/lib/python3.10/site-packages (from jinja2->torch==2.5.1) (3.0.4)
+Installing collected packages: mpmath, typing-extensions, sympy, networkx, fsspec, filelock, torch
+Successfully installed filelock-4.1.0 fsspec-2026.9.0 mpmath-1.3.0 networkx-3.4.2 sympy-1.13.1 torch-2.5.1 typing-extensions-4.16.0
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_20261117T113417_893459Z/bin/python -m pip check
+No broken requirements found.
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_20261117T113417_893459Z/bin/python -c 'from pathlib import Path; from src.evaluation.research_bundle import verify_bundle; m=verify_bundle(Path('"'"'artifacts/research_bundle_portable'"'"')); print('"'"'Model etiketi:'"'"',m['"'"'experiment_label'"'"'])'
+Model etiketi: functional_check
+
+=== Kısa CPU denemesi ===
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_20261117T113417_893459Z/bin/python scripts/run_edge_benchmark.py --bundle /home/tayfun/specific-range-jetson-auto/run_20261117T113402_897807Z/project/artifacts/research_bundle_portable --ft-device cpu --sample-size 24 --warmup 5 --repetitions 20 --trials 1 --threads 1 --seed 42 --require-jetson --output /home/tayfun/specific-range-jetson-auto/run_20261117T113402_897807Z/output/cpu_smoke
+ft_transformer trial 1: p95=11.682 ms
+xgboost trial 1: p95=6.003 ms
+interpolation trial 1: p95=42.683 ms
+Results: /home/tayfun/specific-range-jetson-auto/run_20261117T113402_897807Z/output/cpu_smoke/edge_20261117T113558Z_3a318642 (complete=True, Jetson=True)
+
+=== Üç yöntem CPU benchmarkı: 3 tekrar, 1000 çağrı ===
+$ /home/tayfun/specific-range-jetson-auto/venv_cpu_20261117T113417_893459Z/bin/python scripts/run_edge_benchmark.py --bundle /home/tayfun/specific-range-jetson-auto/run_20261117T113402_897807Z/project/artifacts/research_bundle_portable --ft-device cpu --sample-size 200 --warmup 50 --repetitions 1000 --trials 3 --threads 1 --seed 42 --require-jetson --output /home/tayfun/specific-range-jetson-auto/run_20261117T113402_897807Z/output/cpu_benchmark
+ft_transformer trial 1: p95=11.257 ms
+xgboost trial 1: p95=5.905 ms
+interpolation trial 1: p95=26.392 ms
+xgboost trial 2: p95=6.002 ms
+ft_transformer trial 2: p95=11.438 ms
+interpolation trial 2: p95=28.296 ms
+xgboost trial 3: p95=5.918 ms
+interpolation trial 3: p95=28.068 ms
+ft_transformer trial 3: p95=11.470 ms
+Results: /home/tayfun/specific-range-jetson-auto/run_20261117T113402_897807Z/output/cpu_benchmark/edge_20261117T113612Z_43a6bf0e (complete=True, Jetson=True)
+
+=== Mevcut NVIDIA CUDA ortamı kontrolü ===
+GPU ölçümü atlandı: mevcut sistem PyTorch/CUDA hazır değil. Rastgele NVIDIA wheel/driver kurulmadı.
+
+=== Son cihaz durumu ve arayüz başlatıcısı ===
