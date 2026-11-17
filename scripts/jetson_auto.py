@@ -173,7 +173,7 @@ def prepare_repo(repo, target):
                     and '__pycache__' not in p.parts and p.suffix != '.pyc']
     entries += [repo/name for name in ['README.md', 'requirements-edge.txt', 'requirements.txt',
                 'One_Engine_Data.xlsx', 'Two_Engine_Data.xlsx', 'BASLAT.sh', 'JETSON_SAATI_DUZELT.sh',
-                'USB_KONTROL.sh', 'SONUCLARI_GONDER.sh', 'GITHUB_GIRIS.sh']]
+                'USB_KONTROL.sh', 'SONUCLARI_GONDER.sh', 'GITHUB_GIRIS.sh', 'GPU_PYTORCH_KUR.sh']]
     for path in entries:
         if os.path.commonpath([str(repo.resolve()), str(path.resolve())]) != str(repo.resolve()):
             raise RuntimeError('Repo dışına çıkan kaynak yolu: ' + str(path))
@@ -287,6 +287,22 @@ def torch_probe(executable):
     try: return json.loads(result.get('stdout', '').strip().splitlines()[-1])
     except (ValueError, IndexError): return {'cuda': False, 'error': result}
 
+def registered_gpu_runtime(base, identity):
+    """Accept only a verified private runtime registered for this Jetson identity."""
+    try:
+        record = json.loads((base/'gpu_runtime.json').read_text(encoding='utf-8'))
+        path = Path(record['python'])
+        matches = all(record['identity'].get(key) == identity.get(key) for key in ['machine', 'model', 'l4t'])
+        if (record.get('schema_version') != 1 or not record.get('probe', {}).get('cuda') or
+                not matches or not path.is_file() or
+                os.path.commonpath([str(base.resolve()), str(path.resolve())]) != str(base.resolve())):
+            return None
+        version = record['version']
+        if not (3,10) <= tuple(version[:2]) <= (3,12): return None
+        return {'path': str(path), 'version': version, 'registered_runtime': True}
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
 def benchmark(py, mode, short):
     output = REPORT/(mode + ('_smoke' if short else '_benchmark'))
     args = [str(py), 'scripts/run_edge_benchmark.py', '--bundle', str(PROJECT/'artifacts/research_bundle_portable'),
@@ -358,7 +374,9 @@ def main(base):
     gpu_interpreter = chosen
     system_torch = {'cuda': False}
     system_probes = []
-    for candidate in available:
+    registered = registered_gpu_runtime(base, info['identity'])
+    gpu_candidates = ([registered] if registered else []) + available
+    for candidate in gpu_candidates:
         probe = torch_probe(candidate['path'])
         system_probes.append({'interpreter': candidate, 'probe': probe})
         if probe.get('cuda'):
@@ -369,9 +387,13 @@ def main(base):
     STATE['gpu'] = 'skipped_cuda_not_ready'
     if system_torch.get('cuda'):
         try:
-            gpu = make_env(base, gpu_interpreter['path'], gpu_interpreter['version'], 'gpu')
+            # A venv does not inherit another venv's site-packages. Use the
+            # registered CUDA runtime directly so its NVIDIA torch is retained.
+            gpu = (Path(gpu_interpreter['path']) if gpu_interpreter.get('registered_runtime') else
+                   make_env(base, gpu_interpreter['path'], gpu_interpreter['version'], 'gpu'))
             gpip = [str(gpu)] + pip[1:]
             run(gpip + ['-r', 'requirements-edge.txt'])
+            run([str(gpu), '-m', 'pip', 'check'])
             save(REPORT/'gpu_packages.json', query([str(gpu), '-m', 'pip', 'freeze']))
             gp = torch_probe(gpu)
             save(REPORT/'gpu_torch.json', gp)
@@ -383,7 +405,7 @@ def main(base):
             STATE['gpu_error'] = str(exc)
             traceback.print_exc()
     else:
-        print('GPU ölçümü atlandı: mevcut sistem PyTorch/CUDA hazır değil. Rastgele NVIDIA wheel/driver kurulmadı.', flush=True)
+        print('GPU ölçümü atlandı: kayıtlı veya sistem PyTorch/CUDA hazır değil. Rastgele NVIDIA wheel/driver kurulmadı.', flush=True)
     phase('Son cihaz durumu ve arayüz başlatıcısı')
     profile(base, 'device_after.json')
     launcher = REPORT.parent/'ARAYUZU_AC.sh'

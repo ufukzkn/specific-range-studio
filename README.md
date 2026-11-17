@@ -1,5 +1,8 @@
 # Aircraft Specific Range Modeling
 
+**Önce yalnız GPU için PyTorch kurulumunu yapmak istiyorsan:**
+[GPU PyTorch kurulum komutları — benchmark başlatmaz](GPU_PYTORCH_KURULUM_KOMUTLARI.md).
+
 **Tüm benchmarkı çalıştırıp sonuçlarını GitHub'a göndermek için:**
 [Benchmark ve GitHub komutları — tamamını tek seferde kopyala](BENCHMARK_VE_GITHUB_KOMUTLARI.md).
 
