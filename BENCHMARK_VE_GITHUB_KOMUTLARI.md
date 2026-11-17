@@ -47,6 +47,8 @@ Gönderim başarılı olması tek başına benchmarkın tamamlandığı anlamın
 hata raporu da gönderilmiş olabilir. Sonuçtaki STATUS.json bu ayrımı içerir.
 
 USB bağlantısı gerekmez; bu blok USB teşhisi veya bağlama komutu çalıştırmaz.
+Önceki USB raporları varsa son gönderme adımı onları da gönderir; yeni USB
+kontrolü başlatmak için ayrı `USB_KONTROL.sh` kullanılır.
 Hazır modeller `functional_check` etiketlidir; FT modeli 5 epoch eğitilmiştir.
 Bu koşu cihazdaki kurulum ve ölçüm yolunu doğrular; nihai bilimsel model eğitimi
 ve model seçimi ayrı adımdır.

@@ -29,7 +29,12 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 def textfile(path):
-    try: return Path(path).read_text(errors='replace').replace('\0', '').strip()
+    try:
+        # Some Jetson sysfs sensors return no data (None) temporarily. Passing
+        # that through TextIO's decoder raises TypeError before OSError handling.
+        data = Path(path).read_bytes()
+        if data is None: return None
+        return data.decode('utf-8', errors='replace').replace('\0', '').strip()
     except OSError: return None
 
 def query(args, timeout=20):

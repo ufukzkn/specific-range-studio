@@ -2,6 +2,7 @@
 import hashlib
 import importlib.util
 import json
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -24,6 +25,32 @@ class JetsonLauncherTests(unittest.TestCase):
 
     def tearDown(self):
         self.temp.cleanup()
+
+    def test_temporarily_unreadable_sysfs_sensor_does_not_enter_text_decoder(self):
+        with patch.object(AUTO.Path, 'read_bytes', return_value=None), \
+             patch.object(AUTO.Path, 'read_text', side_effect=TypeError("can't concat NoneType to bytes")):
+            self.assertIsNone(AUTO.textfile('/sys/class/thermal/thermal_zone0/temp'))
+        with patch.object(AUTO.Path, 'read_bytes', return_value=b'52000\n'):
+            self.assertEqual(AUTO.textfile('/sys/class/thermal/thermal_zone0/temp'), '52000')
+
+    def test_device_profile_survives_one_missing_temperature_reading(self):
+        sensor = self.base/'thermal_zone0'
+        sensor.mkdir()
+        (sensor/'type').write_bytes(b'cpu-thermal\n')
+        (sensor/'temp').write_bytes(b'52000\n')
+        original = AUTO.Path.read_bytes
+        def sensor_read(path):
+            return None if path == sensor/'temp' else original(path)
+        with patch.object(AUTO.Path, 'read_bytes', autospec=True, side_effect=sensor_read), \
+             patch.object(AUTO.Path, 'glob', return_value=[sensor]), \
+             patch.object(AUTO.shutil, 'which', return_value=sys.executable), \
+             patch.object(AUTO, 'query', return_value={'code': 0, 'stdout': '[3,10,12]', 'stderr': ''}):
+            info = AUTO.profile(self.base)
+        self.assertIn('cpu-thermal', info['current']['thermal'])
+        self.assertIsNone(info['current']['thermal']['cpu-thermal'])
+        self.assertTrue((AUTO.REPORT/'device_profile.json').is_file())
+        saved = json.loads((AUTO.REPORT/'device_profile.json').read_text())
+        self.assertIsNone(saved['current']['thermal']['cpu-thermal'])
 
     def test_clone_snapshot_contains_frozen_models_and_source_provenance(self):
         target = self.base/'project'
