@@ -1,5 +1,8 @@
 # Aircraft Specific Range Modeling
 
+**Tüm benchmarkı çalıştırıp sonuçlarını GitHub'a göndermek için:**
+[Benchmark ve GitHub komutları — tamamını tek seferde kopyala](BENCHMARK_VE_GITHUB_KOMUTLARI.md).
+
 **Jetson'da ilk kez başlıyorsan:** [İlk Adım Komutları — tek blok, her komut ayrı satırda](ILK_ADIM_KOMUTLARI.md).
 Repo indirme/güncelleme, GitHub girişi, USB kontrolü ve sonuç gönderme adımları birlikte bulunur.
 
