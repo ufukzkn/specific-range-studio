@@ -1,0 +1,20 @@
+
+=== Cihaz profili: önbellek kontrolü ve güncel durum ===
+Traceback (most recent call last):
+  File "/home/tayfun/specific-range-jetson/scripts/jetson_auto.py", line 454, in entry
+    try: main(base)
+  File "/home/tayfun/specific-range-jetson/scripts/jetson_auto.py", line 300, in main
+    info = profile(base)
+  File "/home/tayfun/specific-range-jetson/scripts/jetson_auto.py", line 213, in profile
+    'thermal': {textfile(p/'type') or p.name: textfile(p/'temp')
+  File "/home/tayfun/specific-range-jetson/scripts/jetson_auto.py", line 213, in <dictcomp>
+    'thermal': {textfile(p/'type') or p.name: textfile(p/'temp')
+  File "/home/tayfun/specific-range-jetson/scripts/jetson_auto.py", line 32, in textfile
+    try: return Path(path).read_text(errors='replace').replace('\0', '').strip()
+  File "/usr/lib/python3.10/pathlib.py", line 1135, in read_text
+    return f.read()
+  File "/usr/lib/python3.10/codecs.py", line 321, in decode
+    data = self.buffer + input
+TypeError: can't concat NoneType to bytes
+
+DURDU: can't concat NoneType to bytes

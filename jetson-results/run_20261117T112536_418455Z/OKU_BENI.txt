@@ -1,0 +1,5 @@
+Yerel sonuçlar: /home/tayfun/specific-range-jetson-auto/run_20261117T112536_418455Z/output
+CPU: not_run
+GPU: not_run
+Paket modelleri functional_check / kısa eğitimdir; nihai bilimsel model değildir.
+Cihaz profili, kurulum logu, STATUS ve varsa bütün benchmark ham dosyaları buradadır.
