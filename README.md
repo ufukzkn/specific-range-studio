@@ -18,6 +18,12 @@ copy. Python 3.10–3.12 is required; unsupported devices stop with diagnostic o
 The included FT model is a five-epoch `functional_check`, not a final scientific model.
 See the [Turkish quick-start guide](docs/JETSON_TEK_KOMUT.md), including clock repair.
 
+For an unreadable USB, run `bash USB_KONTROL.sh` to collect partition/capacity
+diagnostics and try a read-only exFAT mount. Authenticate once with
+`bash GITHUB_GIRIS.sh`; completed runs then try committing their output to this
+branch under `jetson-results/`. `bash SONUCLARI_GONDER.sh` sends earlier local
+outputs without rerunning benchmarks. Failed uploads preserve local results.
+
 ## Common-input research comparison and Jetson benchmark (12 October 2026)
 
 For a comparison of cubic interpolation, XGBoost and the local FT-Transformer-style

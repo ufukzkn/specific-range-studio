@@ -167,7 +167,8 @@ def prepare_repo(repo, target):
         entries += [p for p in (repo/folder).rglob('*') if p.is_file()
                     and '__pycache__' not in p.parts and p.suffix != '.pyc']
     entries += [repo/name for name in ['README.md', 'requirements-edge.txt', 'requirements.txt',
-                'One_Engine_Data.xlsx', 'Two_Engine_Data.xlsx', 'BASLAT.sh', 'JETSON_SAATI_DUZELT.sh']]
+                'One_Engine_Data.xlsx', 'Two_Engine_Data.xlsx', 'BASLAT.sh', 'JETSON_SAATI_DUZELT.sh',
+                'USB_KONTROL.sh', 'SONUCLARI_GONDER.sh', 'GITHUB_GIRIS.sh']]
     for path in entries:
         if os.path.commonpath([str(repo.resolve()), str(path.resolve())]) != str(repo.resolve()):
             raise RuntimeError('Repo dışına çıkan kaynak yolu: ' + str(path))
@@ -431,6 +432,7 @@ def entry():
     parser.add_argument('--repo', type=Path, default=Path(__file__).resolve().parents[1],
                         help='Klonlanan Jetson repo klasörü (varsayılan: bu betiğin reposu)')
     parser.add_argument('--usb', action='store_true', help='Eski kaynak+model USB paketinden çalıştır')
+    parser.add_argument('--no-publish', action='store_true', help='GitHub sonuç gönderimini deneme')
     args = parser.parse_args()
     REPO = None if args.usb else args.repo.resolve()
     if os.name != 'posix': raise RuntimeError('Bu komut Jetson Linux terminali içindir.')
@@ -460,6 +462,12 @@ def entry():
             sys.stdout = sys.stderr = TERMINAL
             traceback.print_exc()
             print('Yerel kayıtlar:', REPORT)
+    if not args.no_publish and REPO is not None and STATE.get('error') != 'KeyboardInterrupt':
+        try:
+            subprocess.call([sys.executable, str(REPO/'scripts/publish_jetson_results.py'),
+                             '--repo', str(REPO), '--output', str(REPORT)], timeout=240)
+        except Exception as exc:
+            print('GitHub gönderimi tamamlanamadı; yerel sonuçlar korunuyor:', exc)
     if STATE.get('error') or STATE['cpu'] != 'passed':
         sys.exit(130 if STATE.get('error') == 'KeyboardInterrupt' else 1)
 
