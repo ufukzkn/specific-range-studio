@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "python": "/home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/gpu_python",
+  "version": [
+    3,
+    10
+  ],
+  "runtime": "/home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126",
+  "identity": {
+    "model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super",
+    "l4t": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia",
+    "machine": "aarch64",
+    "kernel": "5.15.148-tegra",
+    "python_paths": [
+      "/usr/bin/python3",
+      "/usr/bin/python3.10"
+    ]
+  },
+  "verified_utc": "20261117T121230_195746Z",
+  "probe": {
+    "cuda": true,
+    "torch": "2.5.0a0+872d972e41.nv24.08",
+    "cuda_build": "12.6",
+    "gpu": "Orin",
+    "cudnn": 90300,
+    "matmul_check": true,
+    "transformer_check": true
+  },
+  "torch_url": "https://developer.download.nvidia.com/compute/redist/jp/v61/pytorch/torch-2.5.0a0+872d972e41.nv24.08.17622132-cp310-cp310-linux_aarch64.whl"
+}

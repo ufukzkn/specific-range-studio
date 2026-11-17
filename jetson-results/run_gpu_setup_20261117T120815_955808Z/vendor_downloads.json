@@ -1,0 +1,11 @@
+{
+  "torch_url": "https://developer.download.nvidia.com/compute/redist/jp/v61/pytorch/torch-2.5.0a0+872d972e41.nv24.08.17622132-cp310-cp310-linux_aarch64.whl",
+  "torch_bytes": 806950107,
+  "torch_sha256": "6f75fd2d2ef840ede1a90dbcf40a5458214bee26cc803fa510cda2e8978d972a",
+  "cusparselt_url": "https://developer.download.nvidia.com/compute/cusparselt/redist/libcusparse_lt/linux-sbsa/libcusparse_lt-linux-sbsa-0.5.2.1-archive.tar.xz",
+  "cusparselt_sha256": "389167df60404fe9d49f5975239bd095c440328d951152082d8603f8bdac1a97",
+  "documentation": [
+    "https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html",
+    "https://docs.pytorch.org/TensorRT/v2.6.1/getting_started/jetpack.html"
+  ]
+}

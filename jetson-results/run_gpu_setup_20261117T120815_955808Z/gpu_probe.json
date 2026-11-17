@@ -1,0 +1,9 @@
+{
+  "cuda": true,
+  "torch": "2.5.0a0+872d972e41.nv24.08",
+  "cuda_build": "12.6",
+  "gpu": "Orin",
+  "cudnn": 90300,
+  "matmul_check": true,
+  "transformer_check": true
+}

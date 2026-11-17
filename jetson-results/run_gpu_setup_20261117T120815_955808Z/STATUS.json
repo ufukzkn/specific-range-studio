@@ -1,0 +1,7 @@
+{
+  "cpu": "not_requested",
+  "gpu": "ready",
+  "stage": "GPU PyTorch hazir",
+  "kind": "gpu_setup",
+  "finished_utc": "20261117T121230_200560Z"
+}

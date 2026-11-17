@@ -1,0 +1,51 @@
+
+=== Cihaz ve CUDA surum kontrolu ===
+$ /usr/bin/python3 -m venv /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126
+
+=== NVIDIA CUDA 12.6 PyTorch ve cuSPARSELt indirme ===
+Indiriliyor: torch-2.5.0a0+872d972e41.nv24.8-cp310-cp310-linux_aarch64.whl
+Indirilen: 67 / 807 MB
+Indirilen: 134 / 807 MB
+Indirilen: 201 / 807 MB
+Indirilen: 268 / 807 MB
+Indirilen: 336 / 807 MB
+Indirilen: 403 / 807 MB
+Indirilen: 470 / 807 MB
+Indirilen: 537 / 807 MB
+Indirilen: 604 / 807 MB
+Indirilen: 671 / 807 MB
+Indirilen: 738 / 807 MB
+Indirilen: 805 / 807 MB
+Indiriliyor: libcusparse_lt-linux-sbsa-0.5.2.1-archive.tar.xz
+
+=== Ayri GPU Python ortamina kurulum ===
+$ /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/bin/python -m pip --disable-pip-version-check --no-input install --only-binary=:all: --retries 2 --timeout 30 --cache-dir /home/tayfun/specific-range-jetson-auto/pip-cache --index-url https://pypi.org/simple numpy==1.26.4
+Collecting numpy==1.26.4
+  Using cached numpy-1.26.4-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (14.2 MB)
+Installing collected packages: numpy
+Successfully installed numpy-1.26.4
+$ /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/bin/python -m pip --disable-pip-version-check --no-input install --only-binary=:all: --retries 2 --timeout 30 --cache-dir /home/tayfun/specific-range-jetson-auto/pip-cache --index-url https://pypi.org/simple /home/tayfun/specific-range-jetson-auto/nvidia-downloads/torch-2.5.0a0+872d972e41.nv24.8-cp310-cp310-linux_aarch64.whl
+Processing /home/tayfun/specific-range-jetson-auto/nvidia-downloads/torch-2.5.0a0+872d972e41.nv24.8-cp310-cp310-linux_aarch64.whl
+Collecting typing-extensions>=4.8.0
+  Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Collecting filelock
+  Using cached filelock-4.1.0-py3-none-any.whl (133 kB)
+Collecting jinja2
+  Using cached jinja2-3.1.6-py3-none-any.whl (134 kB)
+Collecting networkx
+  Using cached networkx-3.4.2-py3-none-any.whl (1.7 MB)
+Collecting sympy==1.13.1
+  Using cached sympy-1.13.1-py3-none-any.whl (6.2 MB)
+Collecting fsspec
+  Using cached fsspec-2026.9.0-py3-none-any.whl (221 kB)
+Collecting mpmath<1.4,>=1.1.0
+  Using cached mpmath-1.3.0-py3-none-any.whl (536 kB)
+Collecting MarkupSafe>=2.0
+  Using cached markupsafe-3.0.4-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (22 kB)
+Installing collected packages: mpmath, typing-extensions, sympy, networkx, MarkupSafe, fsspec, filelock, jinja2, torch
+Successfully installed MarkupSafe-3.0.4 filelock-4.1.0 fsspec-2026.9.0 jinja2-3.1.6 mpmath-1.3.0 networkx-3.4.2 sympy-1.13.1 torch-2.5.0a0+872d972e41.nv24.8 typing-extensions-4.16.0
+$ /home/tayfun/specific-range-jetson-auto/pytorch_gpu_310_cuda126/bin/python -m pip check
+No broken requirements found.
+
+=== Gercek GPU matris ve Transformer kontrolu ===
+GPU PYTORCH HAZIR: Orin | torch: 2.5.0a0+872d972e41.nv24.08
