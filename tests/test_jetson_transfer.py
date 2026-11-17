@@ -1,5 +1,6 @@
 """Partition-selection safety and real local Git result publication."""
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -24,6 +25,27 @@ UPLOAD = module('publish_jetson_results')
 
 
 class UsbSelectionTests(unittest.TestCase):
+    def test_sudo_prompt_supports_nonseekable_terminal(self):
+        class Tty(io.RawIOBase):
+            def readable(self): return True
+            def writable(self): return True
+            def seekable(self): return False
+        def terminal_open(path, mode, **kwargs):
+            self.assertEqual(path, '/dev/tty')
+            if mode == 'r+': return io.BufferedRandom(Tty())
+            self.assertIn(mode, ['rb', 'wb'])
+            self.assertEqual(kwargs.get('buffering'), 0)
+            return Tty()
+        with patch.object(USB.os, 'geteuid', return_value=1000, create=True), \
+             patch.object(USB.shutil, 'which', return_value='/usr/bin/sudo'), \
+             patch('builtins.open', side_effect=terminal_open), \
+             patch.object(USB.subprocess, 'call', return_value=0) as call, \
+             patch.object(USB, 'query', return_value={'code': 1}) as cached:
+            self.assertTrue(USB.sudo_ready())
+            cached.assert_not_called()
+        self.assertEqual(call.call_args[0][0], ['sudo', '-v'])
+        self.assertEqual(USB.SUDO_AUTH['method'], 'controlling_terminal')
+
     def test_small_metadata_partition_does_not_hide_real_exfat_partition(self):
         disk = {'name': '/dev/sda', 'type': 'disk', 'size': 64000000000, 'tran': 'usb', 'rm': True,
                 'children': [{'name': '/dev/sda1', 'type': 'part', 'size': 32768, 'fstype': None},
@@ -47,6 +69,26 @@ class UsbSelectionTests(unittest.TestCase):
             self.assertEqual(USB.try_mount(candidate, False)['status'], 'mounted_read_only')
         self.assertEqual(query.call_args[0][0], ['udisksctl', 'mount', '--block-device', '/dev/sdz2',
                                                '--options', 'ro', '--no-user-interaction'])
+
+    def test_kernel_exfat_error_falls_back_to_installed_fuse_with_sudo(self):
+        candidate = {'name': '/dev/sdz1', 'fstype': 'exfat', 'size': 61523984384, 'label': 'usb'}
+        disk = {'name': '/dev/sdz', 'type': 'disk', 'tran': 'usb', 'children': [candidate]}
+        def executable(name):
+            return '/usr/bin/' + name if name in ['udisksctl', 'mount.exfat-fuse'] else None
+        with patch.object(USB.shutil, 'which', side_effect=executable), \
+             patch.object(USB.os, 'geteuid', return_value=1000, create=True), \
+             patch.object(USB.os, 'getuid', return_value=1000, create=True), \
+             patch.object(USB.os, 'getgid', return_value=1000, create=True), \
+             patch.object(USB.getpass, 'getuser', return_value='test-user'), \
+             patch.object(USB, 'read_layout', return_value=({'blockdevices': [disk]}, {})), \
+             patch.object(USB, 'query', side_effect=[{'code': 1, 'stderr': "unknown filesystem type 'exfat'"},
+                                                   {'code': 0}, {'code': 0}]) as query:
+            result = USB.try_mount(candidate, True)
+        self.assertEqual(result['status'], 'mounted_read_only')
+        command = query.call_args_list[-1][0][0]
+        self.assertEqual(command[:3], ['sudo', '-n', '/usr/bin/mount.exfat-fuse'])
+        self.assertIn('ro,uid=1000,gid=1000', command)
+        self.assertEqual(command[-2], '/dev/sdz1')
 
 
 class PublishTests(unittest.TestCase):

@@ -3,6 +3,8 @@
 **Jetson'da ilk kez başlıyorsan:** [İlk Adım Komutları — tek blok, her komut ayrı satırda](ILK_ADIM_KOMUTLARI.md).
 Repo indirme/güncelleme, GitHub girişi, USB kontrolü ve sonuç gönderme adımları birlikte bulunur.
 
+USB ilk denemede açılmadıysa: [USB'yi yeniden dene — mevcut GitHub girişiyle](USB_YENIDEN_DENE_KOMUTLARI.md).
+
 ## Jetson: clone and start
 
 The `jetson-benchmark` branch includes the launcher and the frozen functional-check

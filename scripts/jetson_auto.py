@@ -252,8 +252,8 @@ def apt(packages):
     if os.geteuid() == 0: prefix = []
     else:
         if not shutil.which('sudo'): raise RuntimeError('Eksik sistem paketi var, sudo yok: ' + ', '.join(packages))
-        with open('/dev/tty', 'r+') as tty:
-            if subprocess.call(['sudo', '-v'], stdin=tty, stdout=tty, stderr=tty):
+        with open('/dev/tty', 'rb', buffering=0) as tty_in, open('/dev/tty', 'wb', buffering=0) as tty_out:
+            if subprocess.call(['sudo', '-v'], stdin=tty_in, stdout=tty_out, stderr=tty_out):
                 raise RuntimeError('Sudo yetkisi alınamadı; ihtiyaç: ' + ', '.join(packages))
         prefix = ['sudo', '-n']
     run(prefix + ['apt-get', '-o', 'Acquire::Retries=2', '-o', 'Acquire::http::Timeout=25', 'update'], timeout=360)

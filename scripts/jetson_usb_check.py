@@ -12,6 +12,7 @@ import sys
 import tarfile
 
 SYSTEM_MOUNTS = {'/', '/boot', '/boot/efi', '/home', '/usr', '/var', '[SWAP]'}
+SUDO_AUTH = {}
 
 
 def query(args, timeout=25):
@@ -65,13 +66,19 @@ def read_layout():
 
 
 def sudo_ready():
+    global SUDO_AUTH
     if os.geteuid() == 0: return True
     if not shutil.which('sudo'): return False
     try:
-        with open('/dev/tty', 'r+') as tty:
-            return subprocess.call(['sudo', '-v'], stdin=tty, stdout=tty, stderr=tty) == 0
-    except OSError:
-        return query(['sudo', '-n', 'true'])['code'] == 0
+        # A terminal is non-seekable: buffered r+ fails before sudo can prompt.
+        with open('/dev/tty', 'rb', buffering=0) as tty_in, open('/dev/tty', 'wb', buffering=0) as tty_out:
+            code = subprocess.call(['sudo', '-v'], stdin=tty_in, stdout=tty_out, stderr=tty_out)
+            SUDO_AUTH = {'method': 'controlling_terminal', 'code': code}
+            return code == 0
+    except OSError as exc:
+        result = query(['sudo', '-n', 'true'])
+        SUDO_AUTH = {'method': 'cached_only', 'terminal_error': str(exc), 'result': result}
+        return result['code'] == 0
 
 
 def try_mount(candidate, privileged):
@@ -123,6 +130,9 @@ def main():
         privileged = sudo_ready()
         prefix = [] if os.geteuid() == 0 else ['sudo', '-n']
         info['sudo_ready'] = privileged
+        info['sudo_auth'] = SUDO_AUTH
+        if not privileged:
+            print('YONETICI YETKISI ALINAMADI. FUSE baglama ve ayrintili disk sorgulari yetki bekliyor.')
         commands = [(['uname', '-a'], 'kernel'), (['lsusb'], 'lsusb'),
                     (['lsusb', '-t'], 'usb_tree'), (['df', '-hT'], 'df'),
                     (['dpkg-query', '-W', 'exfat-fuse', 'exfat-utils', 'exfatprogs'], 'exfat_packages'),
