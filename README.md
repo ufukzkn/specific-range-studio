@@ -1,5 +1,8 @@
 # Aircraft Specific Range Modeling
 
+**Jetson'da ilk kez başlıyorsan:** [İlk Adım Komutları — tek blok, her komut ayrı satırda](ILK_ADIM_KOMUTLARI.md).
+Repo indirme/güncelleme, GitHub girişi, USB kontrolü ve sonuç gönderme adımları birlikte bulunur.
+
 ## Jetson: clone and start
 
 The `jetson-benchmark` branch includes the launcher and the frozen functional-check
